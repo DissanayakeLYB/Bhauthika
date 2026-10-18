@@ -18,6 +18,8 @@ export interface Question {
   hint: string;
   steps: DerivationStep[];
   diagram?: 'potentiometer';
+  /** Optional YouTube link to a full worked video explanation. */
+  videoUrl?: string;
 }
 
 /**
@@ -36,6 +38,7 @@ export const QUESTIONS: Question[] = [
     options: ['0.018 V cm⁻¹', '0.020 V cm⁻¹', '0.022 V cm⁻¹', '0.180 V cm⁻¹', '0.200 V cm⁻¹'],
     answer: 0,
     hint: 'Formula Hint (V = IR)',
+    videoUrl: 'https://www.youtube.com/watch?v=EXAMPLE',
     diagram: 'potentiometer',
     steps: [
       { label: 'Step 1: Circuit Total Resistance', formula: 'R_total = 10 Ω + 1 Ω = 11 Ω' },
@@ -54,6 +57,7 @@ export const QUESTIONS: Question[] = [
     options: ['0.5 A', '1.0 A', '3.0 A', '6.0 A', '12.0 A'],
     answer: 3,
     hint: 'Formula Hint (1/R = Σ1/R)',
+    videoUrl: 'https://www.youtube.com/watch?v=EXAMPLE',
     steps: [
       { label: 'Step 1: Parallel Equivalent Resistance', formula: '1/R_p = 1/2 + 1/3 + 1/6 = 1 Ω⁻¹' },
       { label: 'Step 2: Equivalent Resistance', formula: 'R_p = 1 Ω' },

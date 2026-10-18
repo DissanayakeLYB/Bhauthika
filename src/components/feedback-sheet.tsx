@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Question } from '@/data/questions';
 import { ActionButton } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
@@ -34,6 +34,7 @@ export function FeedbackSheet({
 }: FeedbackSheetProps) {
   const statusColor = correct ? colors.green : colors.red;
   const statusSoft = correct ? colors.greenSoft : colors.redSoft;
+  const videoUrl = question.videoUrl;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={() => {}}>
@@ -109,6 +110,16 @@ export function FeedbackSheet({
                 </Text>
               </Pressable>
             </View>
+
+            {/* Video link: shown only if the question has a videoUrl. */}
+            {videoUrl ? (
+              <ActionButton
+                label="Watch full explanation"
+                variant="ghost"
+                icon="play-circle-outline"
+                onPress={() => Linking.openURL(videoUrl)}
+              />
+            ) : null}
           </ScrollView>
         </View>
       </View>
