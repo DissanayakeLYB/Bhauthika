@@ -1,10 +1,12 @@
 import { router } from 'expo-router';
-import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GoogleIcon } from '@/components/brand/google-icon';
 import { LogoMark } from '@/components/brand/logo';
+import { ActionButton } from '@/components/ui/button';
 import { Icon, type IconName } from '@/components/ui/icon';
+import { useAuth } from '@/store/auth-context';
 import { colors, fonts, radius, spacing, type } from '@/theme';
 
 const FEATURES: { icon: IconName; title: string; subtitle: string; tone: 'indigo' | 'soft' | 'amber' }[] =
@@ -30,7 +32,56 @@ const FEATURES: { icon: IconName; title: string; subtitle: string; tone: 'indigo
   ];
 
 export default function WelcomeScreen() {
-  const enterApp = () => router.replace('/home');
+  const { signIn, signUp } = useAuth();
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const [formOpen, setFormOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [googleMessage, setGoogleMessage] = useState<string | null>(null);
+
+  const comingSoon = () => setGoogleMessage('Coming soon');
+
+  const toggleMode = () => {
+    setMode((current) => (current === 'signin' ? 'signup' : 'signin'));
+    setFormOpen(true);
+    setError(null);
+    setNotice(null);
+  };
+
+  const submit = async () => {
+    if (busy) return;
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
+      setNotice(null);
+      setError('Enter your email and password.');
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+
+    const result =
+      mode === 'signin'
+        ? await signIn(trimmedEmail, password)
+        : await signUp(trimmedEmail, password);
+
+    setBusy(false);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    if (mode === 'signup' && 'needsConfirmation' in result && result.needsConfirmation) {
+      setNotice('Check your email to confirm your account, then sign in.');
+      return;
+    }
+
+    router.replace('/home');
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -97,34 +148,73 @@ export default function WelcomeScreen() {
         <View style={styles.footer}>
           <Pressable
             accessibilityRole="button"
-            onPress={enterApp}
+            onPress={comingSoon}
             style={({ pressed }) => [styles.googleButton, pressed ? styles.pressed : null]}
           >
             <GoogleIcon size={20} />
             <Text style={styles.googleLabel}>Continue with Google</Text>
           </Pressable>
 
+          {googleMessage ? <Text style={styles.notice}>{googleMessage}</Text> : null}
+
           <Pressable
             accessibilityRole="button"
-            onPress={enterApp}
+            onPress={() => setFormOpen(true)}
             style={({ pressed }) => [styles.emailButton, pressed ? styles.emailPressed : null]}
           >
             <Icon name="mail" size={20} color={colors.surface} />
             <Text style={styles.emailLabel}>Continue with email</Text>
           </Pressable>
 
+          {formOpen ? (
+            <View style={styles.form}>
+              <TextInput
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Email"
+                placeholderTextColor={colors.inkFaint}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                editable={!busy}
+                style={styles.input}
+                accessibilityLabel="Email"
+              />
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Password"
+                placeholderTextColor={colors.inkFaint}
+                secureTextEntry
+                autoCapitalize="none"
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                editable={!busy}
+                onSubmitEditing={submit}
+                style={styles.input}
+                accessibilityLabel="Password"
+              />
+
+              {error ? <Text style={styles.error}>{error}</Text> : null}
+              {notice ? <Text style={styles.notice}>{notice}</Text> : null}
+
+              <ActionButton
+                label={mode === 'signin' ? 'Sign in' : 'Create account'}
+                icon={mode === 'signin' ? 'login' : 'person-add'}
+                loading={busy}
+                onPress={submit}
+              />
+            </View>
+          ) : null}
+
           <View style={styles.createRow}>
-            <Text style={styles.createText}>New here?</Text>
-            <Pressable
-              onPress={() =>
-                Alert.alert(
-                  'Account creation',
-                  'This demo build signs you straight into a sample student profile (Nimal) so you can explore the practice flow.',
-                  [{ text: 'Got it' }],
-                )
-              }
-            >
-              <Text style={styles.createLink}>Create account</Text>
+            <Text style={styles.createText}>
+              {mode === 'signin' ? 'New here?' : 'Already registered?'}
+            </Text>
+            <Pressable onPress={toggleMode} disabled={busy}>
+              <Text style={styles.createLink}>
+                {mode === 'signin' ? 'Create account' : 'Sign in'}
+              </Text>
             </Pressable>
           </View>
 
@@ -293,6 +383,31 @@ const styles = StyleSheet.create({
   },
   footer: {
     gap: 8,
+  },
+  form: {
+    gap: 8,
+  },
+  input: {
+    minHeight: 48,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontFamily: fonts.body,
+    fontSize: 14,
+    color: colors.ink,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+  },
+  error: {
+    ...type.bodySm,
+    color: colors.red,
+    paddingHorizontal: 2,
+  },
+  notice: {
+    ...type.bodySm,
+    color: colors.green,
+    paddingHorizontal: 2,
   },
   googleButton: {
     minHeight: 52,

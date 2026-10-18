@@ -8,8 +8,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { QUESTIONS, questionsForTopics, type Question } from '@/data/questions';
+import { QUESTIONS, type Question } from '@/data/questions';
 import { TOPICS, TOPIC_MAP, type TopicId } from '@/data/topics';
+import { fetchQuestions, recordAttempt } from '@/lib/questions';
+import { useAuth } from '@/store/auth-context';
 
 export interface TopicProgress {
   mastery: number;
@@ -57,6 +59,7 @@ interface StudyContextValue {
   active: ActiveSession | null;
   result: SessionResult | null;
   bookmarks: string[];
+  questionsLoading: boolean;
   startSession: (topicIds: TopicId[] | 'all', count?: number) => number;
   answerCurrent: (choice: number) => boolean;
   advance: () => void;
@@ -103,6 +106,10 @@ const StudyContext = createContext<StudyContextValue | null>(null);
 const STORAGE_KEY = 'bhauthika.progress.v1';
 
 export function StudyProvider({ children }: { children: React.ReactNode }) {
+  const { session, initializing: authInitializing } = useAuth();
+  const userId = session?.user.id;
+  const [questions, setQuestions] = useState<Question[]>(QUESTIONS);
+  const [questionsLoading, setQuestionsLoading] = useState(true);
   const [progress, setProgress] = useState<StudyProgress>(seedProgress);
   const [active, setActive] = useState<ActiveSession | null>(null);
   const [result, setResult] = useState<SessionResult | null>(null);
@@ -110,6 +117,33 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const activeRef = useRef<ActiveSession | null>(null);
   const progressRef = useRef<StudyProgress>(progress);
+
+  // The bank lives in Supabase; the bundled questions are the offline fallback.
+  useEffect(() => {
+    if (authInitializing) return;
+    if (!userId) {
+      setQuestions(QUESTIONS);
+      setQuestionsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setQuestionsLoading(true);
+    fetchQuestions()
+      .then((next) => {
+        if (!cancelled) setQuestions(next);
+      })
+      .catch(() => {
+        if (!cancelled) setQuestions(QUESTIONS);
+      })
+      .finally(() => {
+        if (!cancelled) setQuestionsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authInitializing, userId]);
 
   useEffect(() => {
     activeRef.current = active;
@@ -146,14 +180,20 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(progress)).catch(() => {});
   }, [hydrated, progress]);
 
-  const startSession = useCallback((topicIds: TopicId[] | 'all', count = 10) => {
-    const pool = topicIds === 'all' ? QUESTIONS : questionsForTopics(topicIds);
-    const picked = shuffle(pool).slice(0, Math.min(count, pool.length));
-    if (picked.length === 0) return 0;
-    setActive({ questions: picked, index: 0, answers: picked.map(() => null) });
-    setResult(null);
-    return picked.length;
-  }, []);
+  const startSession = useCallback(
+    (topicIds: TopicId[] | 'all', count = 10) => {
+      const pool =
+        topicIds === 'all'
+          ? questions
+          : questions.filter((question) => topicIds.includes(question.topicId));
+      const picked = shuffle(pool).slice(0, Math.min(count, pool.length));
+      if (picked.length === 0) return 0;
+      setActive({ questions: picked, index: 0, answers: picked.map(() => null) });
+      setResult(null);
+      return picked.length;
+    },
+    [questions],
+  );
 
   const answerCurrent = useCallback((choice: number) => {
     const session = activeRef.current;
@@ -165,6 +205,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const next = { ...session, answers };
     activeRef.current = next;
     setActive(next);
+    void recordAttempt(question.id, choice, correct);
     return correct;
   }, []);
 
@@ -262,6 +303,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       active,
       result,
       bookmarks,
+      questionsLoading,
       startSession,
       answerCurrent,
       advance,
@@ -274,6 +316,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       active,
       result,
       bookmarks,
+      questionsLoading,
       startSession,
       answerCurrent,
       advance,

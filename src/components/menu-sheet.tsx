@@ -3,6 +3,7 @@ import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LogoMark } from '@/components/brand/logo';
 import { Icon, type IconName } from '@/components/ui/icon';
+import { useAuth } from '@/store/auth-context';
 import { useStudy } from '@/store/study-context';
 import { colors, fonts, radius, sheetShadow, spacing, type } from '@/theme';
 
@@ -19,6 +20,7 @@ const destinations: { label: string; icon: IconName; href: '/home' | '/practice'
 
 export function MenuSheet({ visible, onClose }: MenuSheetProps) {
   const { progress, resetProgress } = useStudy();
+  const { signOut } = useAuth();
 
   const go = (href: '/home' | '/practice' | '/progress') => {
     onClose();
@@ -74,8 +76,9 @@ export function MenuSheet({ visible, onClose }: MenuSheetProps) {
           </Pressable>
 
           <Pressable
-            onPress={() => {
+            onPress={async () => {
               onClose();
+              await signOut();
               router.replace('/');
             }}
             style={({ pressed }) => [styles.row, pressed ? styles.rowPressed : null]}

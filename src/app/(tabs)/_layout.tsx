@@ -1,8 +1,11 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
 import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon, type IconName } from '@/components/ui/icon';
-import { colors, fonts } from '@/theme';
+import { useAuth } from '@/store/auth-context';
+import { useStudy } from '@/store/study-context';
+import { colors, fonts, spacing } from '@/theme';
 
 const TAB_META: Record<string, { label: string; icon: IconName }> = {
   home: { label: 'Home', icon: 'home' },
@@ -44,6 +47,26 @@ function AppTabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
 }
 
 export default function TabsLayout() {
+  const { session, initializing } = useAuth();
+  const { questionsLoading } = useStudy();
+
+  useEffect(() => {
+    if (!initializing && !session) {
+      router.replace('/');
+    }
+  }, [initializing, session]);
+
+  if (initializing || (session && questionsLoading)) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator color={colors.primary} />
+        <Text style={styles.loadingText}>Loading your practice set…</Text>
+      </View>
+    );
+  }
+
+  if (!session) return null;
+
   return (
     <Tabs
       tabBar={(props) => <AppTabBar {...props} />}
@@ -60,6 +83,18 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.canvas,
+  },
+  loadingText: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.inkMuted,
+  },
   bar: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
