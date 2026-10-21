@@ -1,10 +1,8 @@
+# freebuff platform artefacts
 .freebuff
-<<<<<<< HEAD
-*freebuff
-freebuff*
-=======
 *freebuff*
->>>>>>> a18764b0e4052c1fe4b54a702e8d9135ebc546ce
+/.open-next/
+/.wrangler/
 
 # dependencies
 node_modules/
@@ -17,6 +15,7 @@ next-env.d.ts
 
 # testing
 coverage/
+/qa/
 
 # local env files
 .env
@@ -24,17 +23,7 @@ coverage/
 
 # misc
 .DS_Store
+*.pem
 npm-debug.*
 yarn-debug.*
 yarn-error.*
-*.pem
-*.orig.*
-
-# design references are kept locally, not published
-/stitch_bhauthika_physics_app_ui
-
-# local QA artefacts (screenshots, puppeteer walk-through)
-/qa/
-/freebuff-sites-build/
-/.open-next/
-/.wrangler/
