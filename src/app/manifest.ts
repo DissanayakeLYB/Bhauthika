@@ -1,0 +1,29 @@
+import type { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    id: '/',
+    name: 'Bhauthika — A/L Physics practice',
+    short_name: 'Bhauthika',
+    description:
+      'Adaptive G.C.E. A/L Physics practice for Sri Lankan English-medium students: past-paper MCQs, worked derivations and topic mastery tracking.',
+    start_url: '/home',
+    scope: '/',
+    display: 'standalone',
+    orientation: 'portrait',
+    lang: 'en',
+    background_color: '#f8f9fc',
+    theme_color: '#f8f9fc',
+    categories: ['education'],
+    icons: [
+      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      {
+        src: '/icons/maskable-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+    ],
+  };
+}
