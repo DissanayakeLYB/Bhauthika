@@ -1,4 +1,6 @@
 .freebuff
+*freebuff
+freebuff*
 
 # dependencies
 node_modules/
