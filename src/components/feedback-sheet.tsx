@@ -1,261 +1,130 @@
-import React from 'react';
-import { Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import type { Question } from '@/data/questions';
+'use client';
+
+import { Formula } from '@/components/formula';
 import { ActionButton } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
-import { colors, fonts, radius, sheetShadow, spacing, type } from '@/theme';
+import { Sheet } from '@/components/ui/sheet';
+import type { Question } from '@/data/questions';
+import { cn } from '@/lib/utils';
 
 interface FeedbackSheetProps {
-  visible: boolean;
+  open: boolean;
   question: Question;
-  selected: number;
   correct: boolean;
   bookmarked: boolean;
   isLast: boolean;
   onNext: () => void;
+  onClose: () => void;
   onToggleBookmark: () => void;
 }
 
-const monoFont = Platform.select({
-  ios: 'Menlo',
-  android: 'monospace',
-  default: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-});
-
 export function FeedbackSheet({
-  visible,
+  open,
   question,
-  selected,
   correct,
   bookmarked,
   isLast,
   onNext,
+  onClose,
   onToggleBookmark,
 }: FeedbackSheetProps) {
-  const statusColor = correct ? colors.green : colors.red;
-  const statusSoft = correct ? colors.greenSoft : colors.redSoft;
-  const videoUrl = question.videoUrl;
-
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={() => {}}>
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>
-          <View style={styles.handle} />
-          <ScrollView
-            contentContainerStyle={styles.content}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
+    <Sheet
+      open={open}
+      onClose={onClose}
+      labelledBy="feedback-title"
+      className="overflow-hidden rounded-t-sheet bg-surface shadow-sheet md:rounded-sheet md:shadow-dialog"
+    >
+      <div className="mx-auto mt-2.5 h-1 w-9 shrink-0 rounded-full bg-border md:hidden" aria-hidden="true" />
+
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-3 md:px-5 md:pt-5">
+        <div
+          className={cn(
+            'flex items-start gap-3 rounded-card border p-3.5',
+            correct ? 'border-green/40 bg-green-soft' : 'border-red/40 bg-red-soft',
+          )}
+        >
+          <span
+            className={cn(
+              'mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full text-white',
+              correct ? 'bg-green' : 'bg-red',
+            )}
+            aria-hidden="true"
           >
-            <View style={[styles.banner, { backgroundColor: statusSoft, borderColor: `${statusColor}66` }]}>
-              <View style={[styles.bannerIcon, { backgroundColor: statusColor }]}>
-                <Icon name={correct ? 'check' : 'close'} size={20} color={colors.surface} />
-              </View>
-              <View style={styles.bannerText}>
-                <Text style={[styles.bannerTitle, { color: statusColor }]}>
-                  {correct ? 'Correct answer' : 'Not quite'}
-                </Text>
-                <Text style={styles.bannerSubtitle}>
-                  {correct ? 'The correct answer is ' : 'The correct answer is '}
-                  <Text style={styles.bannerStrong}>
-                    ({question.answer + 1}) {question.options[question.answer]}
-                  </Text>
-                </Text>
-              </View>
-            </View>
+            <Icon name={correct ? 'check' : 'close'} size={18} />
+          </span>
+          <div className="min-w-0">
+            <h2
+              id="feedback-title"
+              className={cn(
+                'font-display text-headline-sm',
+                correct ? 'text-green-ink' : 'text-red-ink',
+              )}
+            >
+              {correct ? 'Correct answer' : 'Not quite'}
+            </h2>
+            <p className="mt-0.5 text-body-md text-ink-muted">
+              The correct answer is{' '}
+              <strong className="font-semibold text-ink">
+                ({question.answer + 1}) {question.options[question.answer]}
+              </strong>
+            </p>
+          </div>
+        </div>
 
-            <View style={styles.whyCard}>
-              <View style={styles.whyHeader}>
-                <Icon name="lightbulb" size={19} color={colors.indigoMid} />
-                <Text style={styles.whyTitle}>Why?</Text>
-              </View>
-
-              {question.steps.map((step, index) => {
-                const isFinal = index === question.steps.length - 1;
-                return (
-                  <View
-                    key={step.label}
-                    style={[styles.step, isFinal ? styles.stepFinal : null]}
-                  >
-                    <Text style={[styles.stepLabel, isFinal ? styles.stepLabelFinal : null]}>
-                      {step.label.toUpperCase()}
-                    </Text>
-                    <Text style={styles.stepFormula}>{step.formula}</Text>
-                  </View>
-                );
-              })}
-            </View>
-
-            <View style={styles.actions}>
-              <ActionButton
-                label={isLast ? 'Finish session' : 'Next question'}
-                icon="arrow-forward"
-                iconPosition="right"
-                onPress={onNext}
-              />
-              <Pressable
-                onPress={onToggleBookmark}
-                accessibilityRole="button"
-                accessibilityLabel={bookmarked ? 'Remove bookmark' : 'Mark for review'}
-                style={({ pressed }) => [styles.bookmark, pressed ? styles.bookmarkPressed : null]}
-              >
-                <Icon
-                  name={bookmarked ? 'bookmark' : 'bookmark-border'}
-                  size={18}
-                  color={bookmarked ? colors.primary : colors.inkMuted}
-                />
-                <Text
-                  style={[styles.bookmarkLabel, bookmarked ? styles.bookmarkLabelActive : null]}
+        <div className="mt-3 rounded-card border border-border bg-surface-low p-3.5">
+          <h3 className="flex items-center gap-1.5 font-display text-headline-sm text-ink">
+            <Icon name="lightbulb" size={19} className="text-indigo-mid" />
+            Why?
+          </h3>
+          <ol className="mt-2 space-y-2">
+            {question.steps.map((step, index) => {
+              const isFinal = index === question.steps.length - 1;
+              return (
+                <li
+                  key={step.label}
+                  className={cn(
+                    'rounded-tile border bg-surface p-2.5',
+                    isFinal ? 'border-green/30 bg-green-soft' : 'border-border',
+                  )}
                 >
-                  {bookmarked ? 'Marked for review' : 'Mark for review'}
-                </Text>
-              </Pressable>
-            </View>
+                  <p
+                    className={cn(
+                      'text-label-sm tracking-[0.06em] uppercase',
+                      isFinal ? 'text-green-ink' : 'text-ink-muted',
+                    )}
+                  >
+                    {step.label}
+                  </p>
+                  <Formula
+                    latex={step.latex}
+                    fallback={step.formula}
+                    className="mt-1 text-[15px] leading-6"
+                  />
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
 
-            {/* Video link: shown only if the question has a videoUrl. */}
-            {videoUrl ? (
-              <ActionButton
-                label="Watch full explanation"
-                variant="ghost"
-                icon="play-circle-outline"
-                onPress={() => Linking.openURL(videoUrl)}
-              />
-            ) : null}
-          </ScrollView>
-        </View>
-      </View>
-    </Modal>
+      <div className="shrink-0 border-t border-border px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] md:px-5 md:pb-4">
+        <ActionButton
+          label={isLast ? 'Finish session' : 'Next question'}
+          icon="arrow-right"
+          iconPosition="right"
+          onClick={onNext}
+        />
+        <button
+          type="button"
+          onClick={onToggleBookmark}
+          aria-pressed={bookmarked}
+          className="mt-1 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-tile text-label-md text-ink-muted transition-colors hover:text-primary"
+        >
+          <Icon name="bookmark" size={17} className={bookmarked ? 'text-primary' : undefined} />
+          {bookmarked ? 'Marked for review' : 'Mark for review'}
+        </button>
+      </div>
+    </Sheet>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(27,30,40,0.35)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    maxHeight: '82%',
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.sheet,
-    borderTopRightRadius: radius.sheet,
-    borderTopWidth: 1,
-    borderColor: 'rgba(199,197,210,0.2)',
-    ...sheetShadow,
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
-    marginTop: 10,
-    marginBottom: 8,
-  },
-  content: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.lg,
-    gap: 12,
-  },
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    padding: 14,
-  },
-  bannerIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1,
-  },
-  bannerText: {
-    flex: 1,
-    gap: 2,
-  },
-  bannerTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    lineHeight: 24,
-  },
-  bannerSubtitle: {
-    ...type.bodyMd,
-    color: colors.inkMuted,
-  },
-  bannerStrong: {
-    fontFamily: fonts.bodyBold,
-    color: colors.ink,
-  },
-  whyCard: {
-    backgroundColor: colors.surfaceLow,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 14,
-    gap: 8,
-  },
-  whyHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  whyTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    lineHeight: 24,
-    color: colors.ink,
-  },
-  step: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: 10,
-    gap: 3,
-  },
-  stepFinal: {
-    backgroundColor: colors.greenSoft,
-    borderColor: 'rgba(46,158,107,0.3)',
-  },
-  stepLabel: {
-    fontFamily: fonts.headingMedium,
-    fontSize: 10,
-    lineHeight: 14,
-    letterSpacing: 0.7,
-    color: colors.inkMuted,
-  },
-  stepLabelFinal: {
-    color: colors.green,
-  },
-  stepFormula: {
-    fontFamily: monoFont,
-    fontSize: 12.5,
-    lineHeight: 19,
-    color: colors.ink,
-  },
-  actions: {
-    gap: 4,
-    paddingTop: 4,
-  },
-  bookmark: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-  },
-  bookmarkPressed: {
-    opacity: 0.6,
-  },
-  bookmarkLabel: {
-    ...type.labelMd,
-    fontFamily: fonts.bodyMedium,
-    color: colors.inkMuted,
-  },
-  bookmarkLabelActive: {
-    color: colors.primary,
-  },
-});
