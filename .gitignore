@@ -1,4 +1,5 @@
 .freebuff
+*freebuff*
 
 # dependencies
 node_modules/
@@ -29,3 +30,6 @@ yarn-error.*
 
 # local QA artefacts (screenshots, puppeteer walk-through)
 /qa/
+/freebuff-sites-build/
+/.open-next/
+/.wrangler/
