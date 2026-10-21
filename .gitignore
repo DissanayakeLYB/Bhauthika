@@ -1,9 +1,3 @@
-# freebuff platform artefacts
-.freebuff
-*freebuff*
-/.open-next/
-/.wrangler/
-
 # dependencies
 node_modules/
 
