@@ -107,6 +107,11 @@ export default function SummaryPage() {
           </p>
         </section>
 
+        <p className="mt-3 flex items-center justify-center gap-1.5 rounded-card border border-indigo-line bg-indigo-soft px-3 py-2.5 text-center font-display text-[11px] font-semibold text-primary">
+          <span aria-hidden="true">⚡</span>
+          +{result.points} Mastery Points earned
+        </p>
+
         {shareNote ? (
           <p role="status" className="mt-2 text-center text-label-sm text-ink-muted">
             {shareNote}
