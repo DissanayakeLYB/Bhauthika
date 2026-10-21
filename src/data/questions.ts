@@ -2,7 +2,10 @@ import type { TopicId } from './topics';
 
 export interface DerivationStep {
   label: string;
+  /** Plain-text fallback, also used before KaTeX hydrates. */
   formula: string;
+  /** KaTeX source for the typeset formula. */
+  latex: string;
 }
 
 export interface Question {
@@ -38,13 +41,28 @@ export const QUESTIONS: Question[] = [
     options: ['0.018 V cm⁻¹', '0.020 V cm⁻¹', '0.022 V cm⁻¹', '0.180 V cm⁻¹', '0.200 V cm⁻¹'],
     answer: 0,
     hint: 'Formula Hint (V = IR)',
-    videoUrl: 'https://www.youtube.com/watch?v=EXAMPLE',
     diagram: 'potentiometer',
     steps: [
-      { label: 'Step 1: Circuit Total Resistance', formula: 'R_total = 10 Ω + 1 Ω = 11 Ω' },
-      { label: 'Step 2: Circuit Current (I)', formula: 'I = E / R_total = 2 V / 11 Ω ≈ 0.1818 A' },
-      { label: 'Step 3: Potential Difference V_AB', formula: 'V_AB = I × R_wire = 0.1818 A × 10 Ω = 1.818 V' },
-      { label: 'Step 4: Potential Gradient (k)', formula: 'k = V_AB / L = 1.818 V / 100 cm = 0.018 V cm⁻¹' },
+      {
+        label: 'Step 1: Circuit Total Resistance',
+        formula: 'R_total = 10 Ω + 1 Ω = 11 Ω',
+        latex: String.raw`R_{\text{total}} = 10\,\Omega + 1\,\Omega = 11\,\Omega`,
+      },
+      {
+        label: 'Step 2: Circuit Current (I)',
+        formula: 'I = E / R_total = 2 V / 11 Ω ≈ 0.1818 A',
+        latex: String.raw`I = \frac{E}{R_{\text{total}}} = \frac{2\,\text{V}}{11\,\Omega} \approx 0.1818\,\text{A}`,
+      },
+      {
+        label: 'Step 3: Potential Difference V_AB',
+        formula: 'V_AB = I × R_wire = 0.1818 A × 10 Ω = 1.818 V',
+        latex: String.raw`V_{AB} = I \times R_{\text{wire}} = 0.1818\,\text{A} \times 10\,\Omega = 1.818\,\text{V}`,
+      },
+      {
+        label: 'Step 4: Potential Gradient (k)',
+        formula: 'k = V_AB / L = 1.818 V / 100 cm = 0.018 V cm⁻¹',
+        latex: String.raw`k = \frac{V_{AB}}{L} = \frac{1.818\,\text{V}}{100\,\text{cm}} = 0.018\,\text{V}\,\text{cm}^{-1}`,
+      },
     ],
   },
   {
@@ -57,11 +75,22 @@ export const QUESTIONS: Question[] = [
     options: ['0.5 A', '1.0 A', '3.0 A', '6.0 A', '12.0 A'],
     answer: 3,
     hint: 'Formula Hint (1/R = Σ1/R)',
-    videoUrl: 'https://www.youtube.com/watch?v=EXAMPLE',
     steps: [
-      { label: 'Step 1: Parallel Equivalent Resistance', formula: '1/R_p = 1/2 + 1/3 + 1/6 = 1 Ω⁻¹' },
-      { label: 'Step 2: Equivalent Resistance', formula: 'R_p = 1 Ω' },
-      { label: 'Step 3: Total Current', formula: 'I = V / R_p = 6 V / 1 Ω = 6 A' },
+      {
+        label: 'Step 1: Parallel Equivalent Resistance',
+        formula: '1/R_p = 1/2 + 1/3 + 1/6 = 1 Ω⁻¹',
+        latex: String.raw`\frac{1}{R_p} = \frac{1}{2} + \frac{1}{3} + \frac{1}{6} = 1\,\Omega^{-1}`,
+      },
+      {
+        label: 'Step 2: Equivalent Resistance',
+        formula: 'R_p = 1 Ω',
+        latex: String.raw`R_p = 1\,\Omega`,
+      },
+      {
+        label: 'Step 3: Total Current',
+        formula: 'I = V / R_p = 6 V / 1 Ω = 6 A',
+        latex: String.raw`I = \frac{V}{R_p} = \frac{6\,\text{V}}{1\,\Omega} = 6\,\text{A}`,
+      },
     ],
   },
   {
@@ -75,9 +104,21 @@ export const QUESTIONS: Question[] = [
     answer: 2,
     hint: 'Formula Hint (V = E − Ir)',
     steps: [
-      { label: 'Step 1: Circuit Current', formula: 'I = E / (R + r) = 12 V / (5 Ω + 1 Ω) = 2 A' },
-      { label: 'Step 2: Lost Volts Inside the Cell', formula: 'Ir = 2 A × 1 Ω = 2 V' },
-      { label: 'Step 3: Terminal Potential Difference', formula: 'V = E − Ir = 12 V − 2 V = 10 V' },
+      {
+        label: 'Step 1: Circuit Current',
+        formula: 'I = E / (R + r) = 12 V / (5 Ω + 1 Ω) = 2 A',
+        latex: String.raw`I = \frac{E}{R + r} = \frac{12\,\text{V}}{5\,\Omega + 1\,\Omega} = 2\,\text{A}`,
+      },
+      {
+        label: 'Step 2: Lost Volts Inside the Cell',
+        formula: 'Ir = 2 A × 1 Ω = 2 V',
+        latex: String.raw`Ir = 2\,\text{A} \times 1\,\Omega = 2\,\text{V}`,
+      },
+      {
+        label: 'Step 3: Terminal Potential Difference',
+        formula: 'V = E − Ir = 12 V − 2 V = 10 V',
+        latex: String.raw`V = E - Ir = 12\,\text{V} - 2\,\text{V} = 10\,\text{V}`,
+      },
     ],
   },
   {
@@ -91,9 +132,21 @@ export const QUESTIONS: Question[] = [
     answer: 3,
     hint: 'Formula Hint (s = ut + ½at²)',
     steps: [
-      { label: 'Step 1: Known Quantities', formula: 'u = 0 m s⁻¹, a = 4 m s⁻², t = 5 s' },
-      { label: 'Step 2: Apply the Equation of Motion', formula: 's = ut + ½at² = 0 + ½ × 4 × 5²' },
-      { label: 'Step 3: Evaluate', formula: 's = 2 × 25 = 50 m' },
+      {
+        label: 'Step 1: Known Quantities',
+        formula: 'u = 0 m s⁻¹, a = 4 m s⁻², t = 5 s',
+        latex: String.raw`u = 0\,\text{m}\,\text{s}^{-1},\quad a = 4\,\text{m}\,\text{s}^{-2},\quad t = 5\,\text{s}`,
+      },
+      {
+        label: 'Step 2: Apply the Equation of Motion',
+        formula: 's = ut + ½at² = 0 + ½ × 4 × 5²',
+        latex: String.raw`s = ut + \tfrac{1}{2}at^2 = 0 + \tfrac{1}{2} \times 4 \times 5^2`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 's = 2 × 25 = 50 m',
+        latex: String.raw`s = 2 \times 25 = 50\,\text{m}`,
+      },
     ],
   },
   {
@@ -107,9 +160,21 @@ export const QUESTIONS: Question[] = [
     answer: 1,
     hint: 'Formula Hint (I = ½MR²)',
     steps: [
-      { label: 'Step 1: Moment of Inertia of a Solid Cylinder', formula: 'I = ½ M R²' },
-      { label: 'Step 2: Substitute Values', formula: 'I = ½ × 2 kg × (0.5 m)²' },
-      { label: 'Step 3: Evaluate', formula: 'I = 1 × 0.25 = 0.25 kg m²' },
+      {
+        label: 'Step 1: Moment of Inertia of a Solid Cylinder',
+        formula: 'I = ½ M R²',
+        latex: String.raw`I = \tfrac{1}{2}MR^2`,
+      },
+      {
+        label: 'Step 2: Substitute Values',
+        formula: 'I = ½ × 2 kg × (0.5 m)²',
+        latex: String.raw`I = \tfrac{1}{2} \times 2\,\text{kg} \times (0.5\,\text{m})^2`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'I = 1 × 0.25 = 0.25 kg m²',
+        latex: String.raw`I = 1 \times 0.25 = 0.25\,\text{kg}\,\text{m}^2`,
+      },
     ],
   },
   {
@@ -123,9 +188,21 @@ export const QUESTIONS: Question[] = [
     answer: 3,
     hint: 'Formula Hint (impulse = Δp)',
     steps: [
-      { label: 'Step 1: Choose a Positive Direction', formula: 'Take towards the wall as positive: u = +10 m s⁻¹, v = −8 m s⁻¹' },
-      { label: 'Step 2: Change of Momentum', formula: 'Δp = m(v − u) = 0.2 × (−8 − 10)' },
-      { label: 'Step 3: Magnitude of Impulse', formula: '|Δp| = 0.2 × 18 = 3.6 N s' },
+      {
+        label: 'Step 1: Choose a Positive Direction',
+        formula: 'Take towards the wall as positive: u = +10 m s⁻¹, v = −8 m s⁻¹',
+        latex: String.raw`u = +10\,\text{m}\,\text{s}^{-1},\quad v = -8\,\text{m}\,\text{s}^{-1}`,
+      },
+      {
+        label: 'Step 2: Change of Momentum',
+        formula: 'Δp = m(v − u) = 0.2 × (−8 − 10)',
+        latex: String.raw`\Delta p = m(v - u) = 0.2 \times (-8 - 10)`,
+      },
+      {
+        label: 'Step 3: Magnitude of Impulse',
+        formula: '|Δp| = 0.2 × 18 = 3.6 N s',
+        latex: String.raw`|\Delta p| = 0.2 \times 18 = 3.6\,\text{N}\,\text{s}`,
+      },
     ],
   },
   {
@@ -139,9 +216,21 @@ export const QUESTIONS: Question[] = [
     answer: 2,
     hint: 'Formula Hint (T = 2π√(L/g))',
     steps: [
-      { label: 'Step 1: Period of a Simple Pendulum', formula: 'T = 2π√(L/g)' },
-      { label: 'Step 2: Substitute Values', formula: 'T = 2π√(1.0 / 9.8) = 2π × 0.3194' },
-      { label: 'Step 3: Evaluate', formula: 'T ≈ 2.0 s' },
+      {
+        label: 'Step 1: Period of a Simple Pendulum',
+        formula: 'T = 2π√(L/g)',
+        latex: String.raw`T = 2\pi\sqrt{\frac{L}{g}}`,
+      },
+      {
+        label: 'Step 2: Substitute Values',
+        formula: 'T = 2π√(1.0 / 9.8) = 2π × 0.3194',
+        latex: String.raw`T = 2\pi\sqrt{\frac{1.0}{9.8}} = 2\pi \times 0.3194`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'T ≈ 2.0 s',
+        latex: String.raw`T \approx 2.0\,\text{s}`,
+      },
     ],
   },
   {
@@ -155,9 +244,21 @@ export const QUESTIONS: Question[] = [
     answer: 2,
     hint: 'Formula Hint (v = ω/k)',
     steps: [
-      { label: 'Step 1: Compare with y = A sin(ωt − kx)', formula: 'ω = 100π rad s⁻¹, k = 5π rad m⁻¹' },
-      { label: 'Step 2: Wave Speed', formula: 'v = ω / k = 100π / 5π' },
-      { label: 'Step 3: Evaluate', formula: 'v = 20 m s⁻¹' },
+      {
+        label: 'Step 1: Compare with y = A sin(ωt − kx)',
+        formula: 'ω = 100π rad s⁻¹, k = 5π rad m⁻¹',
+        latex: String.raw`\omega = 100\pi\,\text{rad}\,\text{s}^{-1},\quad k = 5\pi\,\text{rad}\,\text{m}^{-1}`,
+      },
+      {
+        label: 'Step 2: Wave Speed',
+        formula: 'v = ω / k = 100π / 5π',
+        latex: String.raw`v = \frac{\omega}{k} = \frac{100\pi}{5\pi}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'v = 20 m s⁻¹',
+        latex: String.raw`v = 20\,\text{m}\,\text{s}^{-1}`,
+      },
     ],
   },
   {
@@ -171,9 +272,21 @@ export const QUESTIONS: Question[] = [
     answer: 1,
     hint: 'Formula Hint (f₁ = v/4L)',
     steps: [
-      { label: 'Step 1: Fundamental Mode of a Closed Pipe', formula: 'λ₁ / 4 = L, so λ₁ = 4L' },
-      { label: 'Step 2: Fundamental Frequency', formula: 'f₁ = v / 4L = 340 / (4 × 0.5)' },
-      { label: 'Step 3: Evaluate', formula: 'f₁ = 340 / 2 = 170 Hz' },
+      {
+        label: 'Step 1: Fundamental Mode of a Closed Pipe',
+        formula: 'λ₁ / 4 = L, so λ₁ = 4L',
+        latex: String.raw`\frac{\lambda_1}{4} = L \;\Rightarrow\; \lambda_1 = 4L`,
+      },
+      {
+        label: 'Step 2: Fundamental Frequency',
+        formula: 'f₁ = v / 4L = 340 / (4 × 0.5)',
+        latex: String.raw`f_1 = \frac{v}{4L} = \frac{340}{4 \times 0.5}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'f₁ = 340 / 2 = 170 Hz',
+        latex: String.raw`f_1 = \frac{340}{2} = 170\,\text{Hz}`,
+      },
     ],
   },
   {
@@ -187,9 +300,21 @@ export const QUESTIONS: Question[] = [
     answer: 2,
     hint: 'Formula Hint (P/T = constant)',
     steps: [
-      { label: 'Step 1: Convert to Kelvin', formula: 'T₁ = 27 + 273 = 300 K' },
-      { label: 'Step 2: Constant Volume Relation', formula: 'P₁/T₁ = P₂/T₂, and P₂ = 2P₁ ⇒ T₂ = 2T₁' },
-      { label: 'Step 3: Final Temperature', formula: 'T₂ = 600 K = 600 − 273 = 327 °C' },
+      {
+        label: 'Step 1: Convert to Kelvin',
+        formula: 'T₁ = 27 + 273 = 300 K',
+        latex: String.raw`T_1 = 27 + 273 = 300\,\text{K}`,
+      },
+      {
+        label: 'Step 2: Constant Volume Relation',
+        formula: 'P₁/T₁ = P₂/T₂, and P₂ = 2P₁ ⇒ T₂ = 2T₁',
+        latex: String.raw`\frac{P_1}{T_1} = \frac{P_2}{T_2},\quad P_2 = 2P_1 \Rightarrow T_2 = 2T_1`,
+      },
+      {
+        label: 'Step 3: Final Temperature',
+        formula: 'T₂ = 600 K = 600 − 273 = 327 °C',
+        latex: String.raw`T_2 = 600\,\text{K} = 600 - 273 = 327\,^\circ\text{C}`,
+      },
     ],
   },
   {
@@ -203,9 +328,21 @@ export const QUESTIONS: Question[] = [
     answer: 3,
     hint: 'Formula Hint (Q = mcΔT)',
     steps: [
-      { label: 'Step 1: Temperature Rise', formula: 'ΔT = 70 − 20 = 50 K' },
-      { label: 'Step 2: Heat Energy Required', formula: 'Q = mcΔT = 2 × 4200 × 50' },
-      { label: 'Step 3: Evaluate', formula: 'Q = 420 000 J = 420 kJ' },
+      {
+        label: 'Step 1: Temperature Rise',
+        formula: 'ΔT = 70 − 20 = 50 K',
+        latex: String.raw`\Delta T = 70 - 20 = 50\,\text{K}`,
+      },
+      {
+        label: 'Step 2: Heat Energy Required',
+        formula: 'Q = mcΔT = 2 × 4200 × 50',
+        latex: String.raw`Q = mc\Delta T = 2 \times 4200 \times 50`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'Q = 420 000 J = 420 kJ',
+        latex: String.raw`Q = 420{,}000\,\text{J} = 420\,\text{kJ}`,
+      },
     ],
   },
   {
@@ -219,9 +356,21 @@ export const QUESTIONS: Question[] = [
     answer: 1,
     hint: 'Formula Hint (g′ = g / (1 + h/R)²)',
     steps: [
-      { label: 'Step 1: Variation with Height', formula: 'g′ = g / (1 + h/R)²' },
-      { label: 'Step 2: Substitute h = R/2', formula: 'g′ = 9.8 / (1 + 0.5)² = 9.8 / 2.25' },
-      { label: 'Step 3: Evaluate', formula: 'g′ ≈ 4.4 m s⁻²' },
+      {
+        label: 'Step 1: Variation with Height',
+        formula: "g′ = g / (1 + h/R)²",
+        latex: String.raw`g' = \frac{g}{(1 + h/R)^2}`,
+      },
+      {
+        label: 'Step 2: Substitute h = R/2',
+        formula: "g′ = 9.8 / (1 + 0.5)² = 9.8 / 2.25",
+        latex: String.raw`g' = \frac{9.8}{(1 + 0.5)^2} = \frac{9.8}{2.25}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: "g′ ≈ 4.4 m s⁻²",
+        latex: String.raw`g' \approx 4.4\,\text{m}\,\text{s}^{-2}`,
+      },
     ],
   },
   {
@@ -235,9 +384,21 @@ export const QUESTIONS: Question[] = [
     answer: 1,
     hint: 'Formula Hint (v = √(GM/r))',
     steps: [
-      { label: 'Step 1: Orbital Speed', formula: 'v = √(GM / r), with GM = gR²' },
-      { label: 'Step 2: Substitute r = 2R', formula: 'v = √(gR² / 2R) = √(gR / 2)' },
-      { label: 'Step 3: Evaluate', formula: 'v = √(9.8 × 6.4 × 10⁶ / 2) ≈ 5.6 × 10³ m s⁻¹' },
+      {
+        label: 'Step 1: Orbital Speed',
+        formula: 'v = √(GM / r), with GM = gR²',
+        latex: String.raw`v = \sqrt{\frac{GM}{r}},\quad GM = gR^2`,
+      },
+      {
+        label: 'Step 2: Substitute r = 2R',
+        formula: 'v = √(gR² / 2R) = √(gR / 2)',
+        latex: String.raw`v = \sqrt{\frac{gR^2}{2R}} = \sqrt{\frac{gR}{2}}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'v = √(9.8 × 6.4 × 10⁶ / 2) ≈ 5.6 × 10³ m s⁻¹',
+        latex: String.raw`v = \sqrt{\frac{9.8 \times 6.4 \times 10^6}{2}} \approx 5.6 \times 10^3\,\text{m}\,\text{s}^{-1}`,
+      },
     ],
   },
   {
@@ -251,9 +412,21 @@ export const QUESTIONS: Question[] = [
     answer: 2,
     hint: 'Formula Hint (F = kq₁q₂/r²)',
     steps: [
-      { label: 'Step 1: Coulomb’s Law', formula: 'F = (1/4πε₀) q₁q₂ / r²' },
-      { label: 'Step 2: Substitute Values', formula: 'F = 9 × 10⁹ × (2 × 10⁻⁶)(8 × 10⁻⁶) / (0.3)²' },
-      { label: 'Step 3: Evaluate', formula: 'F = 9 × 10⁹ × 16 × 10⁻¹² / 0.09 = 1.6 N' },
+      {
+        label: 'Step 1: Coulomb’s Law',
+        formula: 'F = (1/4πε₀) q₁q₂ / r²',
+        latex: String.raw`F = \frac{1}{4\pi\varepsilon_0}\,\frac{q_1 q_2}{r^2}`,
+      },
+      {
+        label: 'Step 2: Substitute Values',
+        formula: 'F = 9 × 10⁹ × (2 × 10⁻⁶)(8 × 10⁻⁶) / (0.3)²',
+        latex: String.raw`F = 9 \times 10^9 \times \frac{(2 \times 10^{-6})(8 \times 10^{-6})}{(0.3)^2}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'F = 9 × 10⁹ × 16 × 10⁻¹² / 0.09 = 1.6 N',
+        latex: String.raw`F = 9 \times 10^9 \times \frac{16 \times 10^{-12}}{0.09} = 1.6\,\text{N}`,
+      },
     ],
   },
   {
@@ -267,9 +440,21 @@ export const QUESTIONS: Question[] = [
     answer: 3,
     hint: 'Formula Hint (E = V/d)',
     steps: [
-      { label: 'Step 1: Uniform Field Between Parallel Plates', formula: 'E = V / d' },
-      { label: 'Step 2: Convert Separation to Metres', formula: 'd = 2 cm = 2 × 10⁻² m' },
-      { label: 'Step 3: Evaluate', formula: 'E = 200 / 0.02 = 10 000 V m⁻¹' },
+      {
+        label: 'Step 1: Uniform Field Between Parallel Plates',
+        formula: 'E = V / d',
+        latex: String.raw`E = \frac{V}{d}`,
+      },
+      {
+        label: 'Step 2: Convert Separation to Metres',
+        formula: 'd = 2 cm = 2 × 10⁻² m',
+        latex: String.raw`d = 2\,\text{cm} = 2 \times 10^{-2}\,\text{m}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'E = 200 / 0.02 = 10 000 V m⁻¹',
+        latex: String.raw`E = \frac{200}{0.02} = 10{,}000\,\text{V}\,\text{m}^{-1}`,
+      },
     ],
   },
   {
@@ -283,9 +468,21 @@ export const QUESTIONS: Question[] = [
     answer: 1,
     hint: 'Formula Hint (F = qvB)',
     steps: [
-      { label: 'Step 1: Magnetic Force on a Moving Charge', formula: 'F = qvB sin θ, with θ = 90°' },
-      { label: 'Step 2: Substitute Values', formula: 'F = 1.6 × 10⁻¹⁹ × 2 × 10⁶ × 0.5' },
-      { label: 'Step 3: Evaluate', formula: 'F = 1.6 × 10⁻¹³ N' },
+      {
+        label: 'Step 1: Magnetic Force on a Moving Charge',
+        formula: 'F = qvB sin θ, with θ = 90°',
+        latex: String.raw`F = qvB\sin\theta,\quad \theta = 90^\circ`,
+      },
+      {
+        label: 'Step 2: Substitute Values',
+        formula: 'F = 1.6 × 10⁻¹⁹ × 2 × 10⁶ × 0.5',
+        latex: String.raw`F = 1.6 \times 10^{-19} \times 2 \times 10^6 \times 0.5`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'F = 1.6 × 10⁻¹³ N',
+        latex: String.raw`F = 1.6 \times 10^{-13}\,\text{N}`,
+      },
     ],
   },
   {
@@ -299,9 +496,21 @@ export const QUESTIONS: Question[] = [
     answer: 1,
     hint: 'Formula Hint (Φ = BA)',
     steps: [
-      { label: 'Step 1: Area of the Loop', formula: 'A = πr² = π × (0.1)² = 0.0314 m²' },
-      { label: 'Step 2: Magnetic Flux', formula: 'Φ = BA cos θ, with θ = 0°' },
-      { label: 'Step 3: Evaluate', formula: 'Φ = 0.4 × 0.0314 ≈ 0.013 Wb' },
+      {
+        label: 'Step 1: Area of the Loop',
+        formula: 'A = πr² = π × (0.1)² = 0.0314 m²',
+        latex: String.raw`A = \pi r^2 = \pi \times (0.1)^2 = 0.0314\,\text{m}^2`,
+      },
+      {
+        label: 'Step 2: Magnetic Flux',
+        formula: 'Φ = BA cos θ, with θ = 0°',
+        latex: String.raw`\Phi = BA\cos\theta,\quad \theta = 0^\circ`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'Φ = 0.4 × 0.0314 ≈ 0.013 Wb',
+        latex: String.raw`\Phi = 0.4 \times 0.0314 \approx 0.013\,\text{Wb}`,
+      },
     ],
   },
   {
@@ -315,9 +524,21 @@ export const QUESTIONS: Question[] = [
     answer: 0,
     hint: 'Formula Hint (G = −R_f/R_in)',
     steps: [
-      { label: 'Step 1: Inverting Amplifier Gain', formula: 'G = −R_f / R_in' },
-      { label: 'Step 2: Substitute Values', formula: 'G = −10 kΩ / 2 kΩ' },
-      { label: 'Step 3: Evaluate', formula: 'G = −5 (inverted and amplified five times)' },
+      {
+        label: 'Step 1: Inverting Amplifier Gain',
+        formula: 'G = −R_f / R_in',
+        latex: String.raw`G = -\frac{R_f}{R_{\text{in}}}`,
+      },
+      {
+        label: 'Step 2: Substitute Values',
+        formula: 'G = −10 kΩ / 2 kΩ',
+        latex: String.raw`G = -\frac{10\,\text{k}\Omega}{2\,\text{k}\Omega}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'G = −5 (inverted and amplified five times)',
+        latex: String.raw`G = -5`,
+      },
     ],
   },
   {
@@ -331,9 +552,21 @@ export const QUESTIONS: Question[] = [
     answer: 1,
     hint: 'Formula Hint (I = (V − V_D)/R)',
     steps: [
-      { label: 'Step 1: Voltage Across the Resistor', formula: 'V_R = V − V_D = 5 V − 0.7 V = 4.3 V' },
-      { label: 'Step 2: Ohm’s Law', formula: 'I = V_R / R = 4.3 V / 1000 Ω' },
-      { label: 'Step 3: Evaluate', formula: 'I = 4.3 × 10⁻³ A = 4.3 mA' },
+      {
+        label: 'Step 1: Voltage Across the Resistor',
+        formula: 'V_R = V − V_D = 5 V − 0.7 V = 4.3 V',
+        latex: String.raw`V_R = V - V_D = 5\,\text{V} - 0.7\,\text{V} = 4.3\,\text{V}`,
+      },
+      {
+        label: 'Step 2: Ohm’s Law',
+        formula: 'I = V_R / R = 4.3 V / 1000 Ω',
+        latex: String.raw`I = \frac{V_R}{R} = \frac{4.3\,\text{V}}{1000\,\Omega}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'I = 4.3 × 10⁻³ A = 4.3 mA',
+        latex: String.raw`I = 4.3 \times 10^{-3}\,\text{A} = 4.3\,\text{mA}`,
+      },
     ],
   },
   {
@@ -347,9 +580,21 @@ export const QUESTIONS: Question[] = [
     answer: 2,
     hint: 'Formula Hint (e = FL/AY)',
     steps: [
-      { label: 'Step 1: Young’s Modulus Definition', formula: 'Y = (F/A) / (e/L) ⇒ e = FL / AY' },
-      { label: 'Step 2: Substitute Values', formula: 'e = (100 × 2) / (1 × 10⁻⁶ × 2 × 10¹¹)' },
-      { label: 'Step 3: Evaluate', formula: 'e = 200 / 2 × 10⁵ = 1 × 10⁻³ m = 1.0 mm' },
+      {
+        label: 'Step 1: Young’s Modulus Definition',
+        formula: 'Y = (F/A) / (e/L) ⇒ e = FL / AY',
+        latex: String.raw`Y = \frac{F/A}{e/L} \;\Rightarrow\; e = \frac{FL}{AY}`,
+      },
+      {
+        label: 'Step 2: Substitute Values',
+        formula: 'e = (100 × 2) / (1 × 10⁻⁶ × 2 × 10¹¹)',
+        latex: String.raw`e = \frac{100 \times 2}{1 \times 10^{-6} \times 2 \times 10^{11}}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'e = 200 / 2 × 10⁵ = 1 × 10⁻³ m = 1.0 mm',
+        latex: String.raw`e = \frac{200}{2 \times 10^5} = 1 \times 10^{-3}\,\text{m} = 1.0\,\text{mm}`,
+      },
     ],
   },
   {
@@ -363,9 +608,21 @@ export const QUESTIONS: Question[] = [
     answer: 2,
     hint: 'Formula Hint (F = 2TL for a soap film)',
     steps: [
-      { label: 'Step 1: Two Surfaces of a Soap Film', formula: 'F = 2 T L' },
-      { label: 'Step 2: Substitute Values', formula: 'F = 2 × 0.04 × 0.1' },
-      { label: 'Step 3: Evaluate', formula: 'F = 0.008 N = 8 mN' },
+      {
+        label: 'Step 1: Two Surfaces of a Soap Film',
+        formula: 'F = 2 T L',
+        latex: String.raw`F = 2TL`,
+      },
+      {
+        label: 'Step 2: Substitute Values',
+        formula: 'F = 2 × 0.04 × 0.1',
+        latex: String.raw`F = 2 \times 0.04 \times 0.1`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'F = 0.008 N = 8 mN',
+        latex: String.raw`F = 0.008\,\text{N} = 8\,\text{mN}`,
+      },
     ],
   },
   {
@@ -379,9 +636,21 @@ export const QUESTIONS: Question[] = [
     answer: 1,
     hint: 'Formula Hint (K_max = hf − Φ)',
     steps: [
-      { label: 'Step 1: Einstein’s Photoelectric Equation', formula: 'K_max = hf − Φ' },
-      { label: 'Step 2: Substitute Values', formula: 'K_max = 3.0 eV − 2.0 eV' },
-      { label: 'Step 3: Evaluate', formula: 'K_max = 1.0 eV' },
+      {
+        label: 'Step 1: Einstein’s Photoelectric Equation',
+        formula: 'K_max = hf − Φ',
+        latex: String.raw`K_{\max} = hf - \Phi`,
+      },
+      {
+        label: 'Step 2: Substitute Values',
+        formula: 'K_max = 3.0 eV − 2.0 eV',
+        latex: String.raw`K_{\max} = 3.0\,\text{eV} - 2.0\,\text{eV}`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'K_max = 1.0 eV',
+        latex: String.raw`K_{\max} = 1.0\,\text{eV}`,
+      },
     ],
   },
   {
@@ -395,9 +664,21 @@ export const QUESTIONS: Question[] = [
     answer: 1,
     hint: 'Formula Hint (N = N₀(½)ⁿ)',
     steps: [
-      { label: 'Step 1: Number of Half-lives', formula: 'n = t / T½ = 15 / 5 = 3' },
-      { label: 'Step 2: Decay Relation', formula: 'N = N₀ × (½)ⁿ = 80 × (½)³' },
-      { label: 'Step 3: Evaluate', formula: 'N = 80 / 8 = 10 g' },
+      {
+        label: 'Step 1: Number of Half-lives',
+        formula: 'n = t / T½ = 15 / 5 = 3',
+        latex: String.raw`n = \frac{t}{T_{1/2}} = \frac{15}{5} = 3`,
+      },
+      {
+        label: 'Step 2: Decay Relation',
+        formula: 'N = N₀ × (½)ⁿ = 80 × (½)³',
+        latex: String.raw`N = N_0\left(\tfrac{1}{2}\right)^n = 80 \times \left(\tfrac{1}{2}\right)^3`,
+      },
+      {
+        label: 'Step 3: Evaluate',
+        formula: 'N = 80 / 8 = 10 g',
+        latex: String.raw`N = \frac{80}{8} = 10\,\text{g}`,
+      },
     ],
   },
 ];
@@ -407,7 +688,7 @@ export const QUESTION_MAP: Record<string, Question> = QUESTIONS.reduce(
   {} as Record<string, Question>,
 );
 
-export function questionsForTopics(topicIds: TopicId[]): Question[] {
-  const allowed = new Set(topicIds);
-  return QUESTIONS.filter((question) => allowed.has(question.topicId));
+/** The number of curated questions available for one syllabus unit. */
+export function countQuestionsForTopic(topicId: TopicId): number {
+  return QUESTIONS.filter((question) => question.topicId === topicId).length;
 }

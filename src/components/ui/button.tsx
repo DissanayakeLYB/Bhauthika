@@ -1,157 +1,72 @@
-import React from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
+import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { Icon, type IconName } from '@/components/ui/icon';
-import { colors, fonts, radius, type } from '@/theme';
+import { cn } from '@/lib/utils';
 
-type Variant = 'primary' | 'ghost' | 'amber';
+export type ButtonVariant = 'primary' | 'ghost' | 'amber';
 
-interface ActionButtonProps {
+const variants: Record<ButtonVariant, string> = {
+  primary:
+    'bg-primary text-white shadow-[0_4px_12px_rgba(32,37,107,0.18)] hover:bg-primary-pressed active:bg-primary-deep',
+  ghost: 'border border-border bg-surface text-primary hover:bg-canvas active:bg-surface-container',
+  amber: 'bg-amber-soft text-amber-ink hover:bg-amber-tint active:bg-[#fcebd3]',
+};
+
+const base =
+  'inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-card px-5 py-3 font-display text-[15px] font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45';
+
+interface CommonProps {
   label: string;
-  onPress?: () => void;
-  variant?: Variant;
+  variant?: ButtonVariant;
   icon?: IconName;
   iconPosition?: 'left' | 'right';
-  disabled?: boolean;
-  loading?: boolean;
-  style?: StyleProp<ViewStyle>;
+  className?: string;
+  children?: ReactNode;
 }
 
-const variants: Record<
-  Variant,
-  { container: ViewStyle; label: string; icon: string; pressed: ViewStyle }
-> = {
-  primary: {
-    container: {
-      backgroundColor: colors.primary,
-      shadowColor: colors.primary,
-      shadowOpacity: 0.18,
-      shadowRadius: 12,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 3,
-    },
-    label: colors.surface,
-    icon: colors.surface,
-    pressed: { backgroundColor: colors.primaryPressed },
-  },
-  ghost: {
-    container: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    label: colors.primary,
-    icon: colors.primary,
-    pressed: { backgroundColor: colors.canvas },
-  },
-  amber: {
-    container: { backgroundColor: colors.amberSoft },
-    label: colors.amberDeep,
-    icon: colors.amberDeep,
-    pressed: { backgroundColor: '#FCEBD3' },
-  },
-};
+type ButtonProps = CommonProps &
+  Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'children'>;
 
 export function ActionButton({
   label,
-  onPress,
   variant = 'primary',
   icon,
   iconPosition = 'left',
-  disabled = false,
-  loading = false,
-  style,
-}: ActionButtonProps) {
-  const palette = variants[variant];
+  className,
+  type = 'button',
+  ...rest
+}: ButtonProps) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled }}
-      disabled={disabled || loading}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.base,
-        palette.container,
-        pressed && !disabled ? palette.pressed : null,
-        disabled ? styles.disabled : null,
-        style,
-      ]}
-    >
-      {loading ? (
-        <ActivityIndicator color={palette.label} />
-      ) : (
-        <View style={styles.content}>
-          {icon && iconPosition === 'left' ? (
-            <Icon name={icon} size={19} color={palette.icon} />
-          ) : null}
-          <Text style={[type.labelLg, styles.label, { color: palette.label }]}>{label}</Text>
-          {icon && iconPosition === 'right' ? (
-            <Icon name={icon} size={19} color={palette.icon} />
-          ) : null}
-        </View>
-      )}
-    </Pressable>
+    <button type={type} className={cn(base, variants[variant], className)} {...rest}>
+      {icon && iconPosition === 'left' ? <Icon name={icon} size={19} /> : null}
+      <span>{label}</span>
+      {icon && iconPosition === 'right' ? <Icon name={icon} size={19} /> : null}
+    </button>
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    minHeight: 52,
-    borderRadius: radius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  label: {
-    fontFamily: fonts.heading,
-    fontSize: 15,
-    letterSpacing: 0.1,
-  },
-  disabled: {
-    opacity: 0.45,
-  },
-  link: {
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-  },
-  linkPressed: {
-    opacity: 0.6,
-  },
-  linkLabel: {
-    color: colors.primary,
-    fontFamily: fonts.heading,
-  },
-});
+type LinkButtonProps = CommonProps & {
+  href: string;
+  prefetch?: boolean;
+  'aria-label'?: string;
+  onClick?: () => void;
+};
 
-export function LinkButton({
+export function ActionLink({
+  href,
   label,
-  onPress,
-  style,
-}: {
-  label: string;
-  onPress?: () => void;
-  style?: StyleProp<ViewStyle>;
-}) {
+  variant = 'primary',
+  icon,
+  iconPosition = 'left',
+  className,
+  prefetch,
+  ...rest
+}: LinkButtonProps) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [styles.link, pressed ? styles.linkPressed : null, style]}
-    >
-      <Text style={[type.labelMd, styles.linkLabel]}>{label}</Text>
-    </Pressable>
+    <Link href={href} prefetch={prefetch} className={cn(base, variants[variant], className)} {...rest}>
+      {icon && iconPosition === 'left' ? <Icon name={icon} size={19} /> : null}
+      <span>{label}</span>
+      {icon && iconPosition === 'right' ? <Icon name={icon} size={19} /> : null}
+    </Link>
   );
 }

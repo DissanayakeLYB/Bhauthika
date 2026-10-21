@@ -1,43 +1,35 @@
 .freebuff
+*freebuff*
 
 # dependencies
 node_modules/
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
+# next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
+# testing
+coverage/
 
-# Metro
-.metro-health-check*
+# local env files
+.env
+.env*.local
 
-# debug
+# misc
+.DS_Store
 npm-debug.*
 yarn-debug.*
 yarn-error.*
-
-# macOS
-.DS_Store
 *.pem
+*.orig.*
 
-# local env files
-.env*.local
-.env
-
-# typescript
-*.tsbuildinfo
-
-# generated native folders
-/ios
-/android
+# design references are kept locally, not published
 /stitch_bhauthika_physics_app_ui
+
+# local QA artefacts (screenshots, puppeteer walk-through)
+/qa/
+/freebuff-sites-build/
+/.open-next/
+/.wrangler/
