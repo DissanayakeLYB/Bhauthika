@@ -7,11 +7,14 @@ export default defineConfig([
   ...nextTypeScript,
   globalIgnores([
     '.next/**',
+    '.open-next/**',
+    '.wrangler/**',
     'out/**',
     'coverage/**',
     'next-env.d.ts',
-    'stitch_bhauthika_physics_app_ui/**',
+    // Local hosting-platform artefacts (also gitignored).
+    'freebuff-sites-build/**',
+    'freebuff.*',
     'qa/**',
-    'public/_qa/**',
   ]),
 ]);
