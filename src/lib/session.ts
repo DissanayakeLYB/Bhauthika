@@ -24,7 +24,7 @@ export interface SessionResult {
   topics: SessionTopicResult[];
 }
 
-export interface PickQuestionsOptions {
+interface PickQuestionsOptions {
   /** Restrict the primary draw to these units, or 'all'. */
   topicIds?: readonly TopicId[] | 'all';
   count?: number;

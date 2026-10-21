@@ -1,6 +1,6 @@
 import type { TopicId } from './topics';
 
-export interface DerivationStep {
+interface DerivationStep {
   label: string;
   /** Plain-text fallback, also used before KaTeX hydrates. */
   formula: string;

@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-export type ProgressTone = 'primary' | 'green' | 'amber';
+type ProgressTone = 'primary' | 'green' | 'amber';
 
 const fills: Record<ProgressTone, string> = {
   primary: 'bg-primary',

@@ -129,7 +129,7 @@ export function masteryStatus(mastery: number): MasteryStatus | null {
   return null;
 }
 
-export interface FocusTopic {
+interface FocusTopic {
   topicId: TopicId;
   title: string;
   accuracy: number;

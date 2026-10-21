@@ -16,8 +16,8 @@ export interface KeyValueStorage {
 }
 
 export const PROGRESS_STORAGE_KEY = 'bhauthika.progress.v1';
-export const SESSION_STORAGE_KEY = 'bhauthika.session.v1';
-export const RESULT_STORAGE_KEY = 'bhauthika.result.v1';
+const SESSION_STORAGE_KEY = 'bhauthika.session.v1';
+const RESULT_STORAGE_KEY = 'bhauthika.result.v1';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -87,7 +87,7 @@ export function parseStoredProgress(raw: string): StudyProgress | null {
 }
 
 /** Session hand-off stored in sessionStorage so a refresh keeps the set. */
-export interface StoredSession {
+interface StoredSession {
   questionIds: string[];
   index: number;
   answers: (number | null)[];
@@ -114,7 +114,7 @@ export function parseStoredSession(raw: string): StoredSession | null {
   return { questionIds: ids as string[], index, answers: parsedAnswers };
 }
 
-export function parseStoredResult(raw: string): SessionResult | null {
+function parseStoredResult(raw: string): SessionResult | null {
   const value = parseJson(raw);
   if (!isRecord(value)) return null;
 
@@ -152,7 +152,7 @@ export function parseStoredResult(raw: string): SessionResult | null {
  * JSON-over-Web-Storage persistence. Phase 2 swaps these three constructors
  * for a Supabase-backed implementation without touching UI code.
  */
-export class JsonStorageRepository<T> {
+class JsonStorageRepository<T> {
   private storage: KeyValueStorage | null;
 
   constructor(
