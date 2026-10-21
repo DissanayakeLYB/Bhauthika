@@ -1,17 +1,13 @@
-import type { ReactNode } from 'react';
 import { Icon, type IconName } from '@/components/icon';
 import { cn } from '@/lib/utils';
 
-export type ChipTone = 'neutral' | 'indigo' | 'softIndigo' | 'green' | 'amber' | 'red' | 'white';
+export type ChipTone = 'neutral' | 'indigo' | 'green' | 'amber';
 
 const tones: Record<ChipTone, string> = {
   neutral: 'bg-surface-container text-ink-muted',
   indigo: 'bg-indigo-soft text-primary',
-  softIndigo: 'bg-[#dfe2ff] text-primary',
   green: 'bg-green-soft text-green-ink',
   amber: 'bg-amber-soft text-amber-ink ring-1 ring-inset ring-amber/25',
-  red: 'bg-red-soft text-red-ink',
-  white: 'bg-surface text-primary',
 };
 
 interface ChipProps {
@@ -20,7 +16,6 @@ interface ChipProps {
   icon?: IconName;
   uppercase?: boolean;
   className?: string;
-  children?: ReactNode;
 }
 
 export function Chip({ label, tone = 'neutral', icon, uppercase, className }: ChipProps) {

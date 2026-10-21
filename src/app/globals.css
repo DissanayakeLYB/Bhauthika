@@ -2,7 +2,7 @@
 
 /*
  * Bhauthika Laboratory & Study System tokens.
- * Ported from the Stitch DESIGN.md (stitch_bhauthika_physics_app_ui/).
+ * Ported from the Stitch design system in docs/design/DESIGN.md.
  *
  * Text-safe accents: the raw diagnostic hues (#2E9E6B, #F5A524, #D64545) only
  * reach 2.8–4.4:1 on our light surfaces, so small text uses the *-ink variants
@@ -131,15 +131,9 @@
 }
 
 @layer components {
-  /* Chart/ring enter animations, disabled by the reduced-motion rule above. */
+  /* Score-ring enter animation, disabled by the reduced-motion rule above. */
   .ring-progress {
     animation: ring-draw 900ms cubic-bezier(0.4, 0, 0.2, 1) both;
-  }
-
-  .bar-grow {
-    transform-box: fill-box;
-    transform-origin: bottom;
-    animation: bar-grow 600ms cubic-bezier(0.4, 0, 0.2, 1) both;
   }
 
   /* The radio input is visually hidden, so surface focus on its whole tile. */
@@ -185,11 +179,3 @@
   white-space: normal;
 }
 
-@keyframes bar-grow {
-  from {
-    transform: scaleY(0.02);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}

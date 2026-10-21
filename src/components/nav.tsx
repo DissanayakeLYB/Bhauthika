@@ -2,20 +2,21 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogoMark } from '@/components/logo';
-import { useStudy } from '@/components/study-provider';
 import { Icon, type IconName } from '@/components/icon';
+import { LogoMark } from '@/components/logo';
 import { ProgressBar } from '@/components/progress-bar';
+import { useStudy } from '@/components/study-provider';
 import { cn } from '@/lib/utils';
 
-const items: { href: string; label: string; icon: IconName }[] = [
-  { href: '/home', label: 'Home', icon: 'home' },
-  { href: '/practice', label: 'Practice', icon: 'flask' },
-  { href: '/progress', label: 'Progress & Mastery', icon: 'insights' },
+const items: { href: string; label: string; shortLabel: string; icon: IconName }[] = [
+  { href: '/home', label: 'Home', shortLabel: 'Home', icon: 'home' },
+  { href: '/practice', label: 'Practice', shortLabel: 'Practice', icon: 'flask' },
+  { href: '/progress', label: 'Progress & Mastery', shortLabel: 'Progress', icon: 'insights' },
 ];
 
+/** Left navigation from lg up; the same destinations drive the tab bar below. */
 export function Sidebar() {
-  const { progress, resetProgress } = useStudy();
+  const { progress } = useStudy();
   const pathname = usePathname();
   const dailyPercent = Math.min(100, (progress.answeredToday / progress.dailyTarget) * 100);
 
@@ -72,16 +73,47 @@ export function Sidebar() {
           <Icon name="fire" size={16} className="text-amber" />
           {progress.streak}-day streak
         </p>
-        <button
-          type="button"
-          onClick={resetProgress}
-          className="flex min-h-11 w-full items-center gap-2 rounded-tile px-2 text-left font-display text-label-md text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
-        >
-          <Icon name="restart" size={17} />
-          Reset practice data
-        </button>
         <p className="text-label-sm text-ink-muted">Phase 1 · stored on this device</p>
       </div>
     </aside>
+  );
+}
+
+/** Bottom tab bar on phones, hidden once the sidebar takes over. */
+export function TabBar() {
+  const pathname = usePathname();
+
+  return (
+    <nav
+      aria-label="Primary"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
+    >
+      <ul className="grid h-16 grid-cols-3">
+        {items.map((item) => {
+          const active = pathname === item.href;
+          return (
+            <li key={item.href} className="min-w-0">
+              <Link
+                href={item.href}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex h-full flex-col items-center justify-center gap-0.5 transition-colors',
+                  active ? 'text-primary' : 'text-ink-muted',
+                )}
+              >
+                <Icon name={item.icon} size={22} />
+                <span className={cn('font-display text-label-sm', active && 'font-semibold')}>
+                  {item.shortLabel}
+                </span>
+                <span
+                  className={cn('h-1 w-1 rounded-full', active ? 'bg-primary' : 'bg-transparent')}
+                  aria-hidden="true"
+                />
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }

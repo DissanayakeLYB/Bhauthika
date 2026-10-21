@@ -32,7 +32,6 @@ interface StudyContextValue {
   goToNext: () => void;
   finishSession: () => void;
   toggleBookmark: (questionId: string) => void;
-  resetProgress: () => void;
 }
 
 const StudyContext = createContext<StudyContextValue | null>(null);
@@ -156,17 +155,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
-  const resetProgress = useCallback(() => {
-    const seeded = createSeedProgress();
-    setProgress(seeded);
-    setActive(null);
-    setResult(null);
-    setBookmarks([]);
-    void progressRepository.save(seeded);
-    void sessionRepository.clear();
-    void resultRepository.clear();
-  }, []);
-
   const value = useMemo<StudyContextValue>(
     () => ({
       progress,
@@ -178,7 +166,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       goToNext,
       finishSession,
       toggleBookmark,
-      resetProgress,
     }),
     [
       progress,
@@ -190,7 +177,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       goToNext,
       finishSession,
       toggleBookmark,
-      resetProgress,
     ],
   );
 

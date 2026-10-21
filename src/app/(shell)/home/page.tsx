@@ -207,27 +207,6 @@ export default function HomePage() {
         </ul>
       </section>
 
-      <Link
-        href="/practice"
-        className="mt-6 flex items-center justify-between gap-2.5 rounded-tile border border-border bg-surface-low p-3 transition-colors hover:bg-surface-container"
-      >
-        <span className="flex min-w-0 items-center gap-2.5">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-tile bg-primary/10 text-primary">
-            <Icon name="calendar" size={17} />
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate font-display text-[11px] font-semibold text-primary">
-              G.C.E. A/L Examination
-            </span>
-            <span className="block truncate text-[11px] text-ink-muted">
-              Target exam scheduled in 118 days
-            </span>
-          </span>
-        </span>
-        <span className="shrink-0 rounded-tile border border-border bg-surface px-2 py-1.5 font-display text-[10.5px] font-semibold text-primary">
-          Revise Fast
-        </span>
-      </Link>
     </div>
   );
 }

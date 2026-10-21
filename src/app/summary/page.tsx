@@ -1,16 +1,15 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStudy } from '@/components/study-provider';
-import { ScoreRing } from '@/components/score-ring';
 import { ActionButton } from '@/components/button';
-import { Chip } from '@/components/chip';
 import { Icon } from '@/components/icon';
 import { cn } from '@/lib/utils';
 
 export default function SummaryPage() {
-  const { result, progress, startSession } = useStudy();
+  const { result, startSession } = useStudy();
   const router = useRouter();
   const [shareNote, setShareNote] = useState<string | null>(null);
 
@@ -23,7 +22,7 @@ export default function SummaryPage() {
           </span>
           <h1 className="mt-4 font-display text-headline-sm text-primary">No session summary yet</h1>
           <p className="mt-1 text-body-md text-ink-muted">
-            Complete a practice set to see your mastery movement.
+            Complete a practice set to see your results.
           </p>
           <ActionButton
             label="Start practising"
@@ -108,11 +107,6 @@ export default function SummaryPage() {
           </p>
         </section>
 
-        <p className="mt-3 flex items-center justify-center gap-1.5 rounded-card border border-indigo-line bg-indigo-soft px-3 py-2.5 text-center font-display text-[11px] font-semibold text-primary">
-          <span aria-hidden="true">⚡</span>
-          +{result.points} Mastery Points earned · {progress.streak}-day streak maintained!
-        </p>
-
         {shareNote ? (
           <p role="status" className="mt-2 text-center text-label-sm text-ink-muted">
             {shareNote}
@@ -126,46 +120,29 @@ export default function SummaryPage() {
           </div>
 
           <ul>
-            {practiced.map((topic, index) => {
-              const up = topic.delta > 0;
-              const flat = topic.delta === 0;
-              return (
-                <li
-                  key={topic.topicId}
-                  className={cn(
-                    'flex items-center justify-between gap-2 py-3',
-                    index > 0 && 'border-t border-border',
-                  )}
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-body text-[13.5px] font-semibold text-ink">
-                      {topic.title}
-                    </p>
-                    <p className="text-[11.5px] text-ink-muted">
-                      Accuracy:{' '}
-                      <span className="font-semibold text-ink">
-                        {topic.accuracy}% ({topic.correct}/{topic.total})
-                      </span>
-                    </p>
-                  </div>
-                  <Chip
-                    label={flat ? 'No change' : `${up ? '+' : ''}${topic.delta}% Mastery`}
-                    tone={flat ? 'neutral' : up ? 'green' : 'amber'}
-                    icon={flat ? undefined : up ? 'arrow-up' : 'arrow-down'}
-                    className="shrink-0"
-                  />
-                </li>
-              );
-            })}
+            {practiced.map((topic, index) => (
+              <li
+                key={topic.topicId}
+                className={cn(
+                  'flex items-center justify-between gap-2 py-3',
+                  index > 0 && 'border-t border-border',
+                )}
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-body text-[13.5px] font-semibold text-ink">
+                    {topic.title}
+                  </p>
+                  <p className="text-[11.5px] text-ink-muted">
+                    Accuracy:{' '}
+                    <span className="font-semibold text-ink">
+                      {topic.accuracy}% ({topic.correct}/{topic.total})
+                    </span>
+                  </p>
+                </div>
+              </li>
+            ))}
           </ul>
         </section>
-
-        {practiced.some((topic) => topic.delta < 0) ? (
-          <p className="mt-3 px-1 text-[11.5px] leading-[17px] text-ink-muted">
-            Amber rows mark units where accuracy dipped — the adaptive engine will resurface them in
-            your next set.
-          </p>
-        ) : null}
       </div>
 
       <div className="sticky bottom-0 border-t border-border bg-surface px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))]">
@@ -179,5 +156,50 @@ export default function SummaryPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+const RADIUS = 60;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+/** Hand-drawn SVG score ring for the finished set. */
+function ScoreRing({ correct, total, size = 140 }: { correct: number; total: number; size?: number }) {
+  const ratio = total > 0 ? Math.min(1, Math.max(0, correct / total)) : 0;
+  const offset = CIRCUMFERENCE * (1 - ratio);
+  const style = {
+    '--ring-circumference': CIRCUMFERENCE,
+    '--ring-offset': offset,
+  } as CSSProperties;
+
+  return (
+    <div className="relative grid place-items-center" style={{ width: size, height: size }}>
+      <svg
+        viewBox="0 0 140 140"
+        className="h-full w-full -rotate-90"
+        role="img"
+        aria-label={`${correct} of ${total} questions correct`}
+      >
+        <circle cx="70" cy="70" r={RADIUS} fill="none" className="stroke-border" strokeWidth="10" />
+        <circle
+          cx="70"
+          cy="70"
+          r={RADIUS}
+          fill="none"
+          strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={CIRCUMFERENCE}
+          strokeDashoffset={offset}
+          style={style}
+          className="ring-progress stroke-green"
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center">
+        <p className="font-display text-[32px] leading-[38px] text-primary">
+          {correct}
+          <span className="ml-1 font-display text-[22px] text-ink-muted">/ {total}</span>
+        </p>
+        <p className="text-label-sm text-ink-muted">Questions correct</p>
+      </div>
+    </div>
   );
 }

@@ -6,7 +6,6 @@ import { useStudy } from '@/components/study-provider';
 import { Chip, type ChipTone } from '@/components/chip';
 import { Icon } from '@/components/icon';
 import { ProgressBar } from '@/components/progress-bar';
-import { WeekChart } from '@/components/week-chart';
 import { countQuestionsForTopic } from '@/lib/questions';
 import { TOPICS } from '@/lib/topics';
 import { overallAccuracy } from '@/lib/progress';
@@ -79,10 +78,6 @@ export default function ProgressPage() {
             {progress.pastPapers} Past papers
           </p>
         </article>
-      </div>
-
-      <div className="mt-4">
-        <WeekChart progress={progress} />
       </div>
 
       <div className="mt-6 mb-3 flex items-center justify-between gap-2">

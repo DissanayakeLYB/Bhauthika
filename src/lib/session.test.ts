@@ -101,7 +101,7 @@ describe('updateMastery', () => {
 });
 
 describe('applySessionResult', () => {
-  it('scores the set, moves mastery and advances the weekly series', () => {
+  it('scores the set and moves mastery', () => {
     const progress = createSeedProgress();
     const seedMastery = progress.topics.current.mastery;
     const seedSolved = progress.topics.current.solved;
@@ -124,7 +124,6 @@ describe('applySessionResult', () => {
       correct: 3,
       accuracy: 100,
     });
-    expect(result.topics[0].delta).toBe(updateMastery(seedMastery, 100) - seedMastery);
 
     expect(next.topics.current.mastery).toBe(updateMastery(seedMastery, 100));
     expect(next.topics.current.solved).toBe(seedSolved + 3);
@@ -132,9 +131,6 @@ describe('applySessionResult', () => {
     expect(next.correctToday).toBe(progress.correctToday + 3);
     expect(next.totalPractised).toBe(progress.totalPractised + 3);
     expect(next.totalCorrect).toBe(progress.totalCorrect + 3);
-    expect(next.weekly[progress.todayIndex]).toBe(
-      progress.weekly[progress.todayIndex] + 3,
-    );
   });
 
   it('treats unanswered questions as incorrect', () => {

@@ -15,7 +15,6 @@ export interface SessionTopicResult {
   total: number;
   correct: number;
   accuracy: number;
-  delta: number;
 }
 
 export interface SessionResult {
@@ -87,8 +86,8 @@ export function updateMastery(previous: number, accuracy: number, weight = 0.3):
 }
 
 /**
- * Folds a finished session into progress: mastery per unit, volume counters,
- * the weekly pacing series and the daily streak numbers.
+ * Folds a finished session into progress: mastery per unit and the volume
+ * counters behind the Progress screen.
  */
 export function applySessionResult(
   progress: StudyProgress,
@@ -126,16 +125,10 @@ export function applySessionResult(
       total: stats.total,
       correct: stats.correct,
       accuracy,
-      delta: mastery - current.mastery,
     });
   });
 
   topicResults.sort((a, b) => b.accuracy - a.accuracy);
-
-  const weekly = [...progress.weekly];
-  if (progress.todayIndex >= 0 && progress.todayIndex < weekly.length) {
-    weekly[progress.todayIndex] += total;
-  }
 
   const nextProgress: StudyProgress = {
     ...progress,
@@ -143,7 +136,6 @@ export function applySessionResult(
     correctToday: progress.correctToday + correct,
     totalPractised: progress.totalPractised + total,
     totalCorrect: progress.totalCorrect + correct,
-    weekly,
     topics,
   };
 

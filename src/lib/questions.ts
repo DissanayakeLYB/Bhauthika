@@ -21,8 +21,6 @@ export interface Question {
   hint: string;
   steps: DerivationStep[];
   diagram?: 'potentiometer';
-  /** Optional YouTube link to a full worked video explanation. */
-  videoUrl?: string;
 }
 
 /**

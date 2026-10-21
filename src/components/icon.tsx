@@ -1,13 +1,6 @@
 import type { ReactNode } from 'react';
 
 const strokeIcons = {
-  menu: (
-    <>
-      <path d="M4 7h16" />
-      <path d="M4 12h16" />
-      <path d="M4 17h16" />
-    </>
-  ),
   close: (
     <>
       <path d="M6 6l12 12" />
@@ -48,18 +41,6 @@ const strokeIcons = {
       <path d="m13 6 6 6-6 6" />
     </>
   ),
-  'arrow-up': (
-    <>
-      <path d="M12 19V5" />
-      <path d="m6 11 6-6 6 6" />
-    </>
-  ),
-  'arrow-down': (
-    <>
-      <path d="M12 5v14" />
-      <path d="m6 13 6 6 6-6" />
-    </>
-  ),
   check: <path d="m4 12.5 5 5L20 6.5" />,
   'check-circle': (
     <>
@@ -75,14 +56,6 @@ const strokeIcons = {
     </>
   ),
   'chevron-right': <path d="m9 5.5 6.5 6.5L9 18.5" />,
-  calendar: (
-    <>
-      <rect x="3" y="5" width="18" height="16" rx="2.5" />
-      <path d="M8 3v4" />
-      <path d="M16 3v4" />
-      <path d="M3 10.5h18" />
-    </>
-  ),
   search: (
     <>
       <circle cx="11" cy="11" r="7" />
@@ -121,12 +94,6 @@ const strokeIcons = {
     </>
   ),
   bookmark: <path d="M6.5 3h11v18l-5.5-3.8L6.5 21z" />,
-  restart: (
-    <>
-      <path d="M3.5 12a8.5 8.5 0 1 0 2.8-6.3" />
-      <path d="M3 4.5V10h5.5" />
-    </>
-  ),
   share: (
     <>
       <circle cx="18" cy="5" r="2.8" />
@@ -159,12 +126,6 @@ const strokeIcons = {
     <>
       <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
       <path d="M14 3v5h5" />
-    </>
-  ),
-  'arrow-up-right': (
-    <>
-      <path d="M7 17 17 7" />
-      <path d="M8 7h9v9" />
     </>
   ),
 } satisfies Record<string, ReactNode>;

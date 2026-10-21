@@ -1,6 +1,5 @@
 import { AppHeader } from '@/components/app-header';
-import { Sidebar } from '@/components/sidebar';
-import { TabBar } from '@/components/tab-bar';
+import { Sidebar, TabBar } from '@/components/nav';
 
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
   return (

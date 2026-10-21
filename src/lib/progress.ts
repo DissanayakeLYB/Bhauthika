@@ -1,4 +1,4 @@
-import { TOPICS, type TopicId } from '@/lib/topics';
+import { TOPICS, type TopicId } from './topics';
 
 export interface TopicProgress {
   mastery: number;
@@ -6,6 +6,7 @@ export interface TopicProgress {
 }
 
 export interface StudyProgress {
+  /** Simple day count, nothing more. */
   streak: number;
   dailyTarget: number;
   answeredToday: number;
@@ -14,14 +15,8 @@ export interface StudyProgress {
   totalCorrect: number;
   pastPapers: number;
   monthlyDelta: number;
-  /** Questions answered on each day, Monday first. */
-  weekly: number[];
-  /** Index into `weekly` for today. */
-  todayIndex: number;
   topics: Record<TopicId, TopicProgress>;
 }
-
-export const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
 export function clampPercent(value: number): number {
   if (!Number.isFinite(value)) return 0;
@@ -41,10 +36,7 @@ export function createSeedTopics(): Record<TopicId, TopicProgress> {
   );
 }
 
-/**
- * Demo profile used until a student has answered anything (and by "Reset
- * practice data"). Numbers mirror the Stitch design so screens are never empty.
- */
+/** Demo profile used until a student has answered anything. */
 export function createSeedProgress(): StudyProgress {
   return {
     streak: 4,
@@ -55,8 +47,6 @@ export function createSeedProgress(): StudyProgress {
     totalCorrect: 328,
     pastPapers: 64,
     monthlyDelta: 3.5,
-    weekly: [24, 18, 32, 20, 28, 12, 8],
-    todayIndex: 2,
     topics: createSeedTopics(),
   };
 }
@@ -77,8 +67,4 @@ export function overallAccuracy(progress: StudyProgress): number {
 export function todayAccuracy(progress: StudyProgress): number {
   if (progress.answeredToday <= 0) return 0;
   return Math.round((progress.correctToday / progress.answeredToday) * 100);
-}
-
-export function weeklyTotal(progress: StudyProgress): number {
-  return progress.weekly.reduce((sum, value) => sum + value, 0);
 }

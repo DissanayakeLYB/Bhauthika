@@ -1,12 +1,11 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { Fragment, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PotentiometerDiagram } from '@/components/circuit-diagram';
 import { FeedbackSheet } from '@/components/feedback-sheet';
 import { Formula } from '@/components/formula';
 import { useStudy } from '@/components/study-provider';
-import { RichText } from '@/components/rich-text';
 import { ActionButton } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { Icon } from '@/components/icon';
@@ -48,6 +47,25 @@ export default function SessionPage() {
 
   // Keyed by question so selection, hint and sheet state reset on every step.
   return <QuestionView key={active.questions[active.index].id} />;
+}
+
+/** Renders **double-asterisk** emphasis as the design's deep-indigo bold. */
+function RichText({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
+  return (
+    <>
+      {parts.map((part, index) =>
+        part.startsWith('**') && part.endsWith('**') ? (
+          <strong key={index} className="font-bold text-primary-deep">
+            {part.slice(2, -2)}
+          </strong>
+        ) : (
+          <Fragment key={index}>{part}</Fragment>
+        ),
+      )}
+    </>
+  );
 }
 
 function QuestionView() {

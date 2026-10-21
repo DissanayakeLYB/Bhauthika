@@ -1,5 +1,5 @@
-import { QUESTION_MAP } from '@/lib/questions';
-import { TOPIC_MAP, TOPICS, type TopicId } from '@/lib/topics';
+import { QUESTION_MAP } from './questions';
+import { TOPIC_MAP, TOPICS, type TopicId } from './topics';
 import {
   clampPercent,
   createSeedProgress,
@@ -13,22 +13,6 @@ export interface KeyValueStorage {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
   removeItem(key: string): void;
-}
-
-export interface Repository<T> {
-  load(): Promise<T | null>;
-  save(value: T): Promise<void>;
-  clear(): Promise<void>;
-}
-
-/**
- * Persistence boundary for study progress. Phase 2 swaps the local
- * implementation for a Supabase-backed one without touching UI code.
- */
-export interface ProgressRepository {
-  load(): Promise<StudyProgress | null>;
-  save(progress: StudyProgress): Promise<void>;
-  clear(): Promise<void>;
 }
 
 export const PROGRESS_STORAGE_KEY = 'bhauthika.progress.v1';
@@ -86,14 +70,6 @@ export function parseStoredProgress(raw: string): StudyProgress | null {
     {} as Record<TopicId, TopicProgress>,
   );
 
-  const storedWeekly = value.weekly;
-  const weekly =
-    Array.isArray(storedWeekly) &&
-    storedWeekly.length === 7 &&
-    storedWeekly.every((day) => typeof day === 'number' && Number.isFinite(day) && day >= 0)
-      ? (storedWeekly as number[]).map((day) => Math.round(day))
-      : seed.weekly;
-
   return {
     streak: Math.max(0, Math.round(finiteNumber(value.streak, seed.streak))),
     dailyTarget: Math.max(1, Math.round(finiteNumber(value.dailyTarget, seed.dailyTarget))),
@@ -106,8 +82,6 @@ export function parseStoredProgress(raw: string): StudyProgress | null {
     totalCorrect: Math.max(0, Math.round(finiteNumber(value.totalCorrect, seed.totalCorrect))),
     pastPapers: Math.max(0, Math.round(finiteNumber(value.pastPapers, seed.pastPapers))),
     monthlyDelta: finiteNumber(value.monthlyDelta, seed.monthlyDelta),
-    weekly,
-    todayIndex: Math.min(6, Math.max(0, Math.round(finiteNumber(value.todayIndex, seed.todayIndex)))),
     topics,
   };
 }
@@ -162,7 +136,6 @@ export function parseStoredResult(raw: string): SessionResult | null {
         total: topicTotal,
         correct: Math.min(topicTotal, Math.max(0, Math.round(finiteNumber(entry.correct, 0)))),
         accuracy: clampPercent(finiteNumber(entry.accuracy, 0)),
-        delta: Math.round(finiteNumber(entry.delta, 0)),
       });
     });
   }
@@ -175,8 +148,11 @@ export function parseStoredResult(raw: string): SessionResult | null {
   };
 }
 
-/** Generic JSON-over-Web-Storage repository. Never throws at the call site. */
-export class JsonStorageRepository<T> implements Repository<T> {
+/**
+ * JSON-over-Web-Storage persistence. Phase 2 swaps these three constructors
+ * for a Supabase-backed implementation without touching UI code.
+ */
+export class JsonStorageRepository<T> {
   private storage: KeyValueStorage | null;
 
   constructor(
@@ -215,14 +191,7 @@ export class JsonStorageRepository<T> implements Repository<T> {
   }
 }
 
-/**
- * Phase 1 persistence. Swapping in a Supabase-backed implementation only means
- * passing a different ProgressRepository to the study provider.
- */
-export class LocalProgressRepository
-  extends JsonStorageRepository<StudyProgress>
-  implements ProgressRepository
-{
+export class LocalProgressRepository extends JsonStorageRepository<StudyProgress> {
   constructor(storage?: KeyValueStorage | null) {
     super('local', PROGRESS_STORAGE_KEY, parseStoredProgress, storage);
   }

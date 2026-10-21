@@ -53,7 +53,6 @@ describe('LocalProgressRepository', () => {
 
     expect(loaded?.topics.current.mastery).toBe(71);
     expect(loaded?.streak).toBe(9);
-    expect(loaded?.weekly).toEqual(progress.weekly);
   });
 
   it('returns null when nothing is stored', async () => {
@@ -96,23 +95,18 @@ describe('parseStoredProgress', () => {
     expect(parsed?.streak).toBe(12);
     expect(parsed?.dailyTarget).toBe(seed.dailyTarget);
     expect(parsed?.topics.current).toEqual(seed.topics.current);
-    expect(parsed?.weekly).toEqual(seed.weekly);
   });
 
   it('clamps out-of-range values', () => {
     const parsed = parseStoredProgress(
       JSON.stringify({
         topics: { current: { mastery: 250, solved: -4 } },
-        todayIndex: 99,
         dailyTarget: 0,
-        weekly: [1, 2, 3],
       }),
     );
     expect(parsed?.topics.current.mastery).toBe(100);
     expect(parsed?.topics.current.solved).toBe(0);
-    expect(parsed?.todayIndex).toBe(6);
     expect(parsed?.dailyTarget).toBe(1);
-    expect(parsed?.weekly).toHaveLength(7);
   });
 });
 
@@ -166,7 +160,6 @@ describe('session and result repositories', () => {
           total: 4,
           correct: 3,
           accuracy: 75,
-          delta: 4,
         },
       ],
     };
