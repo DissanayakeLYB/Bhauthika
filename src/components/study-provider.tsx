@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { QUESTION_MAP, QUESTIONS, type Question } from '@/data/questions';
-import type { TopicId } from '@/data/topics';
+import { QUESTION_MAP, QUESTIONS, type Question } from '@/lib/questions';
+import type { TopicId } from '@/lib/topics';
 import { createSeedProgress, type StudyProgress } from '@/lib/progress';
 import {
   LocalProgressRepository,

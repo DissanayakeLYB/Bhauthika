@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { GoogleIcon } from '@/components/brand/google-icon';
-import { LogoMark } from '@/components/brand/logo';
-import { Icon, type IconName } from '@/components/ui/icon';
+import { GoogleIcon } from '@/components/google-icon';
+import { LogoMark } from '@/components/logo';
+import { Icon, type IconName } from '@/components/icon';
 
 const FEATURES: { icon: IconName; title: string; subtitle: string; box: string }[] = [
   {

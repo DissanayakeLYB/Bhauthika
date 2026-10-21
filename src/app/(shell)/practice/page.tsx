@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useStudy } from '@/components/providers/study-provider';
-import { Chip, type ChipTone } from '@/components/ui/chip';
-import { Icon } from '@/components/ui/icon';
-import { ProgressBar } from '@/components/ui/progress-bar';
-import { TOPICS, masteryStatus, type MasteryStatus, type Topic, type TopicId } from '@/data/topics';
+import { useStudy } from '@/components/study-provider';
+import { Chip, type ChipTone } from '@/components/chip';
+import { Icon } from '@/components/icon';
+import { ProgressBar } from '@/components/progress-bar';
+import { TOPICS, masteryStatus, type MasteryStatus, type Topic, type TopicId } from '@/lib/topics';
 import { weakestTopicIds } from '@/lib/progress';
 import { cn } from '@/lib/utils';
 

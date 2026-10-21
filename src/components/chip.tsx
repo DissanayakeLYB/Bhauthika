@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Icon, type IconName } from '@/components/ui/icon';
+import { Icon, type IconName } from '@/components/icon';
 import { cn } from '@/lib/utils';
 
 export type ChipTone = 'neutral' | 'indigo' | 'softIndigo' | 'green' | 'amber' | 'red' | 'white';

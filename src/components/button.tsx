@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { Icon, type IconName } from '@/components/ui/icon';
+import { Icon, type IconName } from '@/components/icon';
 import { cn } from '@/lib/utils';
 
 export type ButtonVariant = 'primary' | 'ghost' | 'amber';

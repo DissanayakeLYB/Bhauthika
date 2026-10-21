@@ -1,10 +1,10 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { LogoMark } from '@/components/brand/logo';
+import { LogoMark } from '@/components/logo';
 import { MenuSheet } from '@/components/menu-sheet';
-import { useStudy } from '@/components/providers/study-provider';
-import { Icon } from '@/components/ui/icon';
+import { useStudy } from '@/components/study-provider';
+import { Icon } from '@/components/icon';
 import { cn } from '@/lib/utils';
 
 export function StreakChip({

@@ -1,10 +1,10 @@
 'use client';
 
 import { Formula } from '@/components/formula';
-import { ActionButton } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
-import { Sheet } from '@/components/ui/sheet';
-import type { Question } from '@/data/questions';
+import { ActionButton } from '@/components/button';
+import { Icon } from '@/components/icon';
+import { Sheet } from '@/components/sheet';
+import type { Question } from '@/lib/questions';
 import { cn } from '@/lib/utils';
 
 interface FeedbackSheetProps {

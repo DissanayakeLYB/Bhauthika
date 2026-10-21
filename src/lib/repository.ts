@@ -1,5 +1,5 @@
-import { QUESTION_MAP } from '@/data/questions';
-import { TOPIC_MAP, TOPICS, type TopicId } from '@/data/topics';
+import { QUESTION_MAP } from '@/lib/questions';
+import { TOPIC_MAP, TOPICS, type TopicId } from '@/lib/topics';
 import {
   clampPercent,
   createSeedProgress,

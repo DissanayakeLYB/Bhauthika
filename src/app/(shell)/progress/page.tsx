@@ -2,13 +2,13 @@
 
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useStudy } from '@/components/providers/study-provider';
-import { Chip, type ChipTone } from '@/components/ui/chip';
-import { Icon } from '@/components/ui/icon';
-import { ProgressBar } from '@/components/ui/progress-bar';
+import { useStudy } from '@/components/study-provider';
+import { Chip, type ChipTone } from '@/components/chip';
+import { Icon } from '@/components/icon';
+import { ProgressBar } from '@/components/progress-bar';
 import { WeekChart } from '@/components/week-chart';
-import { countQuestionsForTopic } from '@/data/questions';
-import { TOPICS } from '@/data/topics';
+import { countQuestionsForTopic } from '@/lib/questions';
+import { TOPICS } from '@/lib/topics';
 import { overallAccuracy } from '@/lib/progress';
 import { cn } from '@/lib/utils';
 

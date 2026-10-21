@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { LogoMark } from '@/components/brand/logo';
-import { useStudy } from '@/components/providers/study-provider';
-import { Icon, type IconName } from '@/components/ui/icon';
-import { Sheet } from '@/components/ui/sheet';
+import { LogoMark } from '@/components/logo';
+import { useStudy } from '@/components/study-provider';
+import { Icon, type IconName } from '@/components/icon';
+import { Sheet } from '@/components/sheet';
 
 interface MenuSheetProps {
   open: boolean;

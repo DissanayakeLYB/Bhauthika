@@ -1,4 +1,4 @@
-import { TOPICS, type TopicId } from '@/data/topics';
+import { TOPICS, type TopicId } from '@/lib/topics';
 
 export interface TopicProgress {
   mastery: number;

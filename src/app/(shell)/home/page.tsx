@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useStudy } from '@/components/providers/study-provider';
-import { Chip } from '@/components/ui/chip';
-import { Icon } from '@/components/ui/icon';
-import { ProgressBar } from '@/components/ui/progress-bar';
-import { FOCUS_TOPICS, TOPIC_MAP, type TopicId } from '@/data/topics';
+import { useStudy } from '@/components/study-provider';
+import { Chip } from '@/components/chip';
+import { Icon } from '@/components/icon';
+import { ProgressBar } from '@/components/progress-bar';
+import { FOCUS_TOPICS, TOPIC_MAP, type TopicId } from '@/lib/topics';
 import { todayAccuracy, weakestTopicIds } from '@/lib/progress';
 
 function greetingForHour(hour: number) {

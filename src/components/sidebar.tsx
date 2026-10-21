@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogoMark } from '@/components/brand/logo';
-import { useStudy } from '@/components/providers/study-provider';
-import { Icon, type IconName } from '@/components/ui/icon';
-import { ProgressBar } from '@/components/ui/progress-bar';
+import { LogoMark } from '@/components/logo';
+import { useStudy } from '@/components/study-provider';
+import { Icon, type IconName } from '@/components/icon';
+import { ProgressBar } from '@/components/progress-bar';
 import { cn } from '@/lib/utils';
 
 const items: { href: string; label: string; icon: IconName }[] = [

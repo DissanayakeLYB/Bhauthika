@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useStudy } from '@/components/providers/study-provider';
+import { useStudy } from '@/components/study-provider';
 import { ScoreRing } from '@/components/score-ring';
-import { ActionButton } from '@/components/ui/button';
-import { Chip } from '@/components/ui/chip';
-import { Icon } from '@/components/ui/icon';
+import { ActionButton } from '@/components/button';
+import { Chip } from '@/components/chip';
+import { Icon } from '@/components/icon';
 import { cn } from '@/lib/utils';
 
 export default function SummaryPage() {

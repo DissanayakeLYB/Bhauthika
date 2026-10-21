@@ -1,5 +1,5 @@
-import type { Question } from '@/data/questions';
-import { TOPIC_MAP, type TopicId } from '@/data/topics';
+import type { Question } from '@/lib/questions';
+import { TOPIC_MAP, type TopicId } from '@/lib/topics';
 import { clampPercent, type StudyProgress, type TopicProgress } from './progress';
 
 export interface ActiveSession {

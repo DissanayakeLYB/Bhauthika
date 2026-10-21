@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { QUESTIONS, type Question } from '@/data/questions';
-import type { TopicId } from '@/data/topics';
+import { QUESTIONS, type Question } from '@/lib/questions';
+import type { TopicId } from '@/lib/topics';
 import { applySessionResult, pickQuestions, shuffle, updateMastery } from './session';
 import { createSeedProgress } from './progress';
 

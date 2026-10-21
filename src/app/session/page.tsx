@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import { PotentiometerDiagram } from '@/components/circuit-diagram';
 import { FeedbackSheet } from '@/components/feedback-sheet';
 import { Formula } from '@/components/formula';
-import { useStudy } from '@/components/providers/study-provider';
+import { useStudy } from '@/components/study-provider';
 import { RichText } from '@/components/rich-text';
-import { ActionButton } from '@/components/ui/button';
-import { Chip } from '@/components/ui/chip';
-import { Icon } from '@/components/ui/icon';
-import type { Question } from '@/data/questions';
-import { TOPIC_MAP } from '@/data/topics';
+import { ActionButton } from '@/components/button';
+import { Chip } from '@/components/chip';
+import { Icon } from '@/components/icon';
+import type { Question } from '@/lib/questions';
+import { TOPIC_MAP } from '@/lib/topics';
 import { cn } from '@/lib/utils';
 
 export default function SessionPage() {

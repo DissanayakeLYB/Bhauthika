@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Icon, type IconName } from '@/components/ui/icon';
+import { Icon, type IconName } from '@/components/icon';
 import { cn } from '@/lib/utils';
 
 const items: { href: string; label: string; icon: IconName }[] = [
