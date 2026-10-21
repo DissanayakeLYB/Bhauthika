@@ -16,9 +16,9 @@ export interface Topic {
   number: string;
   title: string;
   unitLabel: string;
-  /** Curated past-paper questions available for this syllabus unit. */
+  /** Past-paper questions in the curated bank for this syllabus unit. */
   questionCount: number;
-  /** Seed mastery used before a student has answered anything. */
+  /** Seed mastery before the student has answered anything. */
   mastery: number;
 }
 
@@ -119,8 +119,10 @@ export const TOPIC_MAP: Record<TopicId, Topic> = TOPICS.reduce(
   {} as Record<TopicId, Topic>,
 );
 
-/** Status chips shown on topic cards, derived from mastery. */
-export function masteryStatus(mastery: number): 'mastered' | 'strong' | 'focus' | null {
+export type MasteryStatus = 'mastered' | 'strong' | 'focus';
+
+/** Status pills shown on Practice cards. */
+export function masteryStatus(mastery: number): MasteryStatus | null {
   if (mastery >= 85) return 'mastered';
   if (mastery >= 78) return 'strong';
   if (mastery < 50) return 'focus';
@@ -145,7 +147,7 @@ export const FOCUS_TOPICS: FocusTopic[] = [
     topicId: 'current',
     title: 'Current Electricity',
     accuracy: 42,
-    unitLabel: 'Unit 04 · Fields',
+    unitLabel: 'Unit 08 · Electrodynamics',
     due: 8,
     tag: 'High Yield',
   },

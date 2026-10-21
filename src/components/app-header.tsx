@@ -1,132 +1,68 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Icon } from '@/components/ui/icon';
-import { colors, fonts, radius, spacing, type } from '@/theme';
+'use client';
 
-interface AppHeaderProps {
-  streak: number;
-  streakLabel?: 'days' | 'compact' | 'short';
-  onMenuPress?: () => void;
-}
+import { useCallback, useState } from 'react';
+import { LogoMark } from '@/components/brand/logo';
+import { MenuSheet } from '@/components/menu-sheet';
+import { useStudy } from '@/components/providers/study-provider';
+import { Icon } from '@/components/ui/icon';
+import { cn } from '@/lib/utils';
 
 export function StreakChip({
   streak,
   label = 'days',
+  className,
 }: {
   streak: number;
   label?: 'days' | 'compact' | 'short';
+  className?: string;
 }) {
-  const text =
-    label === 'compact' ? `${streak}` : label === 'short' ? `${streak} d` : `${streak} Days Streak`;
+  const text = label === 'compact' ? `${streak}` : label === 'short' ? `${streak} d` : `${streak} Days Streak`;
+
   return (
-    <View
-      style={[
-        styles.streak,
-        label === 'compact' ? styles.streakCompact : null,
-        label === 'short' ? styles.streakShort : null,
-      ]}
+    <span
+      className={cn(
+        'inline-flex h-7 shrink-0 items-center gap-1 rounded-full border px-2.5 text-label-sm font-medium',
+        label === 'days' && 'border-border bg-surface text-amber-ink',
+        label === 'compact' && 'border-indigo-line bg-indigo-soft font-semibold text-primary',
+        label === 'short' && 'border-border-strong bg-surface-high font-semibold text-primary',
+        className,
+      )}
     >
-      <Icon name="local-fire-department" size={18} color={colors.amber} />
-      <Text
-        style={[
-          styles.streakText,
-          label === 'compact' ? styles.streakTextBold : null,
-          label === 'short' ? styles.streakTextPrimary : null,
-        ]}
-      >
-        {text}
-      </Text>
-    </View>
+      <Icon name="fire" size={16} className="text-amber" />
+      {text}
+    </span>
   );
 }
 
-export function AppHeader({ streak, streakLabel = 'days', onMenuPress }: AppHeaderProps) {
+export function AppHeader() {
+  const { progress } = useStudy();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+
   return (
-    <View style={styles.header}>
-      <View style={styles.left}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Open menu"
-          onPress={onMenuPress}
-          hitSlop={8}
-          style={({ pressed }) => [styles.menuButton, pressed ? styles.pressed : null]}
-        >
-          <Icon name="menu" size={22} color={colors.ink} />
-        </Pressable>
-        <Text style={styles.title}>Bhauthika</Text>
-      </View>
-      <StreakChip streak={streak} label={streakLabel} />
-    </View>
+    <>
+      <header className="sticky top-0 z-30 border-b border-border/70 bg-canvas/95 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
+        <div className="flex h-14 items-center justify-between gap-2 px-4">
+          <div className="flex min-w-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open menu"
+              aria-haspopup="dialog"
+              aria-expanded={menuOpen}
+              className="-ml-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink transition-colors hover:bg-surface-container"
+            >
+              <Icon name="menu" size={22} />
+            </button>
+            <LogoMark size={26} className="hidden min-[360px]:block" />
+            <span className="truncate font-display text-[22px] leading-[30px] tracking-[-0.4px] text-primary">
+              Bhauthika
+            </span>
+          </div>
+          <StreakChip streak={progress.streak} />
+        </div>
+      </header>
+      <MenuSheet open={menuOpen} onClose={closeMenu} />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    height: 56,
-    backgroundColor: colors.canvas,
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  menuButton: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: -6,
-  },
-  pressed: {
-    backgroundColor: colors.surfaceContainer,
-    opacity: 0.9,
-  },
-  title: {
-    fontFamily: fonts.display,
-    fontSize: 22,
-    lineHeight: 30,
-    letterSpacing: -0.4,
-    color: colors.primary,
-  },
-  streak: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    height: 28,
-    paddingHorizontal: 10,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  streakCompact: {
-    backgroundColor: colors.indigoSoft,
-    borderColor: '#C9CCF6',
-    paddingHorizontal: 9,
-  },
-  streakShort: {
-    backgroundColor: colors.surfaceHigh,
-    borderColor: colors.borderStrong,
-    paddingHorizontal: 9,
-  },
-  streakText: {
-    ...type.labelMd,
-    fontFamily: fonts.headingMedium,
-    fontSize: 11,
-    color: colors.amberDeep,
-  },
-  streakTextBold: {
-    color: colors.primary,
-    fontFamily: fonts.heading,
-    fontSize: 12,
-  },
-  streakTextPrimary: {
-    color: colors.primary,
-    fontFamily: fonts.heading,
-  },
-});

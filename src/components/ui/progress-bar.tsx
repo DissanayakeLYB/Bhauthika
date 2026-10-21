@@ -1,65 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { Animated, Easing, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import { colors, radius } from '@/theme';
+import { cn } from '@/lib/utils';
+
+export type ProgressTone = 'primary' | 'green' | 'amber';
+
+const fills: Record<ProgressTone, string> = {
+  primary: 'bg-primary',
+  green: 'bg-green',
+  amber: 'bg-amber',
+};
 
 interface ProgressBarProps {
-  /** Percentage between 0 and 100. */
+  /** Percentage, 0–100. */
   value: number;
-  color?: string;
-  trackColor?: string;
+  tone?: ProgressTone;
   height?: number;
-  style?: StyleProp<ViewStyle>;
+  label: string;
+  className?: string;
 }
 
-export function ProgressBar({
-  value,
-  color = colors.primary,
-  trackColor = colors.border,
-  height = 6,
-  style,
-}: ProgressBarProps) {
-  const clamped = Math.max(0, Math.min(100, value));
-  const [animated] = useState(() => new Animated.Value(clamped));
-
-  useEffect(() => {
-    Animated.timing(animated, {
-      toValue: clamped,
-      duration: 450,
-      easing: Easing.bezier(0.4, 0, 0.2, 1),
-      useNativeDriver: false,
-    }).start();
-  }, [animated, clamped]);
+export function ProgressBar({ value, tone = 'primary', height = 6, label, className }: ProgressBarProps) {
+  const clamped = Math.min(100, Math.max(0, Number.isFinite(value) ? value : 0));
 
   return (
-    <View
-      style={[
-        styles.track,
-        { height, borderRadius: height / 2, backgroundColor: trackColor },
-        style,
-      ]}
-      accessibilityRole="progressbar"
-      accessibilityValue={{ min: 0, max: 100, now: clamped }}
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(clamped)}
+      className={cn('w-full overflow-hidden rounded-full bg-border', className)}
+      style={{ height }}
     >
-      <Animated.View
-        style={{
-          height,
-          borderRadius: height / 2,
-          backgroundColor: color,
-          width: animated.interpolate({
-            inputRange: [0, 100],
-            outputRange: ['0%', '100%'],
-            extrapolate: 'clamp',
-          }),
-        }}
+      <div
+        className={cn('h-full rounded-full transition-[width] duration-500 ease-out', fills[tone])}
+        style={{ width: `${clamped}%` }}
       />
-    </View>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  track: {
-    width: '100%',
-    overflow: 'hidden',
-    borderRadius: radius.pill,
-  },
-});

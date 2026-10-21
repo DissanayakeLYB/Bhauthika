@@ -1,33 +1,23 @@
-import React from 'react';
-import { Text, type StyleProp, type TextStyle } from 'react-native';
-import { colors, fonts } from '@/theme';
+import { Fragment } from 'react';
 
-interface RichTextProps {
-  text: string;
-  style?: StyleProp<TextStyle>;
-  boldStyle?: StyleProp<TextStyle>;
-}
-
-/** Renders a string with **double-asterisk** emphasis as bold inline runs. */
-export function RichText({ text, style, boldStyle }: RichTextProps) {
+/**
+ * Renders a string with **double-asterisk** emphasis as bold inline runs.
+ * Physics values become the deep-indigo emphasis used in the Stitch design.
+ */
+export function RichText({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
   return (
-    <Text style={style}>
+    <>
       {parts.map((part, index) =>
         part.startsWith('**') && part.endsWith('**') ? (
-          <Text
-            key={`${index}-${part}`}
-            style={[
-              { fontFamily: fonts.bodyBold, color: colors.ink },
-              boldStyle,
-            ]}
-          >
+          <strong key={index} className="font-bold text-primary-deep">
             {part.slice(2, -2)}
-          </Text>
+          </strong>
         ) : (
-          part
+          <Fragment key={index}>{part}</Fragment>
         ),
       )}
-    </Text>
+    </>
   );
 }
