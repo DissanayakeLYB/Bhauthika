@@ -16,6 +16,10 @@ export interface StudyProgress {
   pastPapers: number;
   monthlyDelta: number;
   topics: Record<TopicId, TopicProgress>;
+  /** ISO date string (YYYY-MM-DD) of the last day questions were answered. */
+  lastActiveDate?: string;
+  /** Activity count for each of the last 7 days (index 0 = 6 days ago, index 6 = today). */
+  weeklyActivity: number[];
 }
 
 export function clampPercent(value: number): number {
@@ -23,31 +27,29 @@ export function clampPercent(value: number): number {
   return Math.min(100, Math.max(0, value));
 }
 
-function createSeedTopics(): Record<TopicId, TopicProgress> {
+function createEmptyTopics(): Record<TopicId, TopicProgress> {
   return TOPICS.reduce(
     (acc, topic) => ({
       ...acc,
-      [topic.id]: {
-        mastery: topic.mastery,
-        solved: Math.round(topic.questionCount * 0.8),
-      },
+      [topic.id]: { mastery: 0, solved: 0 },
     }),
     {} as Record<TopicId, TopicProgress>,
   );
 }
 
-/** Demo profile used until a student has answered anything. */
+/** Zero-state profile for a brand-new student. No placeholder data. */
 export function createSeedProgress(): StudyProgress {
   return {
-    streak: 4,
+    streak: 0,
     dailyTarget: 25,
-    answeredToday: 18,
-    correctToday: 14,
-    totalPractised: 482,
-    totalCorrect: 328,
-    pastPapers: 64,
-    monthlyDelta: 3.5,
-    topics: createSeedTopics(),
+    answeredToday: 0,
+    correctToday: 0,
+    totalPractised: 0,
+    totalCorrect: 0,
+    pastPapers: 0,
+    monthlyDelta: 0,
+    topics: createEmptyTopics(),
+    weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
   };
 }
 

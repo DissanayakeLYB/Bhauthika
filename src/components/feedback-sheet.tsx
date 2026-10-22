@@ -125,6 +125,17 @@ export function FeedbackSheet({
           <Icon name="bookmark" size={17} className={bookmarked ? 'text-primary' : undefined} />
           {bookmarked ? 'Marked for review' : 'Mark for review'}
         </button>
+        {/* Video link: shown only if the question has a videoUrl. */}
+        {question.videoUrl ? (
+          <ActionButton
+            variant="ghost"
+            label="Watch full explanation"
+            icon="play"
+            iconPosition="left"
+            className="mt-1"
+            onClick={() => window.open(question.videoUrl, '_blank', 'noopener,noreferrer')}
+          />
+        ) : null}
       </div>
     </Sheet>
   );

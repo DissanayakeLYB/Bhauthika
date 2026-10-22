@@ -114,7 +114,7 @@ export function applySessionResult(
   byTopic.forEach((stats, topicId) => {
     const accuracy = Math.round((stats.correct / stats.total) * 100);
     const current: TopicProgress = progress.topics[topicId] ?? {
-      mastery: TOPIC_MAP[topicId].mastery,
+      mastery: 0,
       solved: 0,
     };
     const mastery = updateMastery(current.mastery, accuracy);

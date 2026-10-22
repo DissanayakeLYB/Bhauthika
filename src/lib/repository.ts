@@ -15,7 +15,14 @@ export interface KeyValueStorage {
   removeItem(key: string): void;
 }
 
-export const PROGRESS_STORAGE_KEY = 'bhauthika.progress.v1';
+/** Build the per-user progress key. Falls back to a guest key. */
+export function progressStorageKey(userId?: string | null): string {
+  return userId ? `progress:${userId}` : 'bhauthika.progress.guest';
+}
+
+/** Legacy key that must be removed on first run so old seed data does not bleed in. */
+export const LEGACY_PROGRESS_KEY = 'bhauthika.progress.v1';
+
 const SESSION_STORAGE_KEY = 'bhauthika.session.v1';
 const RESULT_STORAGE_KEY = 'bhauthika.result.v1';
 
@@ -47,7 +54,7 @@ function readStorage(kind: 'local' | 'session'): KeyValueStorage | null {
 
 /**
  * Reads a stored progress blob, healing missing or out-of-range fields with the
- * seed profile instead of throwing. Returns null when the blob is unusable.
+ * zero-start profile instead of throwing. Returns null when the blob is unusable.
  */
 export function parseStoredProgress(raw: string): StudyProgress | null {
   const value = parseJson(raw);
@@ -59,30 +66,34 @@ export function parseStoredProgress(raw: string): StudyProgress | null {
   const topics = TOPICS.reduce(
     (acc, topic) => {
       const stored = storedTopics[topic.id];
-      const fallback = seed.topics[topic.id];
       const topicValue = isRecord(stored) ? stored : {};
       acc[topic.id] = {
-        mastery: clampPercent(finiteNumber(topicValue.mastery, fallback.mastery)),
-        solved: Math.max(0, Math.round(finiteNumber(topicValue.solved, fallback.solved))),
+        mastery: clampPercent(finiteNumber(topicValue.mastery, 0)),
+        solved: Math.max(0, Math.round(finiteNumber(topicValue.solved, 0))),
       } satisfies TopicProgress;
       return acc;
     },
     {} as Record<TopicId, TopicProgress>,
   );
 
+  const weeklyRaw = value.weeklyActivity;
+  const weeklyActivity: number[] = Array.isArray(weeklyRaw)
+    ? weeklyRaw.slice(0, 7).map((v) => Math.max(0, Math.round(finiteNumber(v, 0))))
+    : [0, 0, 0, 0, 0, 0, 0];
+  while (weeklyActivity.length < 7) weeklyActivity.push(0);
+
   return {
-    streak: Math.max(0, Math.round(finiteNumber(value.streak, seed.streak))),
+    streak: Math.max(0, Math.round(finiteNumber(value.streak, 0))),
     dailyTarget: Math.max(1, Math.round(finiteNumber(value.dailyTarget, seed.dailyTarget))),
-    answeredToday: Math.max(0, Math.round(finiteNumber(value.answeredToday, seed.answeredToday))),
-    correctToday: Math.max(0, Math.round(finiteNumber(value.correctToday, seed.correctToday))),
-    totalPractised: Math.max(
-      0,
-      Math.round(finiteNumber(value.totalPractised, seed.totalPractised)),
-    ),
-    totalCorrect: Math.max(0, Math.round(finiteNumber(value.totalCorrect, seed.totalCorrect))),
-    pastPapers: Math.max(0, Math.round(finiteNumber(value.pastPapers, seed.pastPapers))),
-    monthlyDelta: finiteNumber(value.monthlyDelta, seed.monthlyDelta),
+    answeredToday: Math.max(0, Math.round(finiteNumber(value.answeredToday, 0))),
+    correctToday: Math.max(0, Math.round(finiteNumber(value.correctToday, 0))),
+    totalPractised: Math.max(0, Math.round(finiteNumber(value.totalPractised, 0))),
+    totalCorrect: Math.max(0, Math.round(finiteNumber(value.totalCorrect, 0))),
+    pastPapers: Math.max(0, Math.round(finiteNumber(value.pastPapers, 0))),
+    monthlyDelta: finiteNumber(value.monthlyDelta, 0),
     topics,
+    weeklyActivity,
+    lastActiveDate: typeof value.lastActiveDate === 'string' ? value.lastActiveDate : undefined,
   };
 }
 
@@ -149,19 +160,23 @@ function parseStoredResult(raw: string): SessionResult | null {
 }
 
 /**
- * JSON-over-Web-Storage persistence. Phase 2 swaps these three constructors
- * for a Supabase-backed implementation without touching UI code.
+ * JSON-over-Web-Storage persistence.
  */
 class JsonStorageRepository<T> {
   private storage: KeyValueStorage | null;
 
   constructor(
     kind: 'local' | 'session',
-    private readonly key: string,
+    private key: string,
     private readonly parse: (raw: string) => T | null,
     storage?: KeyValueStorage | null,
   ) {
     this.storage = storage === undefined ? readStorage(kind) : storage;
+  }
+
+  /** Change the storage key (used when the userId becomes known). */
+  setKey(key: string) {
+    this.key = key;
   }
 
   async load(): Promise<T | null> {
@@ -192,8 +207,8 @@ class JsonStorageRepository<T> {
 }
 
 export class LocalProgressRepository extends JsonStorageRepository<StudyProgress> {
-  constructor(storage?: KeyValueStorage | null) {
-    super('local', PROGRESS_STORAGE_KEY, parseStoredProgress, storage);
+  constructor(key = progressStorageKey(), storage?: KeyValueStorage | null) {
+    super('local', key, parseStoredProgress, storage);
   }
 }
 
@@ -206,5 +221,15 @@ export class LocalSessionRepository extends JsonStorageRepository<StoredSession>
 export class LocalResultRepository extends JsonStorageRepository<SessionResult> {
   constructor(storage?: KeyValueStorage | null) {
     super('session', RESULT_STORAGE_KEY, parseStoredResult, storage);
+  }
+}
+
+/** Remove the legacy v1 key once at app start. Fire-and-forget. */
+export function removeLegacyProgressKey(): void {
+  try {
+    if (typeof window === 'undefined') return;
+    window.localStorage.removeItem(LEGACY_PROGRESS_KEY);
+  } catch {
+    // Nothing to recover.
   }
 }

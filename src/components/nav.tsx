@@ -1,11 +1,13 @@
 'use client';
 
+import { useCallback } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Icon, type IconName } from '@/components/icon';
 import { LogoMark } from '@/components/logo';
 import { ProgressBar } from '@/components/progress-bar';
 import { useStudy } from '@/components/study-provider';
+import { useAuth } from '@/lib/auth-context';
 import { cn } from '@/lib/utils';
 
 const items: { href: string; label: string; shortLabel: string; icon: IconName }[] = [
@@ -17,8 +19,15 @@ const items: { href: string; label: string; shortLabel: string; icon: IconName }
 /** Left navigation from lg up; the same destinations drive the tab bar below. */
 export function Sidebar() {
   const { progress } = useStudy();
+  const { user, signOut } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const dailyPercent = Math.min(100, (progress.answeredToday / progress.dailyTarget) * 100);
+
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    router.replace('/');
+  }, [signOut, router]);
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-border bg-surface px-4 py-6 pb-[max(24px,env(safe-area-inset-bottom))] lg:flex">
@@ -73,7 +82,18 @@ export function Sidebar() {
           <Icon name="fire" size={16} className="text-amber" />
           {progress.streak}-day streak
         </p>
-        <p className="text-label-sm text-ink-muted">Phase 1 · stored on this device</p>
+        {user ? (
+          <p className="truncate text-label-sm text-ink-muted">{user.email}</p>
+        ) : null}
+        <button
+          id="btn-sign-out"
+          type="button"
+          onClick={handleSignOut}
+          className="flex min-h-9 w-full items-center gap-2 rounded-tile px-2 text-label-sm text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
+        >
+          <Icon name="close" size={15} />
+          Sign out
+        </button>
       </div>
     </aside>
   );

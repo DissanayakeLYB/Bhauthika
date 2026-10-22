@@ -1,6 +1,11 @@
-import Link from 'next/link';
+'use client';
+
+import { FormEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { LogoMark } from '@/components/logo';
 import { Icon, type IconName } from '@/components/icon';
+import { useAuth } from '@/lib/auth-context';
+import { supabase } from '@/lib/supabase';
 
 const FEATURES: { icon: IconName; title: string; subtitle: string; box: string }[] = [
   {
@@ -23,7 +28,67 @@ const FEATURES: { icon: IconName; title: string; subtitle: string; box: string }
   },
 ];
 
+type Mode = 'sign-in' | 'sign-up';
+
 export default function WelcomePage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [mode, setMode] = useState<Mode>('sign-in');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Redirect to home once signed in.
+  useEffect(() => {
+    if (!loading && user) router.replace('/home');
+  }, [user, loading, router]);
+
+  const handleEmailAuth = async (event: FormEvent) => {
+    event.preventDefault();
+    setError('');
+    setSuccessMessage('');
+    setSubmitting(true);
+    try {
+      if (mode === 'sign-up') {
+        const { error: signUpError } = await supabase.auth.signUp({ email, password });
+        if (signUpError) { setError(signUpError.message); return; }
+        setSuccessMessage('Check your email to confirm your account, then sign in.');
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) { setError(signInError.message); return; }
+        // onAuthStateChange in AuthProvider will update user → useEffect redirects.
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    setError('');
+    setGoogleLoading(true);
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/home` : undefined,
+        },
+      });
+      if (oauthError) setError(oauthError.message);
+      // On success the browser navigates to Google; Supabase redirects back to /home.
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const toggle = () => {
+    setMode((m) => (m === 'sign-in' ? 'sign-up' : 'sign-in'));
+    setError('');
+    setSuccessMessage('');
+  };
+
   return (
     <main
       id="main"
@@ -50,7 +115,7 @@ export default function WelcomePage() {
           </span>
         </header>
 
-        <div className="flex flex-1 flex-col items-center justify-center py-8 md:py-4">
+        <div className="flex flex-1 flex-col items-center justify-center py-6 md:py-4">
           <div className="grid h-[84px] w-[84px] place-items-center rounded-sheet border border-border-strong/40 bg-surface shadow-raised">
             <LogoMark size={64} />
           </div>
@@ -61,7 +126,7 @@ export default function WelcomePage() {
             Practise smarter. Master Physics.
           </p>
 
-          <ul className="mt-6 w-full max-w-[330px] space-y-2">
+          <ul className="mt-5 w-full max-w-[330px] space-y-2">
             {FEATURES.map((feature) => (
               <li
                 key={feature.title}
@@ -83,33 +148,114 @@ export default function WelcomePage() {
           </ul>
         </div>
 
-        <div className="space-y-2">
-          <Link
-            href="/home"
-            className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-card border border-border bg-surface text-body-md font-semibold text-ink shadow-card transition-colors hover:bg-canvas"
+        {/* ── Auth section ───────────────────────────────────────── */}
+        <div className="space-y-3">
+          {/* Google OAuth */}
+          <button
+            id="btn-google"
+            type="button"
+            onClick={handleGoogle}
+            disabled={googleLoading || submitting}
+            className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-card border border-border bg-surface text-body-md font-semibold text-ink shadow-card transition-colors hover:bg-canvas disabled:opacity-50"
           >
-            <GoogleIcon size={20} />
+            {googleLoading ? (
+              <Spinner />
+            ) : (
+              <GoogleIcon size={20} />
+            )}
             Continue with Google
-          </Link>
-          <Link
-            href="/home"
-            className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-card bg-primary text-body-md font-semibold text-white shadow-[0_4px_12px_rgba(32,37,107,0.2)] transition-colors hover:bg-primary-pressed"
-          >
-            <Icon name="mail" size={20} />
-            Continue with email
-          </Link>
+          </button>
+
+          {/* Divider */}
+          <div className="relative flex items-center gap-2">
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-label-sm text-ink-muted">or</span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          {/* Email / password form */}
+          <form id="form-email-auth" onSubmit={handleEmailAuth} className="space-y-2">
+            <input
+              id="input-email"
+              type="email"
+              required
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-card border border-border bg-surface px-4 py-3 text-body-md text-ink placeholder:text-ink-faint focus:border-primary focus:outline-none"
+            />
+            <input
+              id="input-password"
+              type="password"
+              required
+              minLength={6}
+              placeholder="Password (min 6 characters)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-card border border-border bg-surface px-4 py-3 text-body-md text-ink placeholder:text-ink-faint focus:border-primary focus:outline-none"
+            />
+
+            {error ? (
+              <p id="auth-error" role="alert" className="text-label-sm text-red-ink">
+                {error}
+              </p>
+            ) : null}
+            {successMessage ? (
+              <p id="auth-success" role="status" className="text-label-sm text-green-ink">
+                {successMessage}
+              </p>
+            ) : null}
+
+            <button
+              id="btn-email-auth"
+              type="submit"
+              disabled={submitting || googleLoading}
+              className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-card bg-primary text-body-md font-semibold text-white shadow-[0_4px_12px_rgba(32,37,107,0.2)] transition-colors hover:bg-primary-pressed disabled:opacity-50"
+            >
+              {submitting ? <Spinner light /> : <Icon name="mail" size={20} />}
+              {mode === 'sign-in' ? 'Sign in with email' : 'Create account'}
+            </button>
+          </form>
+
           <p className="pt-1 text-center text-label-sm text-ink-muted">
-            Demo profile · Google and email sign-in arrive in Phase 2
-          </p>        <p className="text-center text-[10px] tracking-[0.03em] text-ink-muted">
-          Curated for the National NIE Physics Syllabus
-        </p>
+            {mode === 'sign-in' ? "Don't have an account?" : 'Already have an account?'}{' '}
+            <button
+              id="btn-toggle-mode"
+              type="button"
+              onClick={toggle}
+              className="font-semibold text-primary hover:underline"
+            >
+              {mode === 'sign-in' ? 'Sign up' : 'Sign in'}
+            </button>
+          </p>
+          <p className="text-center text-[10px] tracking-[0.03em] text-ink-muted">
+            Curated for the National NIE Physics Syllabus
+          </p>
         </div>
       </div>
     </main>
   );
 }
 
-/** Google "G" mark for the demo sign-in button. */
+function Spinner({ light = false }: { light?: boolean }) {
+  return (
+    <svg
+      className={`h-5 w-5 animate-spin ${light ? 'text-white' : 'text-primary'}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
+  );
+}
+
+/** Google "G" mark for the sign-in button. */
 function GoogleIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false">

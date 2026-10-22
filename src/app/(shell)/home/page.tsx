@@ -6,8 +6,9 @@ import { useStudy } from '@/components/study-provider';
 import { Chip } from '@/components/chip';
 import { Icon } from '@/components/icon';
 import { ProgressBar } from '@/components/progress-bar';
-import { FOCUS_TOPICS, TOPIC_MAP, type TopicId } from '@/lib/topics';
+import { TOPICS, TOPIC_MAP, type TopicId } from '@/lib/topics';
 import { todayAccuracy, weakestTopicIds } from '@/lib/progress';
+import { useAuth } from '@/lib/auth-context';
 
 function greetingForHour(hour: number) {
   if (hour < 12) return 'Good morning';
@@ -17,6 +18,7 @@ function greetingForHour(hour: number) {
 
 export default function HomePage() {
   const { progress, startSession } = useStudy();
+  const { user } = useAuth();
   const router = useRouter();
 
   const weakIds = weakestTopicIds(progress, 3);
@@ -24,6 +26,21 @@ export default function HomePage() {
   const accuracy = todayAccuracy(progress);
   const remaining = Math.max(0, progress.dailyTarget - progress.answeredToday);
   const greeting = greetingForHour(new Date().getHours());
+  const noDataYet = progress.totalPractised === 0;
+
+  // Show the 3 weakest topics that have > 0 mastery in the "needs attention" section.
+  // For a brand-new student all masteries are 0, so the section is hidden.
+  const lowMasteryTopics = TOPICS
+    .filter((t) => {
+      const m = progress.topics[t.id].mastery;
+      return m > 0 && m < 70;
+    })
+    .sort((a, b) => progress.topics[a.id].mastery - progress.topics[b.id].mastery)
+    .slice(0, 3);
+
+  const displayName = user?.user_metadata?.full_name
+    ? (user.user_metadata.full_name as string).split(' ')[0]
+    : user?.email?.split('@')[0] ?? 'there';
 
   const beginAdaptive = () => {
     const total = startSession(weakIds, { count: 10, fill: true });
@@ -48,17 +65,18 @@ export default function HomePage() {
             suppressHydrationWarning
             className="mt-0.5 font-display text-headline-md leading-[30px] tracking-[-0.3px] text-ink"
           >
-            {greeting}, Nimal
+            {greeting}, {displayName}
           </h1>
         </div>
         <div className="relative shrink-0">
           <span className="grid h-11 w-11 place-items-center rounded-full border-2 border-surface bg-primary font-display text-[18px] text-white">
-            N
+            {displayName[0]?.toUpperCase() ?? '?'}
           </span>
           <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-canvas bg-green" aria-hidden="true" />
         </div>
       </div>
 
+      {/* ── Hero / Adaptive Focus ─────────────────────────────── */}
       <section
         aria-labelledby="hero-title"
         className="relative overflow-hidden rounded-card bg-gradient-to-br from-indigo-mid to-primary p-5 shadow-hero"
@@ -84,9 +102,16 @@ export default function HomePage() {
         >
           Practise your weak topics
         </h2>
-        <p className="relative mt-1 text-body-md text-white/85">
-          Targeting {weakTopics[0].title} &amp; {weakTopics[1].title} based on your recent errors.
-        </p>
+
+        {noDataYet ? (
+          <p className="relative mt-1 text-body-md text-white/85">
+            Answer some questions to see personalised recommendations.
+          </p>
+        ) : (
+          <p className="relative mt-1 text-body-md text-white/85">
+            Targeting {weakTopics[0]?.title} &amp; {weakTopics[1]?.title} based on your recent errors.
+          </p>
+        )}
 
         <div className="relative mt-4 flex items-center gap-3">
           <button
@@ -103,6 +128,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Today's progress ──────────────────────────────────── */}
       <section aria-labelledby="today-title" className="mt-6">
         <div className="flex items-end justify-between gap-2">
           <h2 id="today-title" className="font-display text-headline-sm text-ink">
@@ -113,100 +139,113 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <article className="flex min-h-[150px] flex-col rounded-card border border-border bg-surface p-4">
-            <div className="flex items-center justify-between gap-1">
-              <h3 className="text-label-sm tracking-[0.06em] text-ink-muted">ANSWERED</h3>
-              <Icon name="check-circle" size={18} className="shrink-0 text-indigo-mid" />
-            </div>
-            <p className="mt-2 font-display text-display-lg leading-[40px] text-ink">
-              {progress.answeredToday}
-              <span className="font-display text-[17px] text-ink-muted"> / {progress.dailyTarget}</span>
-            </p>
-            <p className="mt-auto pt-1 font-display text-[10.5px] text-ink-muted">
-              {remaining === 0 ? 'Daily target reached' : `${remaining} questions left`}
-            </p>
-            <ProgressBar
-              value={(progress.answeredToday / progress.dailyTarget) * 100}
-              height={8}
-              label="Daily questions answered"
-              className="mt-2"
-            />
-          </article>
+        {noDataYet ? (
+          <p className="mt-3 rounded-card border border-border bg-surface px-4 py-6 text-center text-body-md text-ink-muted">
+            No questions answered yet today. Start a session above!
+          </p>
+        ) : (
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <article className="flex min-h-[150px] flex-col rounded-card border border-border bg-surface p-4">
+              <div className="flex items-center justify-between gap-1">
+                <h3 className="text-label-sm tracking-[0.06em] text-ink-muted">ANSWERED</h3>
+                <Icon name="check-circle" size={18} className="shrink-0 text-indigo-mid" />
+              </div>
+              <p className="mt-2 font-display text-display-lg leading-[40px] text-ink">
+                {progress.answeredToday}
+                <span className="font-display text-[17px] text-ink-muted"> / {progress.dailyTarget}</span>
+              </p>
+              <p className="mt-auto pt-1 font-display text-[10.5px] text-ink-muted">
+                {remaining === 0 ? 'Daily target reached' : `${remaining} questions left`}
+              </p>
+              <ProgressBar
+                value={(progress.answeredToday / progress.dailyTarget) * 100}
+                height={8}
+                label="Daily questions answered"
+                className="mt-2"
+              />
+            </article>
 
-          <article className="flex min-h-[150px] flex-col rounded-card border border-border bg-surface p-4">
-            <div className="flex items-center justify-between gap-1">
-              <h3 className="text-label-sm tracking-[0.06em] text-ink-muted">ACCURACY</h3>
-              <Icon name="insights" size={18} className="shrink-0 text-green-ink" />
-            </div>
-            <p className="mt-2 font-display text-display-lg leading-[40px] text-ink">{accuracy}%</p>
-            <p className="mt-auto flex items-center gap-1 pt-1 text-[10.5px] text-ink-muted">
-              <Icon name="trend-up" size={14} className="text-green-ink" />
-              {progress.correctToday} of {progress.answeredToday} correct
-            </p>
-            <ProgressBar
-              value={accuracy}
-              tone="green"
-              height={8}
-              label="Accuracy today"
-              className="mt-2"
-            />
-          </article>
-        </div>
-      </section>
-
-      <section aria-labelledby="attention-title" className="mt-6">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h2 id="attention-title" className="flex items-center gap-1.5 font-display text-headline-sm text-ink">
-              <Icon name="warning" size={17} className="text-amber-ink" />
-              Needs attention
-            </h2>
-            <p className="mt-0.5 text-body-sm text-ink-muted">High-yield topics with low accuracy</p>
+            <article className="flex min-h-[150px] flex-col rounded-card border border-border bg-surface p-4">
+              <div className="flex items-center justify-between gap-1">
+                <h3 className="text-label-sm tracking-[0.06em] text-ink-muted">ACCURACY</h3>
+                <Icon name="insights" size={18} className="shrink-0 text-green-ink" />
+              </div>
+              <p className="mt-2 font-display text-display-lg leading-[40px] text-ink">{accuracy}%</p>
+              <p className="mt-auto flex items-center gap-1 pt-1 text-[10.5px] text-ink-muted">
+                <Icon name="trend-up" size={14} className="text-green-ink" />
+                {progress.correctToday} of {progress.answeredToday} correct
+              </p>
+              <ProgressBar
+                value={accuracy}
+                tone="green"
+                height={8}
+                label="Accuracy today"
+                className="mt-2"
+              />
+            </article>
           </div>
-          <Link
-            href="/practice"
-            className="inline-flex min-h-11 shrink-0 items-center px-1 font-display text-label-md text-primary"
-          >
-            See all
-          </Link>
-        </div>
-
-        <ul className="mt-3 space-y-2.5">
-          {FOCUS_TOPICS.map((topic) => (
-            <li key={topic.title}>
-              <button
-                type="button"
-                onClick={() => beginFocus(topic.topicId)}
-                className="flex w-full items-stretch gap-3 overflow-hidden rounded-tile border border-border bg-surface pr-3 pl-0 text-left transition-colors hover:bg-canvas"
-              >
-                <span className="w-1 shrink-0 bg-amber" aria-hidden="true" />
-                <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 py-3">
-                  <span className="font-display text-[15px] leading-[20px] font-semibold text-ink">
-                    {topic.title}
-                  </span>
-                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <Chip label={`Accuracy ${topic.accuracy}%`} tone="amber" />
-                    <span className="text-label-sm text-ink-muted">{topic.unitLabel}</span>
-                  </span>
-                </span>
-                <span className="flex shrink-0 flex-col items-end justify-center gap-1 py-3">
-                  <span className="font-display text-[11.5px] font-semibold text-amber-ink">
-                    {topic.due} due
-                  </span>
-                  <span className="text-[10px] tracking-[0.05em] uppercase text-ink-muted">
-                    {topic.tag}
-                  </span>
-                </span>
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-container text-primary">
-                  <Icon name="chevron-right" size={16} />
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        )}
       </section>
 
+      {/* ── Needs attention ───────────────────────────────────── */}
+      {lowMasteryTopics.length > 0 ? (
+        <section aria-labelledby="attention-title" className="mt-6">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <h2 id="attention-title" className="flex items-center gap-1.5 font-display text-headline-sm text-ink">
+                <Icon name="warning" size={17} className="text-amber-ink" />
+                Needs attention
+              </h2>
+              <p className="mt-0.5 text-body-sm text-ink-muted">Topics with low mastery</p>
+            </div>
+            <Link
+              href="/practice"
+              className="inline-flex min-h-11 shrink-0 items-center px-1 font-display text-label-md text-primary"
+            >
+              See all
+            </Link>
+          </div>
+
+          <ul className="mt-3 space-y-2.5">
+            {lowMasteryTopics.map((topic) => {
+              const mastery = progress.topics[topic.id].mastery;
+              return (
+                <li key={topic.id}>
+                  <button
+                    type="button"
+                    onClick={() => beginFocus(topic.id)}
+                    className="flex w-full items-stretch gap-3 overflow-hidden rounded-tile border border-border bg-surface pr-3 pl-0 text-left transition-colors hover:bg-canvas"
+                  >
+                    <span className="w-1 shrink-0 bg-amber" aria-hidden="true" />
+                    <span className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 py-3">
+                      <span className="font-display text-[15px] leading-[20px] font-semibold text-ink">
+                        {topic.title}
+                      </span>
+                      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <Chip label={`Mastery ${mastery}%`} tone="amber" />
+                        <span className="text-label-sm text-ink-muted">{topic.unitLabel}</span>
+                      </span>
+                    </span>
+                    <span className="grid h-8 w-8 shrink-0 place-items-center self-center rounded-full bg-surface-container text-primary">
+                      <Icon name="chevron-right" size={16} />
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : noDataYet ? null : (
+        <section aria-labelledby="attention-title" className="mt-6">
+          <h2 id="attention-title" className="flex items-center gap-1.5 font-display text-headline-sm text-ink">
+            <Icon name="check-circle" size={17} className="text-green-ink" />
+            All topics looking good
+          </h2>
+          <p className="mt-0.5 text-body-sm text-ink-muted">
+            Keep practising to push mastery higher.
+          </p>
+        </section>
+      )}
     </div>
   );
 }

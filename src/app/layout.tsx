@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Space_Grotesk } from 'next/font/google';
+import { AuthProvider } from '@/lib/auth-context';
 import { StudyProvider } from '@/components/study-provider';
 import './globals.css';
 
@@ -55,7 +56,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <StudyProvider>{children}</StudyProvider>
+        <AuthProvider>
+          <StudyProvider>{children}</StudyProvider>
+        </AuthProvider>
       </body>
     </html>
   );
