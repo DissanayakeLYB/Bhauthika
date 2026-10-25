@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Formula } from '@/components/formula';
 import { ActionButton } from '@/components/button';
-import { Icon } from '@/components/icon';
+import { Label, Mono } from '@/components/type';
 import type { Question } from '@/lib/questions';
 import { cn } from '@/lib/utils';
 
@@ -34,108 +34,84 @@ export function FeedbackSheet({
       open={open}
       onClose={onClose}
       labelledBy="feedback-title"
-      className="overflow-hidden rounded-t-sheet bg-surface shadow-sheet md:rounded-sheet md:shadow-dialog"
+      className="max-h-[92dvh] border-t border-line bg-bg sm:max-h-[88dvh] sm:border"
     >
-      <div className="mx-auto mt-2.5 h-1 w-9 shrink-0 rounded-full bg-border md:hidden" aria-hidden="true" />
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-6 pb-6 sm:px-8 sm:pt-8">
+        <div className="flex items-baseline justify-between gap-4">
+          <Label className={correct ? 'text-correct' : 'text-wrong'}>
+            {correct ? 'Correct' : 'Incorrect'}
+          </Label>
+          <button
+            type="button"
+            onClick={onClose}
+            className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
+          >
+            Close
+          </button>
+        </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-3 md:px-5 md:pt-5">
-        <div
+        <h2
+          id="feedback-title"
           className={cn(
-            'flex items-start gap-3 rounded-card border p-3.5',
-            correct ? 'border-green/40 bg-green-soft' : 'border-red/40 bg-red-soft',
+            'mt-4 text-[1.75rem] leading-[1.15] font-medium tracking-[-0.01em]',
+            correct ? 'text-correct' : 'text-wrong',
           )}
         >
-          <span
-            className={cn(
-              'mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full text-white',
-              correct ? 'bg-green' : 'bg-red',
-            )}
-            aria-hidden="true"
-          >
-            <Icon name={correct ? 'check' : 'close'} size={18} />
-          </span>
-          <div className="min-w-0">
-            <h2
-              id="feedback-title"
-              className={cn(
-                'font-display text-headline-sm',
-                correct ? 'text-green-ink' : 'text-red-ink',
-              )}
-            >
-              {correct ? 'Correct answer' : 'Not quite'}
-            </h2>
-            <p className="mt-0.5 text-body-md text-ink-muted">
-              The correct answer is{' '}
-              <strong className="font-semibold text-ink">
-                ({question.answer + 1}) {question.options[question.answer]}
-              </strong>
-            </p>
-          </div>
+          {correct ? 'Correct.' : 'Not quite.'}
+        </h2>
+        <p className="mt-3 text-meta text-muted">
+          {correct ? 'You picked the right option.' : 'The right option is below.'}
+        </p>
+
+        <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
+          <Mono className="text-[1.375rem] leading-none text-correct">{question.answer + 1}</Mono>
+          <p className="min-w-0 text-body text-ink">{question.options[question.answer]}</p>
         </div>
 
-        <div className="mt-3 rounded-card border border-border bg-surface-low p-3.5">
-          <h3 className="flex items-center gap-1.5 font-display text-headline-sm text-ink">
-            <Icon name="lightbulb" size={19} className="text-indigo-mid" />
-            Why?
-          </h3>
-          <ol className="mt-2 space-y-2">
-            {question.steps.map((step, index) => {
-              const isFinal = index === question.steps.length - 1;
-              return (
-                <li
-                  key={step.label}
-                  className={cn(
-                    'rounded-tile border bg-surface p-2.5',
-                    isFinal ? 'border-green/30 bg-green-soft' : 'border-border',
-                  )}
-                >
-                  <p
-                    className={cn(
-                      'text-label-sm tracking-[0.06em] uppercase',
-                      isFinal ? 'text-green-ink' : 'text-ink-muted',
-                    )}
-                  >
-                    {step.label}
-                  </p>
-                  <Formula
-                    latex={step.latex}
-                    fallback={step.formula}
-                    className="mt-1 text-[15px] leading-6"
-                  />
-                </li>
-              );
-            })}
-          </ol>
-        </div>
+        <ol className="mt-10 space-y-7">
+          {question.steps.map((step, index) => {
+            const isFinal = index === question.steps.length - 1;
+            return (
+              <li
+                key={step.label}
+                className={cn(
+                  'border-l-2 pl-5',
+                  isFinal ? 'border-l-correct' : 'border-l-line',
+                )}
+              >
+                <Label className={isFinal ? 'text-correct' : 'text-muted'}>{step.label}</Label>
+                <Formula
+                  latex={step.latex}
+                  fallback={step.formula}
+                  className="mt-3 text-body"
+                />
+              </li>
+            );
+          })}
+        </ol>
       </div>
 
-      <div className="shrink-0 border-t border-border px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] md:px-5 md:pb-4">
+      <div className="shrink-0 border-t border-line px-5 pt-5 pb-5 sm:px-8">
         <ActionButton
           label={isLast ? 'Finish session' : 'Next question'}
-          icon="arrow-right"
-          iconPosition="right"
           onClick={onNext}
         />
-        <button
-          type="button"
-          onClick={onToggleBookmark}
-          aria-pressed={bookmarked}
-          className="mt-1 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-tile text-label-md text-ink-muted transition-colors hover:text-primary"
-        >
-          <Icon name="bookmark" size={17} className={bookmarked ? 'text-primary' : undefined} />
-          {bookmarked ? 'Marked for review' : 'Mark for review'}
-        </button>
-        {/* Video link: shown only if the question has a videoUrl. */}
-        {question.videoUrl ? (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          {/* Video link: shown only if the question has a videoUrl. */}
+          {question.videoUrl ? (
+            <ActionButton
+              variant="text"
+              label="Watch full explanation"
+              onClick={() => window.open(question.videoUrl, '_blank', 'noopener,noreferrer')}
+            />
+          ) : null}
           <ActionButton
-            variant="ghost"
-            label="Watch full explanation"
-            icon="play"
-            iconPosition="left"
-            className="mt-1"
-            onClick={() => window.open(question.videoUrl, '_blank', 'noopener,noreferrer')}
+            variant="text"
+            label={bookmarked ? 'Marked for review' : 'Mark for review'}
+            aria-pressed={bookmarked}
+            onClick={onToggleBookmark}
           />
-        ) : null}
+        </div>
       </div>
     </Sheet>
   );
@@ -145,7 +121,7 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
- * Bottom sheet on phones, centred dialog from md up. Handles Escape, focus
+ * Bottom sheet on phones, centred dialog from sm up. Handles Escape, focus
  * trapping, focus restoration and background scroll locking.
  */
 function Sheet({
@@ -217,7 +193,7 @@ function Sheet({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 md:items-center md:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-bg/80 sm:items-center sm:p-8"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -228,7 +204,10 @@ function Sheet({
         aria-modal="true"
         aria-labelledby={labelledBy}
         tabIndex={-1}
-        className={cn('flex max-h-[88dvh] w-full max-w-full flex-col outline-none md:max-w-lg', className)}
+        className={cn(
+          'flex w-full max-w-narrow flex-col outline-none',
+          className,
+        )}
       >
         {children}
       </div>

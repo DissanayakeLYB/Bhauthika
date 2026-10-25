@@ -1,0 +1,51 @@
+/*
+ * Bhauthika design tokens.
+ * Every colour, type size, radius and layout width lives in this file.
+ * Change a value here and the whole site follows.
+ */
+@theme {
+  /* Palette: the only colours used anywhere, dark mode only. */
+  --color-bg: #0b0b0c;
+  --color-ink: #ececea;
+  --color-muted: #8a8a86;
+  --color-line: #26262a;
+  --color-accent: #e9b949; /* the single accent: primary action + focus */
+  --color-correct: #5fbf8a;
+  --color-wrong: #e5645a;
+
+  /* Type: system sans for prose, system mono for numbers and labels. */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+
+  --text-title: clamp(2.25rem, 5vw, 3.25rem);
+  --text-title--line-height: 1.04;
+  --text-title--letter-spacing: -0.03em;
+
+  --text-numeral: clamp(4.5rem, 13vw, 7.5rem);
+  --text-numeral--line-height: 0.9;
+  --text-numeral--letter-spacing: -0.04em;
+
+  --text-question: clamp(1.25rem, 1.8vw, 1.4375rem);
+  --text-question--line-height: 1.5;
+
+  --text-body: 1.0625rem; /* 17px: body copy is never smaller than 16px */
+  --text-body--line-height: 1.6;
+
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.45;
+
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.1;
+  --text-label--letter-spacing: 0.14em;
+
+  /* Shape: no cards, no shadows, no gradients. */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+
+  /* Layout widths. */
+  --container-narrow: 45rem; /* 720px: question + feedback */
+  --container-wide: 60rem; /* 960px: every other page */
+}

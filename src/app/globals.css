@@ -1,182 +1,37 @@
 @import 'tailwindcss';
-
-/* Class-based dark mode: `dark:` utilities follow the .dark class on <html>. */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/*
- * Bhauthika Laboratory & Study System tokens.
- * Ported from the Stitch design system in docs/design/DESIGN.md.
- *
- * Text-safe accents: the raw diagnostic hues (#2E9E6B, #F5A524, #D64545) only
- * reach 2.8–4.4:1 on our light surfaces, so small text uses the *-ink variants
- * (all >= 4.8:1) while the raw hues stay for fills, borders and chart marks.
- */
-@theme {
-  /* Surfaces */
-  --color-canvas: #f8f9fc;
-  --color-surface: #ffffff;
-  --color-surface-low: #f2f3ff;
-  --color-surface-container: #ecedfb;
-  --color-surface-high: #e6e7f6;
-  --color-border: #e8ecf4;
-  --color-border-strong: #c7c5d2;
-
-  /* Indigo core */
-  --color-primary: #20256b;
-  /* Solid brand fill for buttons/banners that carry white text. */
-  --color-primary-solid: #20256b;
-  --color-primary-deep: #070b57;
-  --color-primary-pressed: #2e3280;
-  --color-indigo-soft: #eef0ff;
-  --color-indigo-mid: #3b3f9e;
-  --color-indigo-line: #c9ccf6;
-
-  /* Text */
-  --color-ink: #1b1e28;
-  --color-ink-muted: #636a7e;
-  /* decorative only: 3.15:1 on white, never used for reading text */
-  --color-ink-faint: #8b91a1;
-
-  /* Diagnostic accents */
-  --color-green: #2e9e6b;
-  --color-green-ink: #1c7a4f;
-  --color-green-soft: #ebf7f1;
-  --color-amber: #f5a524;
-  --color-amber-deep: #cd8600;
-  --color-amber-ink: #8a5a00;
-  --color-amber-soft: #fef6e9;
-  --color-amber-tint: #fff7e8;
-  --color-red: #d64545;
-  --color-red-ink: #b3261e;
-  --color-red-soft: #fdecec;
-
-  /* Type families (self-hosted through next/font) */
-  --font-display: var(--font-space-grotesk), 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-jakarta), 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-
-  /* Type scale */
-  --text-display-lg: 2rem;
-  --text-display-lg--line-height: 2.5rem;
-  --text-display-lg--letter-spacing: -0.02em;
-  --text-headline-lg: 1.625rem;
-  --text-headline-lg--line-height: 2.125rem;
-  --text-headline-lg--letter-spacing: -0.01em;
-  --text-headline-md: 1.375rem;
-  --text-headline-md--line-height: 1.875rem;
-  --text-headline-sm: 1.125rem;
-  --text-headline-sm--line-height: 1.625rem;
-  --text-question: 1.125rem;
-  --text-question--line-height: 1.75rem;
-  --text-body-lg: 1rem;
-  --text-body-lg--line-height: 1.5rem;
-  --text-body-md: 0.875rem;
-  --text-body-md--line-height: 1.375rem;
-  --text-body-sm: 0.8125rem;
-  --text-body-sm--line-height: 1.125rem;
-  --text-label-lg: 0.875rem;
-  --text-label-lg--line-height: 1.25rem;
-  --text-label-lg--letter-spacing: 0.02em;
-  --text-label-md: 0.75rem;
-  --text-label-md--line-height: 1rem;
-  --text-label-md--letter-spacing: 0.04em;
-  --text-label-sm: 0.6875rem;
-  --text-label-sm--line-height: 0.875rem;
-  --text-label-sm--letter-spacing: 0.05em;
-
-  /* Radii */
-  --radius-tile: 0.75rem;
-  --radius-card: 1rem;
-  --radius-sheet: 1.75rem;
-
-  /* Elevation */
-  --shadow-card: 0 2px 8px rgba(27, 30, 40, 0.04);
-  --shadow-raised: 0 6px 16px rgba(32, 37, 107, 0.08);
-  --shadow-sheet: 0 -8px 24px rgba(27, 30, 40, 0.08);
-  --shadow-hero: 0 12px 28px rgba(32, 37, 107, 0.18);
-  --shadow-dialog: 0 24px 48px rgba(27, 30, 40, 0.18);
-}
+@import '../theme/tokens.css';
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    text-rendering: optimizeLegibility;
-    color-scheme: light;
-  }
-
-  html.dark {
     color-scheme: dark;
+    text-rendering: optimizeLegibility;
   }
 
-  /* Minimum 16px form text: stops iOS Safari zooming on focus. */
-  input,
-  select,
-  textarea,
-  button {
-    font: inherit;
-    color: inherit;
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
 
+  /* Visible keyboard focus on every control, in the one accent colour. */
   :focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-    border-radius: 4px;
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 
   ::selection {
-    background-color: var(--color-indigo-soft);
-    color: var(--color-primary-deep);
+    background-color: var(--color-accent);
+    color: var(--color-bg);
   }
 
-  .dark ::selection {
-    background-color: var(--color-indigo-mid);
-    color: var(--color-ink);
-  }
-
-  /*
-   * Dark theme: same token names, darker surfaces and lighter ink, so every
-   * component picks it up without dark: variants. `primary` becomes a light
-   * indigo for text and marks; `primary-solid` stays saturated for fills that
-   * carry white text.
-   */
-  .dark {
-    --color-canvas: #0b0e1a;
-    --color-surface: #141829;
-    --color-surface-low: #191d31;
-    --color-surface-container: #1f2438;
-    --color-surface-high: #262b43;
-    --color-border: #2b3149;
-    --color-border-strong: #414a6b;
-
-    --color-primary: #b7beff;
-    --color-primary-solid: #4a51d6;
-    --color-primary-pressed: #5a61e0;
-    --color-primary-deep: #070b57;
-    --color-indigo-soft: #232a4d;
-    --color-indigo-mid: #3b3f9e;
-    --color-indigo-line: #39406b;
-
-    --color-ink: #eceef8;
-    --color-ink-muted: #a3aac4;
-    --color-ink-faint: #737b99;
-
-    --color-green: #2e9e6b;
-    --color-green-ink: #58d9a2;
-    --color-green-soft: #12291f;
-    --color-amber: #f5a524;
-    --color-amber-deep: #cd8600;
-    --color-amber-ink: #f2c069;
-    --color-amber-soft: #2a2114;
-    --color-amber-tint: #241d11;
-    --color-red: #d64545;
-    --color-red-ink: #ff9e9e;
-    --color-red-soft: #2b1618;
-
-    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --shadow-raised: 0 6px 16px rgba(0, 0, 0, 0.45);
-    --shadow-sheet: 0 -8px 24px rgba(0, 0, 0, 0.5);
-    --shadow-hero: 0 12px 28px rgba(0, 0, 0, 0.5);
-    --shadow-dialog: 0 24px 48px rgba(0, 0, 0, 0.55);
+  ::placeholder {
+    color: var(--color-muted);
+    opacity: 0.6;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -192,32 +47,18 @@
 }
 
 @layer components {
-  /* Score-ring enter animation, disabled by the reduced-motion rule above. */
-  .ring-progress {
-    animation: ring-draw 900ms cubic-bezier(0.4, 0, 0.2, 1) both;
-  }
-
-  /* The radio input is visually hidden, so surface focus on its whole tile. */
-  .option-tile:has(input:focus-visible) {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-}
-
-@keyframes ring-draw {
-  from {
-    stroke-dashoffset: var(--ring-circumference);
-  }
-  to {
-    stroke-dashoffset: var(--ring-offset);
+  /* The radio input is visually hidden, so surface focus on its whole row. */
+  .choice-row:has(input:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
   }
 }
 
 /*
  * KaTeX CSS is imported unlayered by the Formula component, so these overrides
  * must also sit outside @layer (layered rules always lose to unlayered ones).
- * Display maths is left-aligned inside derivation cards and scrolls sideways
- * rather than widening the 320px layout.
+ * Display maths is left-aligned and scrolls sideways instead of widening the
+ * 320px layout.
  */
 .formula {
   max-width: 100%;
@@ -239,4 +80,3 @@
   text-align: left;
   white-space: normal;
 }
-

@@ -28,8 +28,9 @@ export default function AuthCallbackPage() {
   }, [router]);
 
   return (
-    <div className="grid min-h-dvh place-items-center bg-canvas">
-      <p className="text-body-md text-ink-muted">Signing you in…</p>
-    </div>
+    <main id="main" className="mx-auto w-full max-w-narrow px-5 py-20 sm:px-8">
+      <p className="font-mono text-label tracking-[0.14em] text-muted uppercase">Bhauthika</p>
+      <p className="mt-6 text-body text-muted">Signing you in…</p>
+    </main>
   );
 }
