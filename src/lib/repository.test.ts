@@ -4,11 +4,13 @@ import {
   LocalProgressRepository,
   LocalResultRepository,
   LocalSessionRepository,
-  PROGRESS_STORAGE_KEY,
   parseStoredProgress,
   parseStoredSession,
+  progressStorageKey,
   type KeyValueStorage,
 } from './repository';
+
+const TEST_KEY = progressStorageKey('test-user');
 
 class MemoryStorage implements KeyValueStorage {
   private readonly map = new Map<string, string>();
@@ -43,7 +45,7 @@ class BrokenStorage implements KeyValueStorage {
 describe('LocalProgressRepository', () => {
   it('round-trips a progress snapshot', async () => {
     const storage = new MemoryStorage();
-    const repository = new LocalProgressRepository(storage);
+    const repository = new LocalProgressRepository(TEST_KEY, storage);
     const progress = createSeedProgress();
     progress.topics.current.mastery = 71;
     progress.streak = 9;
@@ -56,29 +58,29 @@ describe('LocalProgressRepository', () => {
   });
 
   it('returns null when nothing is stored', async () => {
-    await expect(new LocalProgressRepository(new MemoryStorage()).load()).resolves.toBeNull();
+    await expect(new LocalProgressRepository(TEST_KEY, new MemoryStorage()).load()).resolves.toBeNull();
   });
 
   it('clears the stored snapshot', async () => {
     const storage = new MemoryStorage();
-    const repository = new LocalProgressRepository(storage);
+    const repository = new LocalProgressRepository(TEST_KEY, storage);
     await repository.save(createSeedProgress());
-    expect(storage.getItem(PROGRESS_STORAGE_KEY)).not.toBeNull();
+    expect(storage.getItem(TEST_KEY)).not.toBeNull();
 
     await repository.clear();
-    expect(storage.getItem(PROGRESS_STORAGE_KEY)).toBeNull();
+    expect(storage.getItem(TEST_KEY)).toBeNull();
     await expect(repository.load()).resolves.toBeNull();
   });
 
   it('degrades quietly when storage throws', async () => {
-    const repository = new LocalProgressRepository(new BrokenStorage());
+    const repository = new LocalProgressRepository(TEST_KEY, new BrokenStorage());
     await expect(repository.load()).resolves.toBeNull();
     await expect(repository.save(createSeedProgress())).resolves.toBeUndefined();
     await expect(repository.clear()).resolves.toBeUndefined();
   });
 
   it('returns null when no storage is available (SSR)', async () => {
-    await expect(new LocalProgressRepository(null).load()).resolves.toBeNull();
+    await expect(new LocalProgressRepository(TEST_KEY, null).load()).resolves.toBeNull();
   });
 });
 

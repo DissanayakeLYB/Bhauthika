@@ -123,6 +123,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   // Whenever the user changes, update the repository key and reload progress.
   useEffect(() => {
+    // Wait for the Supabase bank so a restored set resolves against the same
+    // questions the session engine will draw from.
+    if (questionsLoading) return;
+
     const key = progressStorageKey(user?.id);
     progressRepository.setKey(key);
 
@@ -153,8 +157,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     })();
 
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [user?.id, questionsLoading]);
 
   useEffect(() => {
     if (!ready) return;
@@ -218,18 +221,17 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   );
 
   const goToNext = useCallback(() => {
-    setActive((previous) => {
-      if (!previous) return previous;
-      // Record the attempt for the question being left.
-      const q = previous.questions[previous.index];
-      const sel = previous.answers[previous.index];
-      if (sel !== null) {
-        void recordAttempt(q.id, sel, sel === q.answer);
-      }
-      const index = Math.min(previous.index + 1, previous.questions.length - 1);
-      return { ...previous, index };
-    });
-  }, [recordAttempt]);
+    if (!active) return;
+    // Record the attempt outside the state updater: React may call updaters
+    // more than once, which would write duplicate rows to `attempts`.
+    const q = active.questions[active.index];
+    const sel = active.answers[active.index];
+    if (sel !== null) {
+      void recordAttempt(q.id, sel, sel === q.answer);
+    }
+    const index = Math.min(active.index + 1, active.questions.length - 1);
+    setActive({ ...active, index });
+  }, [active, recordAttempt]);
 
   const finishSession = useCallback(() => {
     if (!active) return;

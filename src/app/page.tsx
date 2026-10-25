@@ -73,11 +73,12 @@ export default function WelcomePage() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/home` : undefined,
+          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         },
       });
       if (oauthError) setError(oauthError.message);
-      // On success the browser navigates to Google; Supabase redirects back to /home.
+      // On success the browser navigates to Google; Supabase redirects back to the
+      // site origin, where detectSessionInUrl picks the session up.
     } finally {
       setGoogleLoading(false);
     }

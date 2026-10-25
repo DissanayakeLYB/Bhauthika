@@ -23,6 +23,7 @@ export default function ProgressPage() {
   const router = useRouter();
 
   const accuracy = overallAccuracy(progress);
+  const noDataYet = progress.totalPractised === 0;
   const sortedTopics = useMemo(
     () =>
       [...TOPICS].sort(
@@ -50,6 +51,12 @@ export default function ProgressPage() {
       </div>
       <p className="mt-0.5 mb-3.5 text-body-sm text-ink-muted">A/L Physics 2025 · English Medium</p>
 
+      {noDataYet ? (
+        <p className="mb-3.5 rounded-card border border-dashed border-border-strong bg-surface px-4 py-5 text-center text-body-sm text-ink-muted">
+          No practice data yet. Answer your first set and your mastery bars will fill in here.
+        </p>
+      ) : null}
+
       <div className="grid grid-cols-2 gap-3">
         <article className="flex min-h-[116px] flex-col justify-between rounded-tile border border-border bg-surface p-3.5">
           <div className="flex items-center justify-between gap-1.5">
@@ -59,10 +66,12 @@ export default function ProgressPage() {
           <p className="mt-1.5 font-display text-[26px] leading-[34px] tracking-[-0.6px] text-primary">
             {accuracy}%
           </p>
-          <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-green-ink">
-            <Icon name="trend-up" size={15} />
-            +{progress.monthlyDelta}% this month
-          </p>
+          {noDataYet ? null : (
+            <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-green-ink">
+              <Icon name="trend-up" size={15} />
+              +{progress.monthlyDelta}% this month
+            </p>
+          )}
         </article>
 
         <article className="flex min-h-[116px] flex-col justify-between rounded-tile border border-border bg-surface p-3.5">
