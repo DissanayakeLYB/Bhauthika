@@ -1,22 +1,7 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Space_Grotesk } from 'next/font/google';
 import { AuthProvider } from '@/lib/auth-context';
 import { StudyProvider } from '@/components/study-provider';
 import './globals.css';
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-space-grotesk',
-  display: 'swap',
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-jakarta',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: {
@@ -24,7 +9,7 @@ export const metadata: Metadata = {
     template: '%s · Bhauthika',
   },
   description:
-    'Adaptive G.C.E. A/L Physics practice for Sri Lankan English-medium students: past-paper MCQs, worked derivations and topic mastery tracking.',
+    'G.C.E. A/L Physics past-paper MCQs for English-medium students in Sri Lanka: practice, worked explanations and topic mastery.',
   applicationName: 'Bhauthika',
   manifest: '/manifest.webmanifest',
   icons: {
@@ -34,7 +19,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'Bhauthika',
-    statusBarStyle: 'default',
+    statusBarStyle: 'black',
   },
 };
 
@@ -42,25 +27,17 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  colorScheme: 'light dark',
-  themeColor: '#f8f9fc',
+  colorScheme: 'dark',
+  themeColor: '#0b0b0c',
 };
-
-/** Applies the saved theme (or the system preference) before first paint. */
-const THEME_SCRIPT = `try{var t=localStorage.getItem('bhauthika.theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark')}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${spaceGrotesk.variable} ${jakarta.variable}`}
-      suppressHydrationWarning
-    >
-      <body className="min-h-dvh bg-canvas font-body text-ink antialiased">
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+    <html lang="en" className="dark">
+      <body className="min-h-dvh bg-bg font-sans text-ink">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-tile focus:bg-primary-solid focus:px-4 focus:py-3 focus:text-label-lg focus:text-white"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-sm focus:bg-accent focus:px-4 focus:py-3 focus:text-label focus:tracking-[0.14em] focus:text-bg focus:uppercase"
         >
           Skip to content
         </a>

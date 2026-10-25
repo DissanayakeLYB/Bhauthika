@@ -1,17 +1,20 @@
 'use client';
 
 import { Fragment, useCallback, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PotentiometerDiagram } from '@/components/circuit-diagram';
 import { FeedbackSheet } from '@/components/feedback-sheet';
 import { Formula } from '@/components/formula';
 import { useStudy } from '@/components/study-provider';
 import { ActionButton } from '@/components/button';
-import { Chip } from '@/components/chip';
-import { Icon } from '@/components/icon';
+import { ProgressBar } from '@/components/progress-bar';
+import { Label } from '@/components/type';
 import type { Question } from '@/lib/questions';
 import { TOPIC_MAP } from '@/lib/topics';
 import { cn } from '@/lib/utils';
+
+const pad = (value: number) => String(value).padStart(2, '0');
 
 export default function SessionPage() {
   const { active } = useStudy();
@@ -19,27 +22,15 @@ export default function SessionPage() {
 
   if (!active) {
     return (
-      <main id="main" tabIndex={-1} className="grid min-h-dvh place-items-center bg-canvas px-6">
-        <div className="w-full max-w-sm text-center">
-          <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-indigo-soft text-primary">
-            <Icon name="flask" size={30} />
-          </span>
-          <h1 className="mt-4 font-display text-headline-sm text-primary">No active session</h1>
-          <p className="mt-1 text-body-md text-ink-muted">
-            Start an adaptive set and your questions will appear here.
-          </p>
-          <ActionButton
-            label="Browse practice topics"
-            icon="flask"
-            onClick={() => router.push('/practice')}
-            className="mt-4"
-          />
-          <ActionButton
-            label="Back to home"
-            variant="ghost"
-            onClick={() => router.push('/home')}
-            className="mt-2"
-          />
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-narrow px-5 py-20 sm:px-8">
+        <Label className="text-muted">Practice</Label>
+        <h1 className="mt-6 text-title font-medium text-ink">No set in progress.</h1>
+        <p className="mt-6 text-body text-muted">
+          Choose a unit and a set size, then your questions appear here.
+        </p>
+        <div className="mt-10 space-y-4">
+          <ActionButton label="Choose a unit" onClick={() => router.push('/practice')} />
+          <ActionButton label="Back to home" variant="text" onClick={() => router.push('/home')} />
         </div>
       </main>
     );
@@ -49,7 +40,7 @@ export default function SessionPage() {
   return <QuestionView key={active.questions[active.index].id} />;
 }
 
-/** Renders **double-asterisk** emphasis as the design's deep-indigo bold. */
+/** Renders **double-asterisk** emphasis as ink weight inside the stem. */
 function RichText({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
 
@@ -57,7 +48,7 @@ function RichText({ text }: { text: string }) {
     <>
       {parts.map((part, index) =>
         part.startsWith('**') && part.endsWith('**') ? (
-          <strong key={index} className="font-bold text-primary-deep">
+          <strong key={index} className="font-medium text-ink">
             {part.slice(2, -2)}
           </strong>
         ) : (
@@ -108,92 +99,92 @@ function QuestionView() {
   };
 
   return (
-    <main id="main" tabIndex={-1} className="flex min-h-dvh flex-col bg-canvas">
-      <header className="sticky top-0 z-30 border-b border-border bg-surface pt-[env(safe-area-inset-top)]">
-        <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between gap-2 px-4">
-          <button
-            type="button"
-            onClick={() => router.push('/home')}
-            aria-label="Close question and return home"
-            className="-ml-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:bg-surface-container"
+    <main id="main" tabIndex={-1} className="min-h-dvh">
+      <div className="mx-auto w-full max-w-narrow px-5 pb-40 sm:px-8">
+        <header className="flex items-baseline justify-between gap-4 py-5">
+          <Link
+            href="/home"
+            className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
           >
-            <Icon name="close" size={22} />
-          </button>
-          <p className="flex items-baseline gap-1 text-label-md text-ink-muted">
-            <span>Question</span>
-            <span className="font-display text-[18px] font-semibold text-primary">{index + 1}</span>
-            <span>of {total}</span>
+            Close
+          </Link>
+          <div className="flex items-baseline gap-6">
+            <button
+              type="button"
+              onClick={() => toggleBookmark(question.id)}
+              aria-pressed={bookmarked}
+              className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
+            >
+              {bookmarked ? 'Marked' : 'Mark'}
+            </button>
+            <p className="font-mono text-meta text-muted tabular-nums">
+              <span className="text-ink">{pad(index + 1)}</span> / {pad(total)}
+            </p>
+          </div>
+        </header>
+
+        <ProgressBar
+          value={((index + 1) / total) * 100}
+          label={`Question ${index + 1} of ${total}`}
+        />
+
+        <section className="pt-10">
+          <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono text-label tracking-[0.14em] text-muted uppercase">
+            <span>{topic.title}</span>
+            <span aria-hidden="true">·</span>
+            <span>
+              {question.year} {question.paper}
+            </span>
           </p>
-          <button
-            type="button"
-            onClick={() => toggleBookmark(question.id)}
-            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark question'}
-            aria-pressed={bookmarked}
-            className="-mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-full transition-colors hover:bg-surface-container"
-          >
-            <Icon name="flag" size={22} className={bookmarked ? 'text-amber-ink' : 'text-ink-muted'} />
-          </button>
-        </div>
-        <div
-          className="mx-auto flex w-full max-w-3xl gap-[3px] px-4 pb-2"
-          role="progressbar"
-          aria-label="Session progress"
-          aria-valuemin={1}
-          aria-valuemax={total}
-          aria-valuenow={index + 1}
-        >
-          {Array.from({ length: total }).map((_, segment) => (
-            <span
-              key={segment}
-              aria-hidden="true"
-              className={cn(
-                'h-1.5 flex-1 rounded-full',
-                segment <= index ? 'bg-primary' : 'bg-surface-high',
-              )}
+
+          <p className="mt-8 font-mono text-numeral text-ink tabular-nums">{question.number}</p>
+
+          {question.questionImageUrl ? (
+            // Optional image question: the image replaces the written stem.
+            <img
+              src={question.questionImageUrl}
+              alt={`Question ${question.number}, ${question.year} ${question.paper}`}
+              className="mt-8 w-full rounded-xs border border-line"
             />
-          ))}
-        </div>
-      </header>
+          ) : (
+            <p className="mt-6 max-w-[62ch] text-question text-ink">
+              <RichText text={question.stem} />
+            </p>
+          )}
 
-      <div className="mx-auto w-full max-w-3xl flex-1 px-4 pt-4 pb-6">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Chip label={topic.title} tone="indigo" icon="bolt" />
-          <Chip label={`${question.year} · ${question.paper} · Q.${question.number}`} />
-          <Chip label="A/L Past Paper" />
-        </div>
+          {question.diagram === 'potentiometer' ? (
+            <PotentiometerDiagram className="mt-8" />
+          ) : null}
 
-        <h1 className="mt-4 text-question font-medium text-ink">
-          <RichText text={question.stem} />
-        </h1>
-
-        {question.diagram === 'potentiometer' ? (
-          <PotentiometerDiagram className="mt-4" />
-        ) : null}
-
-        <fieldset disabled={submitted} className="mt-4">
-          <legend className="sr-only">Choose one answer</legend>
-          <div className="space-y-2.5">
+          <fieldset disabled={submitted} className="mt-12 border-b border-line">
+            <legend className="sr-only">Choose one answer</legend>
             {question.options.map((option, optionIndex) => {
               const isSelected = selected === optionIndex;
               const isCorrectOption = submitted && optionIndex === question.answer;
               const isIncorrectChoice = submitted && isSelected && !isCorrectOption;
-              const isMuted = submitted && !isCorrectOption && !isIncorrectChoice;
 
               return (
                 <label
                   key={option}
                   className={cn(
-                    'option-tile flex min-h-[54px] w-full items-center gap-3 rounded-tile border px-3 py-2.5 transition-colors',
-                    !submitted && 'cursor-pointer',
-                    isCorrectOption && 'border-green bg-green-soft ring-[1.5px] ring-green ring-inset',
-                    isIncorrectChoice && 'border-red bg-red-soft ring-[1.5px] ring-red ring-inset',
-                    !submitted &&
-                      isSelected &&
-                      'border-primary bg-[rgba(224,224,255,0.35)] ring-2 ring-primary ring-inset dark:bg-indigo-soft/70',
-                    !submitted && !isSelected && 'border-border-strong/45 bg-surface hover:border-primary/40',
-                    isMuted && 'border-border-strong/45 bg-surface opacity-55',
+                    'choice-row relative flex w-full items-start gap-5 border-t border-line py-5 pl-4 transition-colors',
+                    submitted ? 'cursor-default' : 'cursor-pointer hover:opacity-80',
+                    submitted && !isCorrectOption && !isIncorrectChoice && 'opacity-50',
                   )}
                 >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'absolute inset-y-0 left-0 w-[2px]',
+                      isCorrectOption
+                        ? 'bg-correct'
+                        : isIncorrectChoice
+                          ? 'bg-wrong'
+                          : !submitted && isSelected
+                            ? 'bg-ink'
+                            : 'bg-transparent',
+                    )}
+                  />
                   <input
                     type="radio"
                     name={`answer-${question.id}`}
@@ -206,119 +197,91 @@ function QuestionView() {
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full border font-display text-[11px] font-semibold',
-                      isCorrectOption && 'border-green bg-green text-white',
-                      isIncorrectChoice && 'border-red bg-red text-white',
-                      !submitted && isSelected && 'border-primary bg-primary-solid text-white',
-                      !submitted && !isSelected && 'border-border-strong/50 bg-surface-container text-ink-muted',
-                      isMuted && 'border-border-strong/50 bg-surface-container text-ink-muted',
+                      'w-5 shrink-0 pt-0.5 font-mono text-meta tabular-nums',
+                      isCorrectOption
+                        ? 'text-correct'
+                        : isIncorrectChoice
+                          ? 'text-wrong'
+                          : isSelected
+                            ? 'text-ink'
+                            : 'text-muted',
                     )}
                   >
-                    {isCorrectOption ? (
-                      <Icon name="check" size={18} />
-                    ) : isIncorrectChoice ? (
-                      <Icon name="close" size={18} />
-                    ) : (
-                      optionIndex + 1
-                    )}
+                    {optionIndex + 1}
                   </span>
-
                   <span
                     className={cn(
-                      'min-w-0 flex-1 text-body-lg font-medium text-ink',
-                      !submitted && isSelected && 'font-semibold text-primary',
+                      'min-w-0 flex-1 text-body',
+                      isCorrectOption
+                        ? 'text-correct'
+                        : isIncorrectChoice
+                          ? 'text-wrong'
+                          : 'text-ink',
                     )}
                   >
                     {option}
                   </span>
-
                   {isCorrectOption ? (
-                    <span className="shrink-0 rounded-full bg-surface/75 px-1.5 py-1 text-[10px] font-semibold text-green-ink">
+                    <span className="shrink-0 font-mono text-label tracking-[0.14em] text-correct uppercase">
                       Correct
                     </span>
                   ) : isIncorrectChoice ? (
-                    <span className="shrink-0 rounded-full bg-surface/75 px-1.5 py-1 text-[10px] font-semibold text-red-ink">
-                      Your answer
+                    <span className="shrink-0 font-mono text-label tracking-[0.14em] text-wrong uppercase">
+                      Yours
                     </span>
-                  ) : (
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        'grid h-[19px] w-[19px] shrink-0 place-items-center rounded-full border',
-                        !submitted && isSelected
-                          ? 'border-primary bg-primary-solid'
-                          : 'border-border-strong',
-                      )}
-                    >
-                      {!submitted && isSelected ? (
-                        <span className="h-[7px] w-[7px] rounded-full bg-white" />
-                      ) : null}
-                    </span>
-                  )}
-                  <span className="sr-only">
-                    {isCorrectOption ? 'Correct answer.' : isIncorrectChoice ? 'Your answer, incorrect.' : ''}
-                  </span>
+                  ) : null}
                 </label>
               );
             })}
-          </div>
-        </fieldset>
+          </fieldset>
 
-        {hintOpen ? (
-          <div className="mt-4 rounded-tile border border-amber/25 bg-amber-soft p-2.5">
-            <p className="text-label-sm tracking-[0.06em] text-amber-ink uppercase">
-              {question.steps[0].label}
-            </p>
-            <Formula
-              latex={question.steps[0].latex}
-              fallback={question.steps[0].formula}
-              display={false}
-              className="mt-1 text-body-md"
-            />
+          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4">
+            <button
+              type="button"
+              onClick={() => setHintOpen((open) => !open)}
+              aria-expanded={hintOpen}
+              className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
+            >
+              {hintOpen ? 'Hide hint' : 'Show hint'}
+            </button>
+            <p className="text-meta text-muted">One choice only</p>
           </div>
-        ) : null}
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => setHintOpen((open) => !open)}
-            aria-expanded={hintOpen}
-            className="inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-full bg-amber-soft px-3 py-2 text-left text-label-sm font-medium text-amber-ink transition-colors hover:bg-amber-tint"
-          >
-            <Icon name="lightbulb" size={15} className="shrink-0" />
-            {question.hint}
-          </button>
-          <p className="text-label-sm text-ink-muted">Single tap to select</p>
-        </div>
+          {hintOpen ? (
+            <div className="mt-5 border-l-2 border-l-line pl-5">
+              <Label className="text-muted">{question.hint}</Label>
+              <Formula
+                latex={question.steps[0].latex}
+                fallback={question.steps[0].formula}
+                display={false}
+                className="mt-3 text-body"
+              />
+            </div>
+          ) : null}
+        </section>
       </div>
 
-      <div className="sticky bottom-0 z-30 border-t border-border bg-surface px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))]">
-        <div className="mx-auto w-full max-w-3xl">
+      <div className="fixed inset-x-0 bottom-0 border-t border-line bg-bg px-5 py-4 sm:px-8">
+        <div className="mx-auto w-full max-w-narrow">
           {submitted && !sheetOpen ? (
             <ActionButton
               label={isLast ? 'Finish session' : 'Next question'}
-              icon="arrow-right"
-              iconPosition="right"
               onClick={next}
             />
           ) : (
             <ActionButton
               label="Check answer"
-              icon="arrow-right"
-              iconPosition="right"
               disabled={selected === null || submitted}
               onClick={submit}
             />
           )}
           {submitted && !sheetOpen ? (
-            <button
-              type="button"
+            <ActionButton
+              label="Review explanation"
+              variant="text"
+              className="mt-2 w-full"
               onClick={() => setSheetOpen(true)}
-              className="mt-1 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-tile text-label-md text-primary transition-colors hover:bg-canvas"
-            >
-              <Icon name="lightbulb" size={16} />
-              Review explanation
-            </button>
+            />
           ) : null}
         </div>
       </div>

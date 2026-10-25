@@ -21,6 +21,8 @@ export interface Question {
   hint: string;
   steps: DerivationStep[];
   diagram?: 'potentiometer';
+  /** Optional figure that replaces the written stem for image questions. */
+  questionImageUrl?: string;
   /** Optional YouTube / video explanation URL. */
   videoUrl?: string;
 }
