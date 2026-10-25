@@ -7,6 +7,7 @@ import { Icon, type IconName } from '@/components/icon';
 import { LogoMark } from '@/components/logo';
 import { ProgressBar } from '@/components/progress-bar';
 import { useStudy } from '@/components/study-provider';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { useAuth } from '@/lib/auth-context';
 import { cn } from '@/lib/utils';
 
@@ -85,15 +86,18 @@ export function Sidebar() {
         {user ? (
           <p className="truncate text-label-sm text-ink-muted">{user.email}</p>
         ) : null}
-        <button
-          id="btn-sign-out"
-          type="button"
-          onClick={handleSignOut}
-          className="flex min-h-9 w-full items-center gap-2 rounded-tile px-2 text-label-sm text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
-        >
-          <Icon name="close" size={15} />
-          Sign out
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            id="btn-sign-out"
+            type="button"
+            onClick={handleSignOut}
+            className="flex min-h-9 flex-1 items-center gap-2 rounded-tile px-2 text-label-sm text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
+          >
+            <Icon name="close" size={15} />
+            Sign out
+          </button>
+        </div>
       </div>
     </aside>
   );

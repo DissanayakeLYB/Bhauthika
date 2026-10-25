@@ -8,7 +8,7 @@ type ButtonVariant = 'primary' | 'ghost';
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary text-white shadow-[0_4px_12px_rgba(32,37,107,0.18)] hover:bg-primary-pressed active:bg-primary-deep',
+    'bg-primary-solid text-white shadow-[0_4px_12px_rgba(32,37,107,0.18)] hover:bg-primary-pressed active:bg-primary-deep',
   ghost: 'border border-border bg-surface text-primary hover:bg-canvas active:bg-surface-container',
 };
 

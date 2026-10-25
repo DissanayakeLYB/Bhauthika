@@ -116,6 +116,20 @@ const strokeIcons = {
       <circle cx="15.5" cy="17" r="2" />
     </>
   ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.6v2.2" />
+      <path d="M12 19.2v2.2" />
+      <path d="M4.4 4.4 6 6" />
+      <path d="m18 18 1.6 1.6" />
+      <path d="M2.6 12h2.2" />
+      <path d="M19.2 12h2.2" />
+      <path d="M4.4 19.6 6 18" />
+      <path d="m18 6 1.6-1.6" />
+    </>
+  ),
+  moon: <path d="M20.4 14.6A8.4 8.4 0 0 1 9.4 3.6a8.4 8.4 0 1 0 11 11z" />,
   'trend-up': (
     <>
       <path d="m3 17 6-6 4 4 8-8" />

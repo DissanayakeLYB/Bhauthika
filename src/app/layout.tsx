@@ -42,17 +42,25 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  colorScheme: 'light',
+  colorScheme: 'light dark',
   themeColor: '#f8f9fc',
 };
 
+/** Applies the saved theme (or the system preference) before first paint. */
+const THEME_SCRIPT = `try{var t=localStorage.getItem('bhauthika.theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark')}catch(e){}`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${jakarta.variable}`}>
+    <html
+      lang="en"
+      className={`${spaceGrotesk.variable} ${jakarta.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-dvh bg-canvas font-body text-ink antialiased">
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-tile focus:bg-primary focus:px-4 focus:py-3 focus:text-label-lg focus:text-white"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-tile focus:bg-primary-solid focus:px-4 focus:py-3 focus:text-label-lg focus:text-white"
         >
           Skip to content
         </a>

@@ -187,7 +187,9 @@ function QuestionView() {
                     !submitted && 'cursor-pointer',
                     isCorrectOption && 'border-green bg-green-soft ring-[1.5px] ring-green ring-inset',
                     isIncorrectChoice && 'border-red bg-red-soft ring-[1.5px] ring-red ring-inset',
-                    !submitted && isSelected && 'border-primary bg-[rgba(224,224,255,0.35)] ring-2 ring-primary ring-inset',
+                    !submitted &&
+                      isSelected &&
+                      'border-primary bg-[rgba(224,224,255,0.35)] ring-2 ring-primary ring-inset dark:bg-indigo-soft/70',
                     !submitted && !isSelected && 'border-border-strong/45 bg-surface hover:border-primary/40',
                     isMuted && 'border-border-strong/45 bg-surface opacity-55',
                   )}
@@ -207,7 +209,7 @@ function QuestionView() {
                       'grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full border font-display text-[11px] font-semibold',
                       isCorrectOption && 'border-green bg-green text-white',
                       isIncorrectChoice && 'border-red bg-red text-white',
-                      !submitted && isSelected && 'border-primary bg-primary text-white',
+                      !submitted && isSelected && 'border-primary bg-primary-solid text-white',
                       !submitted && !isSelected && 'border-border-strong/50 bg-surface-container text-ink-muted',
                       isMuted && 'border-border-strong/50 bg-surface-container text-ink-muted',
                     )}
@@ -231,11 +233,11 @@ function QuestionView() {
                   </span>
 
                   {isCorrectOption ? (
-                    <span className="shrink-0 rounded-full bg-white/75 px-1.5 py-1 text-[10px] font-semibold text-green-ink">
+                    <span className="shrink-0 rounded-full bg-surface/75 px-1.5 py-1 text-[10px] font-semibold text-green-ink">
                       Correct
                     </span>
                   ) : isIncorrectChoice ? (
-                    <span className="shrink-0 rounded-full bg-white/75 px-1.5 py-1 text-[10px] font-semibold text-red-ink">
+                    <span className="shrink-0 rounded-full bg-surface/75 px-1.5 py-1 text-[10px] font-semibold text-red-ink">
                       Your answer
                     </span>
                   ) : (
@@ -243,7 +245,9 @@ function QuestionView() {
                       aria-hidden="true"
                       className={cn(
                         'grid h-[19px] w-[19px] shrink-0 place-items-center rounded-full border',
-                        !submitted && isSelected ? 'border-primary bg-primary' : 'border-border-strong',
+                        !submitted && isSelected
+                          ? 'border-primary bg-primary-solid'
+                          : 'border-border-strong',
                       )}
                     >
                       {!submitted && isSelected ? (

@@ -10,12 +10,12 @@ export function PotentiometerDiagram({ className }: { className?: string }) {
       )}
       style={{
         backgroundImage:
-          'linear-gradient(to right, rgba(199,197,210,0.28) 1px, transparent 1px), linear-gradient(to bottom, rgba(199,197,210,0.28) 1px, transparent 1px)',
+          'linear-gradient(to right, var(--color-border-strong) 1px, transparent 1px), linear-gradient(to bottom, var(--color-border-strong) 1px, transparent 1px)',
         backgroundSize: '16px 16px',
       }}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-[4px] border border-border-strong/30 bg-white/90 px-1.5 py-0.5 text-label-sm text-ink-muted">
+        <span className="inline-flex items-center gap-1.5 rounded-[4px] border border-border-strong/30 bg-surface/90 px-1.5 py-0.5 text-label-sm text-ink-muted">
           <span className="h-1.5 w-1.5 rounded-full bg-indigo-mid" aria-hidden="true" />
           FIG 1.1: POTENTIOMETER SETUP
         </span>
@@ -30,24 +30,24 @@ export function PotentiometerDiagram({ className }: { className?: string }) {
       >
         <path
           d="M 40 40 L 40 14 L 110 14"
-          stroke="#464650"
+          stroke="var(--color-ink-muted)"
           strokeLinecap="round"
           strokeWidth="1.75"
           fill="none"
         />
-        <line x1="110" x2="110" y1="7" y2="21" stroke="#070B57" strokeWidth="2" />
-        <line x1="115" x2="115" y1="10" y2="18" stroke="#464650" strokeWidth="1.5" />
-        <text x="104" y="6" fill="#070B57" className="font-display text-[8px] font-semibold">
+        <line x1="110" x2="110" y1="7" y2="21" stroke="var(--color-primary)" strokeWidth="2" />
+        <line x1="115" x2="115" y1="10" y2="18" stroke="var(--color-ink-muted)" strokeWidth="1.5" />
+        <text x="104" y="6" fill="var(--color-primary)" className="font-display text-[8px] font-semibold">
           2V, 1Ω
         </text>
-        <path d="M 115 14 L 170 14" stroke="#464650" strokeWidth="1.75" fill="none" />
+        <path d="M 115 14 L 170 14" stroke="var(--color-ink-muted)" strokeWidth="1.75" fill="none" />
         <path
           d="M 170 14 L 175 10 L 180 18 L 185 10 L 190 18 L 195 14 L 250 14 L 250 40"
           fill="none"
-          stroke="#464650"
+          stroke="var(--color-ink-muted)"
           strokeWidth="1.75"
         />
-        <text x="188" y="6" fill="#636A7E" className="font-display text-[8px]">
+        <text x="188" y="6" fill="var(--color-ink-muted)" className="font-display text-[8px]">
           r = 1Ω
         </text>
         <line
@@ -55,24 +55,24 @@ export function PotentiometerDiagram({ className }: { className?: string }) {
           x2="250"
           y1="40"
           y2="40"
-          stroke="#070B57"
+          stroke="var(--color-primary)"
           strokeLinecap="round"
           strokeWidth="3.5"
         />
-        <circle cx="40" cy="40" r="3" fill="#20256B" />
-        <circle cx="250" cy="40" r="3" fill="#20256B" />
-        <text x="34" y="55" fill="#070B57" className="font-display text-[10px]">
+        <circle cx="40" cy="40" r="3" fill="var(--color-primary)" />
+        <circle cx="250" cy="40" r="3" fill="var(--color-primary)" />
+        <text x="34" y="55" fill="var(--color-primary)" className="font-display text-[10px]">
           A
         </text>
-        <text x="252" y="55" fill="#070B57" className="font-display text-[10px]">
+        <text x="252" y="55" fill="var(--color-primary)" className="font-display text-[10px]">
           B
         </text>
-        <text x="112" y="53" fill="#3B3F9E" className="font-display text-[9px]">
+        <text x="112" y="53" fill="var(--color-primary)" className="font-display text-[9px]">
           10 Ω (100 cm)
         </text>
-        <path d="M 145 40 L 145 35" stroke="#D64545" strokeDasharray="2 2" strokeWidth="1.5" />
-        <circle cx="145" cy="40" r="2" fill="#D64545" />
-        <text x="148" y="36" fill="#B3261E" className="font-display text-[7px]">
+        <path d="M 145 40 L 145 35" stroke="var(--color-red)" strokeDasharray="2 2" strokeWidth="1.5" />
+        <circle cx="145" cy="40" r="2" fill="var(--color-red)" />
+        <text x="148" y="36" fill="var(--color-red-ink)" className="font-display text-[7px]">
           G
         </text>
       </svg>

@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Class-based dark mode: `dark:` utilities follow the .dark class on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
  * Bhauthika Laboratory & Study System tokens.
  * Ported from the Stitch design system in docs/design/DESIGN.md.
@@ -20,6 +23,8 @@
 
   /* Indigo core */
   --color-primary: #20256b;
+  /* Solid brand fill for buttons/banners that carry white text. */
+  --color-primary-solid: #20256b;
   --color-primary-deep: #070b57;
   --color-primary-pressed: #2e3280;
   --color-indigo-soft: #eef0ff;
@@ -96,6 +101,11 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   /* Minimum 16px form text: stops iOS Safari zooming on focus. */
@@ -116,6 +126,57 @@
   ::selection {
     background-color: var(--color-indigo-soft);
     color: var(--color-primary-deep);
+  }
+
+  .dark ::selection {
+    background-color: var(--color-indigo-mid);
+    color: var(--color-ink);
+  }
+
+  /*
+   * Dark theme: same token names, darker surfaces and lighter ink, so every
+   * component picks it up without dark: variants. `primary` becomes a light
+   * indigo for text and marks; `primary-solid` stays saturated for fills that
+   * carry white text.
+   */
+  .dark {
+    --color-canvas: #0b0e1a;
+    --color-surface: #141829;
+    --color-surface-low: #191d31;
+    --color-surface-container: #1f2438;
+    --color-surface-high: #262b43;
+    --color-border: #2b3149;
+    --color-border-strong: #414a6b;
+
+    --color-primary: #b7beff;
+    --color-primary-solid: #4a51d6;
+    --color-primary-pressed: #5a61e0;
+    --color-primary-deep: #070b57;
+    --color-indigo-soft: #232a4d;
+    --color-indigo-mid: #3b3f9e;
+    --color-indigo-line: #39406b;
+
+    --color-ink: #eceef8;
+    --color-ink-muted: #a3aac4;
+    --color-ink-faint: #737b99;
+
+    --color-green: #2e9e6b;
+    --color-green-ink: #58d9a2;
+    --color-green-soft: #12291f;
+    --color-amber: #f5a524;
+    --color-amber-deep: #cd8600;
+    --color-amber-ink: #f2c069;
+    --color-amber-soft: #2a2114;
+    --color-amber-tint: #241d11;
+    --color-red: #d64545;
+    --color-red-ink: #ff9e9e;
+    --color-red-soft: #2b1618;
+
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-raised: 0 6px 16px rgba(0, 0, 0, 0.45);
+    --shadow-sheet: 0 -8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-hero: 0 12px 28px rgba(0, 0, 0, 0.5);
+    --shadow-dialog: 0 24px 48px rgba(0, 0, 0, 0.55);
   }
 
   @media (prefers-reduced-motion: reduce) {

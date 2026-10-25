@@ -248,7 +248,7 @@ export default function PracticePage() {
             <button
               type="button"
               onClick={() => begin(weakTopics.map((topic) => topic.id), true)}
-              className="mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-tile bg-primary font-display text-[15px] font-semibold text-white transition-colors hover:bg-primary-pressed"
+              className="mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-tile bg-primary-solid font-display text-[15px] font-semibold text-white transition-colors hover:bg-primary-pressed"
             >
               Start Smart Mix
               <Icon name="arrow-right" size={19} />

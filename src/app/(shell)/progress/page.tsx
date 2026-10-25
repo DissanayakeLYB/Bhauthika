@@ -45,7 +45,7 @@ export default function ProgressPage() {
         <h1 className="min-w-0 font-display text-headline-lg leading-8 tracking-[-0.5px] text-primary">
           Progress &amp; Mastery
         </h1>
-        <span className="shrink-0 rounded-full border border-border bg-[#e1e0ff]/60 px-2.5 py-1 font-display text-[10.5px] font-semibold text-primary">
+        <span className="shrink-0 rounded-full border border-border bg-[#e1e0ff]/60 px-2.5 py-1 font-display text-[10.5px] font-semibold text-primary dark:bg-indigo-soft">
           Live Track
         </span>
       </div>
@@ -144,7 +144,7 @@ export default function ProgressPage() {
         })}
       </ul>
 
-      <section className="relative mt-6 overflow-hidden rounded-card bg-primary p-4">
+      <section className="relative mt-6 overflow-hidden rounded-card bg-primary-solid p-4">
         <span
           aria-hidden="true"
           className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-white/10"
@@ -164,7 +164,7 @@ export default function ProgressPage() {
           <button
             type="button"
             onClick={drill}
-            className="min-h-11 shrink-0 rounded-tile bg-surface px-3 py-2 font-display text-[10.5px] font-semibold text-primary transition-colors hover:bg-[#EDF0FF]"
+            className="min-h-11 shrink-0 rounded-tile bg-surface px-3 py-2 font-display text-[10.5px] font-semibold text-primary transition-colors hover:bg-[#EDF0FF] dark:hover:bg-surface-high"
           >
             Drill Topic
           </button>

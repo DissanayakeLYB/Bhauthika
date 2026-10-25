@@ -3,6 +3,7 @@
 import { Icon } from '@/components/icon';
 import { LogoMark } from '@/components/logo';
 import { useStudy } from '@/components/study-provider';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 /** Sticky phone header: brand mark plus the one streak number. */
 export function AppHeader() {
@@ -17,10 +18,13 @@ export function AppHeader() {
             Bhauthika
           </span>
         </div>
-        <span className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-border bg-surface px-2.5 text-label-sm font-medium text-amber-ink">
-          <Icon name="fire" size={16} className="text-amber" />
-          {progress.streak} Days Streak
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="inline-flex h-7 items-center gap-1 rounded-full border border-border bg-surface px-2.5 text-label-sm font-medium text-amber-ink">
+            <Icon name="fire" size={16} className="text-amber" />
+            {progress.streak} Days Streak
+          </span>
+          <ThemeToggle className="h-8 w-8" />
+        </div>
       </div>
     </header>
   );

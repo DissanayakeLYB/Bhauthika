@@ -69,7 +69,7 @@ export default function HomePage() {
           </h1>
         </div>
         <div className="relative shrink-0">
-          <span className="grid h-11 w-11 place-items-center rounded-full border-2 border-surface bg-primary font-display text-[18px] text-white">
+          <span className="grid h-11 w-11 place-items-center rounded-full border-2 border-surface bg-primary-solid font-display text-[18px] text-white">
             {displayName[0]?.toUpperCase() ?? '?'}
           </span>
           <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-canvas bg-green" aria-hidden="true" />
@@ -79,7 +79,7 @@ export default function HomePage() {
       {/* ── Hero / Adaptive Focus ─────────────────────────────── */}
       <section
         aria-labelledby="hero-title"
-        className="relative overflow-hidden rounded-card bg-gradient-to-br from-indigo-mid to-primary p-5 shadow-hero"
+        className="relative overflow-hidden rounded-card bg-gradient-to-br from-indigo-mid to-primary-solid p-5 shadow-hero"
       >
         <span
           aria-hidden="true"
@@ -117,7 +117,7 @@ export default function HomePage() {
           <button
             type="button"
             onClick={beginAdaptive}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-tile bg-white font-display text-[15px] font-semibold text-primary transition-colors hover:bg-[#EDF0FF] active:bg-[#E0E4FF]"
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-tile bg-white font-display text-[15px] font-semibold text-primary-deep transition-colors hover:bg-[#EDF0FF] active:bg-[#E0E4FF]"
           >
             Start
             <Icon name="play" size={16} />

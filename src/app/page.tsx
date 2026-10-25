@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogoMark } from '@/components/logo';
 import { Icon, type IconName } from '@/components/icon';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/lib/supabase';
 
@@ -12,7 +13,7 @@ const FEATURES: { icon: IconName; title: string; subtitle: string; box: string }
     icon: 'sparkle',
     title: 'Adaptive Question Engine',
     subtitle: 'Calibrated to your weak syllabus units',
-    box: 'bg-[#E0E0FF] text-primary',
+    box: 'bg-[#E0E0FF] text-primary dark:bg-indigo-soft',
   },
   {
     icon: 'book',
@@ -97,11 +98,11 @@ export default function WelcomePage() {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-28 -right-24 h-64 w-64 rounded-full bg-[#E0E0FF]/60 blur-2xl"
+        className="pointer-events-none absolute -top-28 -right-24 h-64 w-64 rounded-full bg-[#E0E0FF]/60 blur-2xl dark:bg-indigo-mid/25"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 -left-32 h-60 w-60 rounded-full bg-[#E1E0FF]/40 blur-2xl"
+        className="pointer-events-none absolute top-1/2 -left-32 h-60 w-60 rounded-full bg-[#E1E0FF]/40 blur-2xl dark:bg-indigo-mid/20"
       />
 
       <div className="relative mx-auto flex w-full max-w-[420px] flex-1 flex-col md:my-auto md:flex-none md:rounded-sheet md:border md:border-border md:bg-surface/80 md:p-8 md:shadow-card md:backdrop-blur">
@@ -110,10 +111,13 @@ export default function WelcomePage() {
             <span className="h-1.5 w-1.5 rounded-full bg-green" aria-hidden="true" />
             G.C.E. A/L 2025/2026
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-container/70 px-2.5 py-1.5 text-label-sm font-semibold text-primary">
-            <Icon name="flask" size={15} />
-            Physics
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-container/70 px-2.5 py-1.5 text-label-sm font-semibold text-primary">
+              <Icon name="flask" size={15} />
+              Physics
+            </span>
+            <ThemeToggle className="h-8 w-8" />
+          </div>
         </header>
 
         <div className="flex flex-1 flex-col items-center justify-center py-6 md:py-4">
@@ -211,7 +215,7 @@ export default function WelcomePage() {
               id="btn-email-auth"
               type="submit"
               disabled={submitting || googleLoading}
-              className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-card bg-primary text-body-md font-semibold text-white shadow-[0_4px_12px_rgba(32,37,107,0.2)] transition-colors hover:bg-primary-pressed disabled:opacity-50"
+              className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-card bg-primary-solid text-body-md font-semibold text-white shadow-[0_4px_12px_rgba(32,37,107,0.2)] transition-colors hover:bg-primary-pressed disabled:opacity-50"
             >
               {submitting ? <Spinner light /> : <Icon name="mail" size={20} />}
               {mode === 'sign-in' ? 'Sign in with email' : 'Create account'}
