@@ -48,13 +48,13 @@ describe('LocalProgressRepository', () => {
     const repository = new LocalProgressRepository(TEST_KEY, storage);
     const progress = createSeedProgress();
     progress.topics.current.mastery = 71;
-    progress.streak = 9;
+    progress.activeDays = ['2026-11-05'];
 
     await repository.save(progress);
     const loaded = await repository.load();
 
     expect(loaded?.topics.current.mastery).toBe(71);
-    expect(loaded?.streak).toBe(9);
+    expect(loaded?.activeDays).toEqual(['2026-11-05']);
   });
 
   it('returns null when nothing is stored', async () => {
@@ -92,9 +92,9 @@ describe('parseStoredProgress', () => {
   });
 
   it('heals missing fields with the seed profile', () => {
-    const parsed = parseStoredProgress(JSON.stringify({ streak: 12 }));
+    const parsed = parseStoredProgress(JSON.stringify({ activeDays: ['2026-11-05'] }));
     const seed = createSeedProgress();
-    expect(parsed?.streak).toBe(12);
+    expect(parsed?.activeDays).toEqual(['2026-11-05']);
     expect(parsed?.dailyTarget).toBe(seed.dailyTarget);
     expect(parsed?.topics.current).toEqual(seed.topics.current);
   });

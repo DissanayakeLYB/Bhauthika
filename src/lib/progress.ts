@@ -6,8 +6,6 @@ export interface TopicProgress {
 }
 
 export interface StudyProgress {
-  /** Simple day count, nothing more. */
-  streak: number;
   dailyTarget: number;
   answeredToday: number;
   correctToday: number;
@@ -16,10 +14,8 @@ export interface StudyProgress {
   pastPapers: number;
   monthlyDelta: number;
   topics: Record<TopicId, TopicProgress>;
-  /** ISO date string (YYYY-MM-DD) of the last day questions were answered. */
-  lastActiveDate?: string;
-  /** Activity count for each of the last 7 days (index 0 = 6 days ago, index 6 = today). */
-  weeklyActivity: number[];
+  /** Calendar days on which the signed-in student answered at least one question. */
+  activeDays: string[];
 }
 
 export function clampPercent(value: number): number {
@@ -40,7 +36,6 @@ function createEmptyTopics(): Record<TopicId, TopicProgress> {
 /** Zero-state profile for a brand-new student. No placeholder data. */
 export function createSeedProgress(): StudyProgress {
   return {
-    streak: 0,
     dailyTarget: 25,
     answeredToday: 0,
     correctToday: 0,
@@ -49,7 +44,7 @@ export function createSeedProgress(): StudyProgress {
     pastPapers: 0,
     monthlyDelta: 0,
     topics: createEmptyTopics(),
-    weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
+    activeDays: [],
   };
 }
 

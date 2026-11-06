@@ -19,6 +19,7 @@ import {
 } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth-context';
+import { calculateStreak, localDateString, type StreakSummary } from '@/lib/streak';
 
 interface StartSessionOptions {
   count?: number;
@@ -28,6 +29,7 @@ interface StartSessionOptions {
 
 interface StudyContextValue {
   progress: StudyProgress;
+  streak: StreakSummary;
   active: ActiveSession | null;
   result: SessionResult | null;
   bookmarks: string[];
@@ -83,6 +85,20 @@ async function fetchQuestions(): Promise<Question[]> {
   }
 }
 
+async function fetchActiveDays(): Promise<string[] | null> {
+  const { data, error } = await supabase.from('attempts').select('created_at');
+  if (error) {
+    console.error('[attempts] history fetch failed:', error.message);
+    return null;
+  }
+  return [...new Set(
+    (data ?? [])
+      .map((row: { created_at: unknown }) => row.created_at)
+      .filter((value: unknown): value is string => typeof value === 'string')
+      .map((value: string) => localDateString(new Date(value))),
+  )];
+}
+
 // Module-level singletons: constructed once per bundle, repositories resolve
 // storage lazily so server rendering never touches window.
 const progressRepository = new LocalProgressRepository();
@@ -104,6 +120,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [questionsLoading, setQuestionsLoading] = useState(true);
   const [allQuestions, setAllQuestions] = useState<Question[]>(QUESTIONS);
   const questionMapRef = useRef<Record<string, Question>>(QUESTION_MAP);
+  const streak = useMemo(
+    () => calculateStreak(progress.activeDays, localDateString(new Date())),
+    [progress.activeDays],
+  );
 
   // Fetch questions from Supabase once on mount.
   useEffect(() => {
@@ -132,14 +152,19 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
     let cancelled = false;
     void (async () => {
-      const [storedProgress, storedSession, storedResult] = await Promise.all([
+      const [storedProgress, storedSession, storedResult, remoteActiveDays] = await Promise.all([
         progressRepository.load(),
         sessionRepository.load(),
         resultRepository.load(),
+        user ? fetchActiveDays() : Promise.resolve(null),
       ]);
       if (cancelled) return;
 
-      setProgress(storedProgress ?? createSeedProgress());
+      const loadedProgress = storedProgress ?? createSeedProgress();
+      setProgress({
+        ...loadedProgress,
+        activeDays: remoteActiveDays ?? loadedProgress.activeDays,
+      });
       setResult(storedResult ?? null);
       if (storedSession) {
         const questions = storedSession.questionIds
@@ -157,7 +182,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     })();
 
     return () => { cancelled = true; };
-  }, [user?.id, questionsLoading]);
+  }, [user, user?.id, questionsLoading]);
 
   useEffect(() => {
     if (!ready) return;
@@ -198,12 +223,18 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   );
 
   const answerCurrent = useCallback((choice: number) => {
+    const today = localDateString(new Date());
     setActive((previous) => {
       if (!previous) return previous;
       const answers = [...previous.answers];
       answers[previous.index] = choice;
       return { ...previous, answers };
     });
+    setProgress((previous) =>
+      previous.activeDays.includes(today)
+        ? previous
+        : { ...previous, activeDays: [...previous.activeDays, today] },
+    );
   }, []);
 
   /** Insert an attempt row in Supabase. Fire-and-forget; never blocks the student. */
@@ -264,6 +295,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<StudyContextValue>(
     () => ({
       progress,
+      streak,
       active,
       result,
       bookmarks,
@@ -276,6 +308,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       progress,
+      streak,
       active,
       result,
       bookmarks,

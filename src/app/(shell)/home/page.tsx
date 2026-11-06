@@ -17,7 +17,7 @@ function greetingForHour(hour: number) {
 }
 
 export default function HomePage() {
-  const { progress, startSession } = useStudy();
+  const { progress, streak, startSession } = useStudy();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -56,7 +56,12 @@ export default function HomePage() {
           <Label className="text-muted">
             <span id="streak-title">Streak</span>
           </Label>
-          <StreakTicks streak={progress.streak} className="mt-5" />
+          <StreakTicks
+            streak={streak.currentStreak}
+            week={streak.week}
+            hint={!streak.todayActive && streak.currentStreak > 0 ? 'Practice today to keep your streak.' : undefined}
+            className="mt-5"
+          />
         </section>
 
         <section aria-labelledby="today-title">

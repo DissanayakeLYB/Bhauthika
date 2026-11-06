@@ -76,14 +76,11 @@ export function parseStoredProgress(raw: string): StudyProgress | null {
     {} as Record<TopicId, TopicProgress>,
   );
 
-  const weeklyRaw = value.weeklyActivity;
-  const weeklyActivity: number[] = Array.isArray(weeklyRaw)
-    ? weeklyRaw.slice(0, 7).map((v) => Math.max(0, Math.round(finiteNumber(v, 0))))
-    : [0, 0, 0, 0, 0, 0, 0];
-  while (weeklyActivity.length < 7) weeklyActivity.push(0);
+  const activeDays = Array.isArray(value.activeDays)
+    ? [...new Set(value.activeDays.filter((day): day is string => typeof day === 'string'))]
+    : [];
 
   return {
-    streak: Math.max(0, Math.round(finiteNumber(value.streak, 0))),
     dailyTarget: Math.max(1, Math.round(finiteNumber(value.dailyTarget, seed.dailyTarget))),
     answeredToday: Math.max(0, Math.round(finiteNumber(value.answeredToday, 0))),
     correctToday: Math.max(0, Math.round(finiteNumber(value.correctToday, 0))),
@@ -92,8 +89,7 @@ export function parseStoredProgress(raw: string): StudyProgress | null {
     pastPapers: Math.max(0, Math.round(finiteNumber(value.pastPapers, 0))),
     monthlyDelta: finiteNumber(value.monthlyDelta, 0),
     topics,
-    weeklyActivity,
-    lastActiveDate: typeof value.lastActiveDate === 'string' ? value.lastActiveDate : undefined,
+    activeDays,
   };
 }
 
