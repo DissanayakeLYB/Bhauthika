@@ -24,3 +24,6 @@ yarn-error.*
 
 # freebuff
 .freebuff/
+*freebuff*
+
+past_paper_imgs
