@@ -16,6 +16,13 @@ function parseDate(date: string): Date {
   return new Date(year, month - 1, day);
 }
 
+const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+/** Three-letter English weekday for a YYYY-MM-DD date. */
+export function weekdayShort(date: string): string {
+  return WEEKDAY_SHORT[parseDate(date).getDay()];
+}
+
 function addDays(date: string, amount: number): string {
   const value = parseDate(date);
   value.setDate(value.getDate() + amount);

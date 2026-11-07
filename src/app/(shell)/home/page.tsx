@@ -6,7 +6,7 @@ import { ActionButton } from '@/components/button';
 import { Label, Lead, Mono } from '@/components/type';
 import { PageHead, Screen } from '@/components/page';
 import { ProgressBar } from '@/components/progress-bar';
-import { StreakTicks } from '@/components/streak';
+import { StreakDisplay } from '@/components/streak';
 import { weakestTopicIds } from '@/lib/progress';
 import { useAuth } from '@/lib/auth-context';
 
@@ -56,8 +56,9 @@ export default function HomePage() {
           <Label className="text-muted">
             <span id="streak-title">Streak</span>
           </Label>
-          <StreakTicks
+          <StreakDisplay
             streak={streak.currentStreak}
+            longestStreak={streak.longestStreak}
             week={streak.week}
             hint={!streak.todayActive && streak.currentStreak > 0 ? 'Practice today to keep your streak.' : undefined}
             className="mt-5"

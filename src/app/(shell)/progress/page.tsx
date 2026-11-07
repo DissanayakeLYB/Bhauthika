@@ -4,7 +4,9 @@ import { useStudy } from '@/components/study-provider';
 import { Label, Mono } from '@/components/type';
 import { PageHead, Screen } from '@/components/page';
 import { ProgressBar } from '@/components/progress-bar';
-import { StreakTicks } from '@/components/streak';
+import { StreakDisplay } from '@/components/streak';
+import { weekdayShort } from '@/lib/streak';
+import { cn } from '@/lib/utils';
 import { TopicRow } from '@/components/topic-row';
 import { TOPICS } from '@/lib/topics';
 import { overallAccuracy } from '@/lib/progress';
@@ -44,8 +46,9 @@ export default function ProgressPage() {
           <Label className="text-muted">
             <span id="streak-title">Streak</span>
           </Label>
-          <StreakTicks
+          <StreakDisplay
             streak={streak.currentStreak}
+            longestStreak={streak.longestStreak}
             week={streak.week}
             hint={!streak.todayActive && streak.currentStreak > 0 ? 'Practice today to keep your streak.' : undefined}
             className="mt-5"
@@ -61,15 +64,18 @@ export default function ProgressPage() {
           <p className="mt-3 text-body text-muted">No activity recorded this week.</p>
         ) : null}
         <ul className="mt-6 space-y-4">
-          {streak.week.map((day, index) => (
+          {streak.week.map((day) => (
             <li key={day.date} className="flex items-center gap-5">
-              <Label className="w-14 shrink-0 text-muted">{day.isToday ? 'Today' : `−${6 - index}`}</Label>
+              <Label
+                className={cn('w-14 shrink-0', day.isToday ? 'text-ink' : 'text-muted')}
+              >
+                {day.isToday ? 'Today' : weekdayShort(day.date)}
+              </Label>
               <ProgressBar
                 value={day.active ? 100 : 0}
                 label={`${day.active ? 'Activity recorded' : 'No activity'} on ${day.date}`}
                 className="flex-1"
               />
-              <Mono className="w-8 shrink-0 text-right text-meta text-muted">{day.active ? 1 : 0}</Mono>
             </li>
           ))}
         </ul>
