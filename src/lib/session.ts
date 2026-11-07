@@ -19,7 +19,10 @@ export interface SessionTopicResult {
 
 export interface SessionResult {
   correct: number;
+  /** Questions that carried an answer key and were therefore marked. */
   total: number;
+  /** Answers recorded, including items whose answer key is still pending. */
+  answered: number;
   points: number;
   topics: SessionTopicResult[];
 }
@@ -32,6 +35,8 @@ interface PickQuestionsOptions {
   rng?: () => number;
   /** Top up from the rest of the bank when the primary pool is too small. */
   fill?: boolean;
+  /** Restrict the draw to one exam year, e.g. a single past paper. */
+  year?: number;
 }
 
 /** Fisher–Yates on a copy; the input array is never mutated. */
@@ -53,17 +58,20 @@ export function shuffle<T>(items: readonly T[], rng: () => number = Math.random)
  */
 export function pickQuestions(
   pool: readonly Question[],
-  { topicIds = 'all', count = 10, rng = Math.random, fill = false }: PickQuestionsOptions = {},
+  { topicIds = 'all', count = 10, rng = Math.random, fill = false, year }: PickQuestionsOptions = {},
 ): Question[] {
   const limit = Math.max(0, Math.floor(count));
+  const inYear = year === undefined ? [...pool] : pool.filter((question) => question.year === year);
   const allowed = topicIds === 'all' ? null : new Set<TopicId>(topicIds);
-  const primary = allowed ? pool.filter((question) => allowed.has(question.topicId)) : [...pool];
+  const primary = allowed
+    ? inYear.filter((question) => question.topicId !== undefined && allowed.has(question.topicId))
+    : inYear;
   const picked = shuffle(primary, rng).slice(0, limit);
 
   if (fill && picked.length < limit) {
     const pickedIds = new Set(picked.map((question) => question.id));
     const rest = shuffle(
-      pool.filter((question) => !pickedIds.has(question.id)),
+      inYear.filter((question) => !pickedIds.has(question.id)),
       rng,
     );
     picked.push(...rest.slice(0, limit - picked.length));
@@ -94,11 +102,15 @@ export function applySessionResult(
   questions: readonly Question[],
   answers: readonly (number | null)[],
 ): { progress: StudyProgress; result: SessionResult } {
-  const total = questions.length;
+  const answered = questions.length;
   let correct = 0;
+  let scored = 0;
   const byTopic = new Map<TopicId, { total: number; correct: number }>();
 
   questions.forEach((question, index) => {
+    // Items with no key yet (the past-paper scans) are recorded, never marked.
+    if (question.answer === null || question.topicId === undefined) return;
+    scored += 1;
     const entry = byTopic.get(question.topicId) ?? { total: 0, correct: 0 };
     entry.total += 1;
     if (answers[index] === question.answer) {
@@ -132,9 +144,9 @@ export function applySessionResult(
 
   const nextProgress: StudyProgress = {
     ...progress,
-    answeredToday: progress.answeredToday + total,
+    answeredToday: progress.answeredToday + answered,
     correctToday: progress.correctToday + correct,
-    totalPractised: progress.totalPractised + total,
+    totalPractised: progress.totalPractised + answered,
     totalCorrect: progress.totalCorrect + correct,
     topics,
   };
@@ -143,7 +155,8 @@ export function applySessionResult(
     progress: nextProgress,
     result: {
       correct,
-      total,
+      total: scored,
+      answered,
       points: correct * 15 + (correct > 0 ? 15 : 0),
       topics: topicResults,
     },

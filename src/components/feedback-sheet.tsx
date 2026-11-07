@@ -63,10 +63,16 @@ export function FeedbackSheet({
           {correct ? 'You picked the right option.' : 'The right option is below.'}
         </p>
 
-        <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
-          <Mono className="text-[1.375rem] leading-none text-correct">{question.answer + 1}</Mono>
-          <p className="min-w-0 text-body text-ink">{question.options[question.answer]}</p>
-        </div>
+        {question.answer !== null ? (
+          <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
+            <Mono className="text-[1.375rem] leading-none text-correct">{question.answer + 1}</Mono>
+            <p className="min-w-0 text-body text-ink">{question.options[question.answer]}</p>
+          </div>
+        ) : (
+          <p className="mt-8 border-t border-line pt-6 text-body text-muted">
+            This paper has no answer key yet, so there is nothing to reveal.
+          </p>
+        )}
 
         <ol className="mt-10 space-y-7">
           {question.steps.map((step, index) => {

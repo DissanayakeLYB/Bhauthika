@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { QUESTION_MAP, QUESTIONS, type Question } from '@/lib/questions';
+import type { Question } from '@/lib/questions';
+import { PAST_PAPER_QUESTIONS, QUESTION_BANK, QUESTION_BANK_MAP } from '@/lib/past-papers';
 import type { TopicId } from '@/lib/topics';
 import { createSeedProgress, type StudyProgress } from '@/lib/progress';
 import {
@@ -25,6 +26,8 @@ interface StartSessionOptions {
   count?: number;
   /** Top the set up from the rest of the bank when a unit is running thin. */
   fill?: boolean;
+  /** Draw only from one exam year, e.g. a single past paper. */
+  year?: number;
 }
 
 interface StudyContextValue {
@@ -77,11 +80,14 @@ function mapRow(row: Record<string, unknown>): Question | null {
 async function fetchQuestions(): Promise<Question[]> {
   try {
     const { data, error } = await supabase.from('questions').select('*');
-    if (error || !data || data.length === 0) return QUESTIONS;
+    if (error || !data || data.length === 0) return QUESTION_BANK;
     const mapped = data.map(mapRow).filter((q): q is Question => q !== null);
-    return mapped.length > 0 ? mapped : QUESTIONS;
+    if (mapped.length === 0) return QUESTION_BANK;
+    // The past-paper scans ship with the app, not the database: always include them.
+    const localIds = new Set(PAST_PAPER_QUESTIONS.map((question) => question.id));
+    return [...PAST_PAPER_QUESTIONS, ...mapped.filter((question) => !localIds.has(question.id))];
   } catch {
-    return QUESTIONS;
+    return QUESTION_BANK;
   }
 }
 
@@ -118,8 +124,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
   const [questionsLoading, setQuestionsLoading] = useState(true);
-  const [allQuestions, setAllQuestions] = useState<Question[]>(QUESTIONS);
-  const questionMapRef = useRef<Record<string, Question>>(QUESTION_MAP);
+  const [allQuestions, setAllQuestions] = useState<Question[]>(QUESTION_BANK);
+  const questionMapRef = useRef<Record<string, Question>>(QUESTION_BANK_MAP);
   const streak = useMemo(
     () => calculateStreak(progress.activeDays, localDateString(new Date())),
     [progress.activeDays],
@@ -212,8 +218,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   }, [ready, result]);
 
   const startSession = useCallback(
-    (topicIds: readonly TopicId[] | 'all', { count = 10, fill = false }: StartSessionOptions = {}) => {
-      const picked = pickQuestions(allQuestions, { topicIds, count, fill });
+    (topicIds: readonly TopicId[] | 'all', { count = 10, fill = false, year }: StartSessionOptions = {}) => {
+      const picked = pickQuestions(allQuestions, { topicIds, count, fill, year });
       if (picked.length === 0) return 0;
       setActive({ questions: picked, index: 0, answers: picked.map(() => null) });
       setResult(null);
@@ -258,7 +264,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const q = active.questions[active.index];
     const sel = active.answers[active.index];
     if (sel !== null) {
-      void recordAttempt(q.id, sel, sel === q.answer);
+      void recordAttempt(q.id, sel, q.answer !== null && sel === q.answer);
     }
     const index = Math.min(active.index + 1, active.questions.length - 1);
     setActive({ ...active, index });
@@ -271,7 +277,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const lastQ = active.questions[active.index];
     const lastSel = active.answers[active.index];
     if (lastSel !== null) {
-      void recordAttempt(lastQ.id, lastSel, lastSel === lastQ.answer);
+      void recordAttempt(lastQ.id, lastSel, lastQ.answer !== null && lastSel === lastQ.answer);
     }
 
     const { progress: nextProgress, result: nextResult } = applySessionResult(

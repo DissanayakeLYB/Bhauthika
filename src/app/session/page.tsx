@@ -77,15 +77,18 @@ function QuestionView() {
   const question: Question = questions[index];
   const total = questions.length;
   const isLast = index + 1 >= total;
-  const correct = selected !== null && selected === question.answer;
+  const hasKey = question.answer !== null;
+  const correct = hasKey && selected !== null && selected === question.answer;
   const bookmarked = bookmarks.includes(question.id);
-  const topic = TOPIC_MAP[question.topicId];
+  const topic = question.topicId ? TOPIC_MAP[question.topicId] : null;
+  const hasHint = question.steps.length > 0;
 
   const submit = () => {
     if (selected === null || submitted) return;
     answerCurrent(selected);
     setSubmitted(true);
-    setSheetOpen(true);
+    // A set without a key has nothing to explain yet: stay on the question.
+    if (hasKey) setSheetOpen(true);
   };
 
   const next = () => {
@@ -130,8 +133,12 @@ function QuestionView() {
 
         <section className="pt-10">
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono text-label tracking-[0.14em] text-muted uppercase">
-            <span>{topic.title}</span>
-            <span aria-hidden="true">·</span>
+            {topic ? (
+              <>
+                <span>{topic.title}</span>
+                <span aria-hidden="true">·</span>
+              </>
+            ) : null}
             <span>
               {question.year} {question.paper}
             </span>
@@ -140,12 +147,26 @@ function QuestionView() {
           <p className="mt-8 font-mono text-numeral text-ink tabular-nums">{question.number}</p>
 
           {question.questionImageUrl ? (
-            // Optional image question: the image replaces the written stem.
-            <img
-              src={question.questionImageUrl}
-              alt={`Question ${question.number}, ${question.year} ${question.paper}`}
-              className="mt-8 w-full rounded-xs border border-line"
-            />
+            // Past-paper item: the scan carries the stem and the printed options.
+            <figure className="mt-8">
+              <img
+                src={question.questionImageUrl}
+                alt={`Question ${question.number} of the ${question.year} ${question.paper}, as printed in the paper`}
+                decoding="async"
+                className="w-full rounded-xs border border-line"
+              />
+              <figcaption className="mt-3 flex flex-wrap items-baseline justify-between gap-3">
+                <span className="text-meta text-muted">Question as printed in the paper.</span>
+                <a
+                  href={question.questionImageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
+                >
+                  Open full size
+                </a>
+              </figcaption>
+            </figure>
           ) : (
             <p className="mt-6 max-w-[62ch] text-question text-ink">
               <RichText text={question.stem} />
@@ -160,7 +181,7 @@ function QuestionView() {
             <legend className="sr-only">Choose one answer</legend>
             {question.options.map((option, optionIndex) => {
               const isSelected = selected === optionIndex;
-              const isCorrectOption = submitted && optionIndex === question.answer;
+              const isCorrectOption = submitted && hasKey && optionIndex === question.answer;
               const isIncorrectChoice = submitted && isSelected && !isCorrectOption;
 
               return (
@@ -189,6 +210,7 @@ function QuestionView() {
                     type="radio"
                     name={`answer-${question.id}`}
                     value={optionIndex}
+                    aria-label={question.questionImageUrl ? `Option ${optionIndex + 1}` : undefined}
                     checked={isSelected}
                     onChange={() => setSelected(optionIndex)}
                     disabled={submitted}
@@ -209,18 +231,20 @@ function QuestionView() {
                   >
                     {optionIndex + 1}
                   </span>
-                  <span
-                    className={cn(
-                      'min-w-0 flex-1 text-body',
-                      isCorrectOption
-                        ? 'text-correct'
-                        : isIncorrectChoice
-                          ? 'text-wrong'
-                          : 'text-ink',
-                    )}
-                  >
-                    {option}
-                  </span>
+                  {question.questionImageUrl ? null : (
+                    <span
+                      className={cn(
+                        'min-w-0 flex-1 text-body',
+                        isCorrectOption
+                          ? 'text-correct'
+                          : isIncorrectChoice
+                            ? 'text-wrong'
+                            : 'text-ink',
+                      )}
+                    >
+                      {option}
+                    </span>
+                  )}
                   {isCorrectOption ? (
                     <span className="shrink-0 font-mono text-label tracking-[0.14em] text-correct uppercase">
                       Correct
@@ -235,15 +259,25 @@ function QuestionView() {
             })}
           </fieldset>
 
+          {submitted && !hasKey ? (
+            <p role="status" className="mt-6 text-meta text-muted">
+              Answer recorded. This paper has no answer key yet, so the set is not marked.
+            </p>
+          ) : null}
+
           <div className="mt-6 flex flex-wrap items-baseline justify-between gap-4">
-            <button
-              type="button"
-              onClick={() => setHintOpen((open) => !open)}
-              aria-expanded={hintOpen}
-              className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
-            >
-              {hintOpen ? 'Hide hint' : 'Show hint'}
-            </button>
+            {hasHint ? (
+              <button
+                type="button"
+                onClick={() => setHintOpen((open) => !open)}
+                aria-expanded={hintOpen}
+                className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
+              >
+                {hintOpen ? 'Hide hint' : 'Show hint'}
+              </button>
+            ) : (
+              <span aria-hidden="true" />
+            )}
             <p className="text-meta text-muted">One choice only</p>
           </div>
 

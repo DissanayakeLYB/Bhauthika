@@ -17,8 +17,8 @@ export default function PracticePage() {
   const [count, setCount] = useState<number>(10);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const begin = (topicIds: readonly TopicId[] | 'all', fill = false) => {
-    const total = startSession(topicIds, { count, fill });
+  const begin = (topicIds: readonly TopicId[] | 'all', fill = false, year?: number) => {
+    const total = startSession(topicIds, { count, fill, year });
     if (total === 0) {
       setNotice('No questions for this unit yet.');
       return;
@@ -64,6 +64,15 @@ export default function PracticePage() {
       ) : null}
 
       <ul className="border-b border-line">
+        <li>
+          <TopicRow
+            number="24"
+            title="EM 2024 · Paper I"
+            meta="Past-paper MCQs shown as printed"
+            value="Images"
+            onClick={() => begin('all', false, 2024)}
+          />
+        </li>
         <li>
           <TopicRow
             number="—"

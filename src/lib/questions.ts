@@ -10,18 +10,20 @@ interface DerivationStep {
 
 export interface Question {
   id: string;
-  topicId: TopicId;
+  /** Syllabus unit. Past-paper image items span units, so this is optional. */
+  topicId?: TopicId;
   year: number;
   paper: string;
   number: number;
-  /** Problem stem. Wrap emphasised values in **double asterisks**. */
+  /** Problem stem. Wrap emphasised values in **double asterisks**. Empty for image items. */
   stem: string;
   options: string[];
-  answer: number;
+  /** Correct option index, or null while a past-paper answer key is pending. */
+  answer: number | null;
   hint: string;
   steps: DerivationStep[];
   diagram?: 'potentiometer';
-  /** Optional figure that replaces the written stem for image questions. */
+  /** Scan that replaces the written stem; used by the past-paper image bank. */
   questionImageUrl?: string;
   /** Optional YouTube / video explanation URL. */
   videoUrl?: string;

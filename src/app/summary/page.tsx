@@ -47,13 +47,30 @@ export default function SummaryPage() {
         </Link>
       </header>
 
-      <p className="mt-12 text-numeral font-mono text-ink tabular-nums">
-        {result.correct}
-        <Mono className="text-muted"> / {result.total}</Mono>
-      </p>
-      <p className="mt-4 text-body text-muted">
-        {result.correct} of {result.total} correct in this set.
-      </p>
+      {result.total > 0 ? (
+        <>
+          <p className="mt-12 text-numeral font-mono text-ink tabular-nums">
+            {result.correct}
+            <Mono className="text-muted"> / {result.total}</Mono>
+          </p>
+          <p className="mt-4 text-body text-muted">
+            {result.correct} of {result.total} correct in this set.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="mt-12 text-numeral font-mono text-ink tabular-nums">{result.answered}</p>
+          <p className="mt-4 text-body text-muted">
+            {result.answered} {result.answered === 1 ? 'answer' : 'answers'} recorded. This paper
+            has no answer key yet, so nothing is marked.
+          </p>
+        </>
+      )}
+      {result.total > 0 && result.answered > result.total ? (
+        <p className="mt-2 text-meta text-muted">
+          {result.answered - result.total} of these answers are unmarked.
+        </p>
+      ) : null}
 
       <section aria-labelledby="weak-title" className="mt-16">
         <h2 id="weak-title" className="text-[1.125rem] leading-[1.3] font-medium text-ink">

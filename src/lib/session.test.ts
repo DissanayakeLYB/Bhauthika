@@ -173,4 +173,22 @@ describe('applySessionResult', () => {
     expect(next).toEqual(progress);
     expect(result).toMatchObject({ correct: 0, total: 0, points: 0, topics: [] });
   });
+
+  it('records past-paper items without a key but does not mark them', () => {
+    const progress = createSeedProgress();
+    const scan: Question = {
+      ...question('img1', 'current'),
+      topicId: undefined,
+      answer: null,
+      options: ['1', '2', '3', '4', '5'],
+      questionImageUrl: '/past-papers/em-2024/EM_2024_Physics_MCQ_q01.png',
+    };
+
+    const { progress: next, result } = applySessionResult(progress, [scan], [2]);
+
+    expect(result).toMatchObject({ correct: 0, total: 0, answered: 1, points: 0, topics: [] });
+    expect(next.totalPractised).toBe(progress.totalPractised + 1);
+    expect(next.answeredToday).toBe(progress.answeredToday + 1);
+    expect(next.topics.current).toEqual(progress.topics.current);
+  });
 });

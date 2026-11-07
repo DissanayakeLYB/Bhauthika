@@ -150,6 +150,8 @@ function parseStoredResult(raw: string): SessionResult | null {
   return {
     correct,
     total,
+    // Results saved before the unmarked past-paper sets carry no `answered`.
+    answered: Math.max(total, Math.round(finiteNumber(value.answered, total))),
     points: Math.max(0, Math.round(finiteNumber(value.points, 0))),
     topics,
   };

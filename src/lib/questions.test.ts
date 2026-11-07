@@ -12,6 +12,7 @@ describe('question bank', () => {
   it('gives every question five options and an in-range answer', () => {
     QUESTIONS.forEach((question) => {
       expect(question.options, question.id).toHaveLength(5);
+      if (question.answer === null) throw new Error(`${question.id} has no answer key`);
       expect(question.answer, question.id).toBeGreaterThanOrEqual(0);
       expect(question.answer, question.id).toBeLessThan(5);
       expect(question.options[question.answer], question.id).toBeTruthy();
@@ -20,6 +21,7 @@ describe('question bank', () => {
 
   it('points every question at a real syllabus unit', () => {
     QUESTIONS.forEach((question) => {
+      if (!question.topicId) throw new Error(`${question.id} has no syllabus unit`);
       expect(TOPIC_MAP[question.topicId], question.id).toBeDefined();
     });
   });

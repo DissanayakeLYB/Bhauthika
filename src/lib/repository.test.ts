@@ -154,6 +154,7 @@ describe('session and result repositories', () => {
     const result = {
       correct: 7,
       total: 10,
+      answered: 10,
       points: 120,
       topics: [
         {
