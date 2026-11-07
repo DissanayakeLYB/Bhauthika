@@ -87,8 +87,9 @@ function QuestionView() {
     if (selected === null || submitted) return;
     answerCurrent(selected);
     setSubmitted(true);
-    // A set without a key has nothing to explain yet: stay on the question.
-    if (hasKey) setSheetOpen(true);
+    // Every set gets feedback: keyed items show a verdict, unkeyed ones still
+    // offer the explanation video.
+    setSheetOpen(true);
   };
 
   const next = () => {
@@ -144,7 +145,10 @@ function QuestionView() {
             </span>
           </p>
 
-          <p className="mt-8 font-mono text-numeral text-ink tabular-nums">{question.number}</p>
+          {/* The paper prints its own question number inside the scan. */}
+          {question.questionImageUrl ? null : (
+            <p className="mt-8 font-mono text-numeral text-ink tabular-nums">{question.number}</p>
+          )}
 
           {question.questionImageUrl ? (
             // Past-paper item: the scan carries the stem and the printed options.

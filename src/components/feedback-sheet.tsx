@@ -29,6 +29,8 @@ export function FeedbackSheet({
   onClose,
   onToggleBookmark,
 }: FeedbackSheetProps) {
+  const unkeyed = question.answer === null;
+
   return (
     <Sheet
       open={open}
@@ -38,8 +40,8 @@ export function FeedbackSheet({
     >
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-6 pb-6 sm:px-8 sm:pt-8">
         <div className="flex items-baseline justify-between gap-4">
-          <Label className={correct ? 'text-correct' : 'text-wrong'}>
-            {correct ? 'Correct' : 'Incorrect'}
+          <Label className={unkeyed ? 'text-muted' : correct ? 'text-correct' : 'text-wrong'}>
+            {unkeyed ? 'Recorded' : correct ? 'Correct' : 'Incorrect'}
           </Label>
           <button
             type="button"
@@ -54,25 +56,43 @@ export function FeedbackSheet({
           id="feedback-title"
           className={cn(
             'mt-4 text-[1.75rem] leading-[1.15] font-medium tracking-[-0.01em]',
-            correct ? 'text-correct' : 'text-wrong',
+            unkeyed ? 'text-ink' : correct ? 'text-correct' : 'text-wrong',
           )}
         >
-          {correct ? 'Correct.' : 'Not quite.'}
+          {unkeyed ? 'Answer recorded.' : correct ? 'Correct.' : 'Not quite.'}
         </h2>
         <p className="mt-3 text-meta text-muted">
-          {correct ? 'You picked the right option.' : 'The right option is below.'}
+          {unkeyed
+            ? 'This paper has no answer key yet, so nothing is marked.'
+            : correct
+              ? 'You picked the right option.'
+              : 'The right option is below.'}
         </p>
 
         {question.answer !== null ? (
           <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
             <Mono className="text-[1.375rem] leading-none text-correct">{question.answer + 1}</Mono>
-            <p className="min-w-0 text-body text-ink">{question.options[question.answer]}</p>
+            <p className="min-w-0 text-body text-ink">
+              {question.questionImageUrl
+                ? 'The option printed with this number in the paper.'
+                : question.options[question.answer]}
+            </p>
           </div>
-        ) : (
-          <p className="mt-8 border-t border-line pt-6 text-body text-muted">
-            This paper has no answer key yet, so there is nothing to reveal.
-          </p>
-        )}
+        ) : null}
+
+        {question.videoUrl ? (
+          <div className="mt-8 border-t border-line pt-6">
+            <Label className="text-muted">Explanation video</Label>
+            <a
+              href={question.videoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 block break-words font-mono text-meta text-ink underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
+            >
+              {question.videoUrl}
+            </a>
+          </div>
+        ) : null}
 
         <ol className="mt-10 space-y-7">
           {question.steps.map((step, index) => {
@@ -103,14 +123,6 @@ export function FeedbackSheet({
           onClick={onNext}
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-          {/* Video link: shown only if the question has a videoUrl. */}
-          {question.videoUrl ? (
-            <ActionButton
-              variant="text"
-              label="Watch full explanation"
-              onClick={() => window.open(question.videoUrl, '_blank', 'noopener,noreferrer')}
-            />
-          ) : null}
           <ActionButton
             variant="text"
             label={bookmarked ? 'Marked for review' : 'Mark for review'}

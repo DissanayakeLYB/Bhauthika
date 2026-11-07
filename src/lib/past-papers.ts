@@ -15,10 +15,34 @@ export function em2024ImageUrl(number: number): string {
 }
 
 /**
+ * Placeholder walkthrough link. Every scan points here until the real videos
+ * are ready: replace an entry with its own YouTube URL to update it.
+ */
+export const PLACEHOLDER_VIDEO_URL = 'https://www.youtube.com/watch?v=XXXXXXXXXXX';
+
+/**
+ * Answer key in paper order, written as the option numbers printed on the paper
+ * (1-5). `null` means the key has not been entered yet: the question is still
+ * recorded, but it is not marked. Fill an entry in and that question starts
+ * showing correct/incorrect plus the explanation video.
+ */
+export const EM_2024_ANSWER_KEY: (number | null)[] = Array.from(
+  { length: EM_2024_MCQ_COUNT },
+  () => null,
+);
+
+/** Printed option number (1-based) to option index, or null when unkeyed. */
+function toAnswerIndex(printed: number | null): number | null {
+  return typeof printed === 'number' && printed >= 1 && printed <= OPTION_NUMBERS.length
+    ? printed - 1
+    : null;
+}
+
+/**
  * One question per scanned MCQ, built from the image files rather than written
  * by hand. The stem, option wording and derivation all sit inside the scan, so
- * an item only carries the five option numbers. The answer key has not been
- * entered yet: `answer` stays null, and these items are recorded but not marked.
+ * an item only carries the five option numbers, the scan and the explanation
+ * video. Items whose key entry is still null are recorded but not marked.
  */
 export const PAST_PAPER_QUESTIONS: Question[] = Array.from(
   { length: EM_2024_MCQ_COUNT },
@@ -31,10 +55,11 @@ export const PAST_PAPER_QUESTIONS: Question[] = Array.from(
       number,
       stem: '',
       options: [...OPTION_NUMBERS],
-      answer: null,
+      answer: toAnswerIndex(EM_2024_ANSWER_KEY[index] ?? null),
       hint: '',
       steps: [],
       questionImageUrl: em2024ImageUrl(number),
+      videoUrl: PLACEHOLDER_VIDEO_URL,
     };
   },
 );
