@@ -51,7 +51,12 @@ function PracticeFlow() {
   const mode: Mode | null = rawMode === 'unit' || rawMode === 'year' ? rawMode : null;
 
   const begin = (topicIds: readonly TopicId[] | 'all', fill = false, year?: number) => {
-    const total = startSession(topicIds, { count, fill, year });
+    const total = startSession(topicIds, {
+      count,
+      fill,
+      year,
+      mode: year !== undefined ? 'past-paper' : topicIds === 'all' ? 'mixed' : 'unit',
+    });
     if (total === 0) {
       setNotice('No questions for this unit yet.');
       return;

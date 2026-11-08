@@ -224,3 +224,88 @@ export function removeLegacyProgressKey(): void {
     // Nothing to recover.
   }
 }
+
+export type ActiveSetMode = 'unit' | 'mixed' | 'past-paper';
+
+/** Everything needed to rebuild the same practice screen after a reload. */
+export interface StoredActiveSet {
+  mode: ActiveSetMode;
+  questionIds: string[];
+  index: number;
+  /** Chosen option per question; the verdict is re-derived from the answer key. */
+  answers: (number | null)[];
+  /** Whether the answer popup was open on the current question. */
+  sheetOpen: boolean;
+}
+
+/** Per-student key: one account never restores another account's set. */
+export function activeSetStorageKey(userId?: string | null): string {
+  return `activeSet:${userId ?? 'guest'}`;
+}
+
+/**
+ * Reads a saved set, healing bad values. Unknown question ids are left to the
+ * caller, which owns the question bank.
+ */
+export function parseStoredActiveSet(raw: string): StoredActiveSet | null {
+  const value = parseJson(raw);
+  if (!isRecord(value)) return null;
+
+  const ids = value.questionIds;
+  const answers = value.answers;
+  if (!Array.isArray(ids) || ids.length === 0) return null;
+  if (!ids.every((id) => typeof id === 'string' && id.length > 0)) return null;
+  if (!Array.isArray(answers) || answers.length !== ids.length) return null;
+
+  const rawMode = value.mode;
+  const mode: ActiveSetMode =
+    rawMode === 'unit' || rawMode === 'past-paper' || rawMode === 'mixed' ? rawMode : 'mixed';
+
+  return {
+    mode,
+    questionIds: ids as string[],
+    index: Math.min(ids.length - 1, Math.max(0, Math.trunc(finiteNumber(value.index, 0)))),
+    answers: answers.map((answer) =>
+      typeof answer === 'number' && Number.isInteger(answer) && answer >= 0 ? answer : null,
+    ),
+    sheetOpen: value.sheetOpen === true,
+  };
+}
+
+/**
+ * The active set lives in localStorage (not sessionStorage) so a full reload, a
+ * discarded tab or a trip to another site cannot lose it.
+ */
+export class LocalActiveSetRepository {
+  private storage: KeyValueStorage | null;
+
+  constructor(storage?: KeyValueStorage | null) {
+    this.storage = storage === undefined ? readStorage('local') : storage;
+  }
+
+  load(key: string): StoredActiveSet | null {
+    if (!this.storage) return null;
+    try {
+      const raw = this.storage.getItem(key);
+      return raw === null ? null : parseStoredActiveSet(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  save(key: string, value: StoredActiveSet): void {
+    try {
+      this.storage?.setItem(key, JSON.stringify(value));
+    } catch {
+      // Quota exceeded or storage disabled: practice must keep working.
+    }
+  }
+
+  clear(key: string): void {
+    try {
+      this.storage?.removeItem(key);
+    } catch {
+      // Nothing to recover from.
+    }
+  }
+}

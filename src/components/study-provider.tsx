@@ -6,11 +6,13 @@ import { PAST_PAPER_QUESTIONS, QUESTION_BANK, QUESTION_BANK_MAP } from '@/lib/pa
 import type { TopicId } from '@/lib/topics';
 import { createSeedProgress, type StudyProgress } from '@/lib/progress';
 import {
+  LocalActiveSetRepository,
   LocalProgressRepository,
   LocalResultRepository,
-  LocalSessionRepository,
+  activeSetStorageKey,
   progressStorageKey,
   removeLegacyProgressKey,
+  type ActiveSetMode,
 } from '@/lib/repository';
 import {
   applySessionResult,
@@ -28,6 +30,8 @@ interface StartSessionOptions {
   fill?: boolean;
   /** Draw only from one exam year, e.g. a single past paper. */
   year?: number;
+  /** Where the set came from; restored with the saved set. */
+  mode?: ActiveSetMode;
 }
 
 interface StudyContextValue {
@@ -37,6 +41,11 @@ interface StudyContextValue {
   result: SessionResult | null;
   bookmarks: string[];
   questionsLoading: boolean;
+  /** The saved set has been considered; before that, show a loading state. */
+  ready: boolean;
+  /** Whether the answer popup is open on the current question. */
+  sheetOpen: boolean;
+  setSheetOpen: (open: boolean) => void;
   startSession: (topicIds: readonly TopicId[] | 'all', options?: StartSessionOptions) => number;
   answerCurrent: (choice: number) => void;
   goToNext: () => void;
@@ -108,7 +117,7 @@ async function fetchActiveDays(): Promise<string[] | null> {
 // Module-level singletons: constructed once per bundle, repositories resolve
 // storage lazily so server rendering never touches window.
 const progressRepository = new LocalProgressRepository();
-const sessionRepository = new LocalSessionRepository();
+const activeSetRepository = new LocalActiveSetRepository();
 const resultRepository = new LocalResultRepository();
 
 // Remove the old v1 key on first load (safe to call multiple times).
@@ -117,12 +126,15 @@ if (typeof window !== 'undefined') {
 }
 
 export function StudyProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [progress, setProgress] = useState<StudyProgress>(createSeedProgress);
   const [active, setActive] = useState<ActiveSession | null>(null);
+  const [mode, setMode] = useState<ActiveSetMode>('mixed');
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [result, setResult] = useState<SessionResult | null>(null);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
+  const previousUserIdRef = useRef<string | null>(null);
   const [questionsLoading, setQuestionsLoading] = useState(true);
   const [allQuestions, setAllQuestions] = useState<Question[]>(QUESTION_BANK);
   const questionMapRef = useRef<Record<string, Question>>(QUESTION_BANK_MAP);
@@ -147,22 +159,40 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     return () => { cancelled = true; };
   }, []);
 
-  // Whenever the user changes, update the repository key and reload progress.
+  // Whenever the student changes, reload their progress and restore their set.
+  // This depends on the user *id*, never on the user object: a refreshed token
+  // is the same student and must not restart this effect.
   useEffect(() => {
     // Wait for the Supabase bank so a restored set resolves against the same
-    // questions the session engine will draw from.
-    if (questionsLoading) return;
+    // questions the session engine will draw from, and for auth to settle so a
+    // reload does not briefly show the empty state.
+    if (questionsLoading || authLoading) return;
 
-    const key = progressStorageKey(user?.id);
-    progressRepository.setKey(key);
+    const userId = user?.id ?? null;
+    const previousUserId = previousUserIdRef.current;
+    if (previousUserId && previousUserId !== userId) {
+      // Signing out, or in as someone else, must never leave a set behind.
+      activeSetRepository.clear(activeSetStorageKey(previousUserId));
+    }
+    previousUserIdRef.current = userId;
 
     let cancelled = false;
     void (async () => {
-      const [storedProgress, storedSession, storedResult, remoteActiveDays] = await Promise.all([
+      if (!userId) {
+        if (cancelled) return;
+        setActive(null);
+        setSheetOpen(false);
+        setReady(true);
+        return;
+      }
+
+      const key = activeSetStorageKey(userId);
+      progressRepository.setKey(progressStorageKey(userId));
+
+      const [storedProgress, storedResult, remoteActiveDays] = await Promise.all([
         progressRepository.load(),
-        sessionRepository.load(),
         resultRepository.load(),
-        user ? fetchActiveDays() : Promise.resolve(null),
+        fetchActiveDays(),
       ]);
       if (cancelled) return;
 
@@ -172,41 +202,57 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         activeDays: remoteActiveDays ?? loadedProgress.activeDays,
       });
       setResult(storedResult ?? null);
-      if (storedSession) {
-        const questions = storedSession.questionIds
-          .map((id) => questionMapRef.current[id])
-          .filter((q): q is Question => Boolean(q));
-        if (questions.length === storedSession.questionIds.length) {
-          setActive({ questions, index: storedSession.index, answers: storedSession.answers });
-        } else {
-          setActive(null);
-        }
+
+      // Restore the saved set by id. Restoring only reopens the screen: it adds
+      // no attempts and touches no mastery or streak.
+      const stored = activeSetRepository.load(key);
+      const questions = stored
+        ? stored.questionIds
+            .map((id) => questionMapRef.current[id])
+            .filter((q): q is Question => Boolean(q))
+        : [];
+      if (stored && questions.length === stored.questionIds.length) {
+        setActive({ questions, index: stored.index, answers: stored.answers });
+        setMode(stored.mode);
+        // Never reopen the popup on an unanswered question.
+        setSheetOpen(stored.sheetOpen && stored.answers[stored.index] !== null);
       } else {
+        // A dropped or unreadable set must not linger in storage.
+        if (stored) activeSetRepository.clear(key);
         setActive(null);
+        setSheetOpen(false);
       }
       setReady(true);
     })();
 
     return () => { cancelled = true; };
-  }, [user, user?.id, questionsLoading]);
+  }, [user?.id, questionsLoading, authLoading]);
 
   useEffect(() => {
     if (!ready) return;
     void progressRepository.save(progress);
   }, [ready, progress]);
 
+  // Save after the start of a set, every answer, every move and every popup
+  // open/close. localStorage, per student, so a reload cannot lose the screen.
   useEffect(() => {
     if (!ready) return;
+    const userId = user?.id ?? null;
+    if (!userId) return;
+
+    const key = activeSetStorageKey(userId);
     if (!active) {
-      void sessionRepository.clear();
+      activeSetRepository.clear(key);
       return;
     }
-    void sessionRepository.save({
+    activeSetRepository.save(key, {
+      mode,
       questionIds: active.questions.map((q) => q.id),
       index: active.index,
       answers: active.answers,
+      sheetOpen,
     });
-  }, [ready, active]);
+  }, [ready, active, sheetOpen, mode, user?.id]);
 
   useEffect(() => {
     if (!ready) return;
@@ -218,10 +264,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   }, [ready, result]);
 
   const startSession = useCallback(
-    (topicIds: readonly TopicId[] | 'all', { count = 10, fill = false, year }: StartSessionOptions = {}) => {
+    (topicIds: readonly TopicId[] | 'all', { count = 10, fill = false, year, mode: nextMode }: StartSessionOptions = {}) => {
       const picked = pickQuestions(allQuestions, { topicIds, count, fill, year });
       if (picked.length === 0) return 0;
+      // A new set replaces the saved one, which also drops the previous set.
       setActive({ questions: picked, index: 0, answers: picked.map(() => null) });
+      setMode(nextMode ?? (year ? 'past-paper' : 'mixed'));
+      setSheetOpen(false);
       setResult(null);
       return picked.length;
     },
@@ -267,6 +316,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       void recordAttempt(q.id, sel, q.answer !== null && sel === q.answer);
     }
     const index = Math.min(active.index + 1, active.questions.length - 1);
+    setSheetOpen(false);
     setActive({ ...active, index });
   }, [active, recordAttempt]);
 
@@ -287,6 +337,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     );
     setProgress(nextProgress);
     setResult(nextResult);
+    setSheetOpen(false);
     setActive(null);
   }, [active, progress, recordAttempt]);
 
@@ -306,6 +357,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       result,
       bookmarks,
       questionsLoading,
+      ready,
+      sheetOpen,
+      setSheetOpen,
       startSession,
       answerCurrent,
       goToNext,
@@ -319,6 +373,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       result,
       bookmarks,
       questionsLoading,
+      ready,
+      sheetOpen,
       startSession,
       answerCurrent,
       goToNext,

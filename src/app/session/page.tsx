@@ -17,8 +17,21 @@ import { cn } from '@/lib/utils';
 const pad = (value: number) => String(value).padStart(2, '0');
 
 export default function SessionPage() {
-  const { active } = useStudy();
+  const { active, ready } = useStudy();
   const router = useRouter();
+
+  // The saved set is read from storage on mount; until then show neither the
+  // question nor the empty state.
+  if (!ready) {
+    return (
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-narrow px-5 py-20 sm:px-8">
+        <Label className="text-muted">Practice</Label>
+        <p role="status" aria-live="polite" className="mt-6 text-body text-muted">
+          Restoring your set…
+        </p>
+      </main>
+    );
+  }
 
   if (!active) {
     return (
@@ -60,18 +73,26 @@ function RichText({ text }: { text: string }) {
 }
 
 function QuestionView() {
-  const { active, answerCurrent, goToNext, finishSession, bookmarks, toggleBookmark } = useStudy();
+  const {
+    active,
+    answerCurrent,
+    goToNext,
+    finishSession,
+    bookmarks,
+    toggleBookmark,
+    sheetOpen,
+    setSheetOpen,
+  } = useStudy();
   const router = useRouter();
   // Restore the checked state if the tab was reloaded mid-session.
   const currentAnswer = active ? (active.answers[active.index] ?? null) : null;
   const [selected, setSelected] = useState<number | null>(currentAnswer);
   const [submitted, setSubmitted] = useState(currentAnswer !== null);
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [hintOpen, setHintOpen] = useState(false);
   // One tap only: a double click must not record the same attempt twice.
   const advancingRef = useRef(false);
 
-  const closeSheet = useCallback(() => setSheetOpen(false), []);
+  const closeSheet = useCallback(() => setSheetOpen(false), [setSheetOpen]);
 
   if (!active) return null;
 

@@ -27,7 +27,11 @@ export default function HomePage() {
   const displayName = displayNameFor(user);
 
   const begin = () => {
-    const total = startSession(weakestTopicIds(progress, 3), { count: 10, fill: true });
+    const total = startSession(weakestTopicIds(progress, 3), {
+      count: 10,
+      fill: true,
+      mode: 'mixed',
+    });
     if (total > 0) router.push('/session');
   };
 
