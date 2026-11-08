@@ -6,7 +6,6 @@ export interface TopicProgress {
 }
 
 export interface StudyProgress {
-  dailyTarget: number;
   answeredToday: number;
   correctToday: number;
   totalPractised: number;
@@ -36,7 +35,6 @@ function createEmptyTopics(): Record<TopicId, TopicProgress> {
 /** Zero-state profile for a brand-new student. No placeholder data. */
 export function createSeedProgress(): StudyProgress {
   return {
-    dailyTarget: 25,
     answeredToday: 0,
     correctToday: 0,
     totalPractised: 0,

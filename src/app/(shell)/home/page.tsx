@@ -5,7 +5,6 @@ import { useStudy } from '@/components/study-provider';
 import { ActionButton } from '@/components/button';
 import { Label, Lead, Mono } from '@/components/type';
 import { PageHead, Screen } from '@/components/page';
-import { ProgressBar } from '@/components/progress-bar';
 import { StreakDisplay } from '@/components/streak';
 import { weakestTopicIds } from '@/lib/progress';
 import { useAuth } from '@/lib/auth-context';
@@ -22,8 +21,6 @@ export default function HomePage() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const dailyPercent = Math.min(100, (progress.answeredToday / progress.dailyTarget) * 100);
-  const remaining = Math.max(0, progress.dailyTarget - progress.answeredToday);
   const greeting = greetingForHour(new Date().getHours());
   const noDataYet = progress.totalPractised === 0;
 
@@ -50,42 +47,18 @@ export default function HomePage() {
         <ActionButton label="Start practice" onClick={begin} />
       </div>
 
-      <div className="grid gap-10 border-t border-line pt-10 sm:grid-cols-2 sm:gap-16">
-        <section aria-labelledby="streak-title">
-          <Label className="text-muted">
-            <span id="streak-title">Streak</span>
-          </Label>
-          <StreakDisplay
-            streak={streak.currentStreak}
-            longestStreak={streak.longestStreak}
-            week={streak.week}
-            hint={!streak.todayActive && streak.currentStreak > 0 ? 'Practice today to keep your streak.' : undefined}
-            className="mt-5"
-          />
-        </section>
-
-        <section aria-labelledby="today-title">
-          <Label className="text-muted">
-            <span id="today-title">Today</span>
-          </Label>
-          <p className="mt-5 text-[1.75rem] leading-none">
-            <Mono>{progress.answeredToday}</Mono>
-            <Mono className="text-muted"> / {progress.dailyTarget}</Mono>
-          </p>
-          <ProgressBar
-            value={dailyPercent}
-            label="Daily questions answered"
-            className="mt-5"
-          />
-          <p className="mt-3 text-meta text-muted">
-            {noDataYet
-              ? 'No questions answered yet.'
-              : remaining === 0
-                ? 'Daily target reached.'
-                : `${remaining} questions left today.`}
-          </p>
-        </section>
-      </div>
+      <section aria-labelledby="streak-title" className="border-t border-line pt-10">
+        <Label className="text-muted">
+          <span id="streak-title">Streak</span>
+        </Label>
+        <StreakDisplay
+          streak={streak.currentStreak}
+          longestStreak={streak.longestStreak}
+          week={streak.week}
+          hint={!streak.todayActive && streak.currentStreak > 0 ? 'Practice today to keep your streak.' : undefined}
+          className="mt-5"
+        />
+      </section>
 
       {noDataYet ? (
         <p className="text-body text-muted">

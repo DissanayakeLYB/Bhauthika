@@ -95,7 +95,6 @@ describe('parseStoredProgress', () => {
     const parsed = parseStoredProgress(JSON.stringify({ activeDays: ['2026-11-05'] }));
     const seed = createSeedProgress();
     expect(parsed?.activeDays).toEqual(['2026-11-05']);
-    expect(parsed?.dailyTarget).toBe(seed.dailyTarget);
     expect(parsed?.topics.current).toEqual(seed.topics.current);
   });
 
@@ -103,12 +102,10 @@ describe('parseStoredProgress', () => {
     const parsed = parseStoredProgress(
       JSON.stringify({
         topics: { current: { mastery: 250, solved: -4 } },
-        dailyTarget: 0,
       }),
     );
     expect(parsed?.topics.current.mastery).toBe(100);
     expect(parsed?.topics.current.solved).toBe(0);
-    expect(parsed?.dailyTarget).toBe(1);
   });
 });
 

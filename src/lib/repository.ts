@@ -1,11 +1,6 @@
 import { QUESTION_MAP } from './questions';
 import { TOPIC_MAP, TOPICS, type TopicId } from './topics';
-import {
-  clampPercent,
-  createSeedProgress,
-  type StudyProgress,
-  type TopicProgress,
-} from './progress';
+import { clampPercent, type StudyProgress, type TopicProgress } from './progress';
 import type { SessionResult, SessionTopicResult } from './session';
 
 /** The subset of the Web Storage API this app needs (easy to stub in tests). */
@@ -60,7 +55,6 @@ export function parseStoredProgress(raw: string): StudyProgress | null {
   const value = parseJson(raw);
   if (!isRecord(value)) return null;
 
-  const seed = createSeedProgress();
   const storedTopics = isRecord(value.topics) ? value.topics : {};
 
   const topics = TOPICS.reduce(
@@ -81,7 +75,6 @@ export function parseStoredProgress(raw: string): StudyProgress | null {
     : [];
 
   return {
-    dailyTarget: Math.max(1, Math.round(finiteNumber(value.dailyTarget, seed.dailyTarget))),
     answeredToday: Math.max(0, Math.round(finiteNumber(value.answeredToday, 0))),
     correctToday: Math.max(0, Math.round(finiteNumber(value.correctToday, 0))),
     totalPractised: Math.max(0, Math.round(finiteNumber(value.totalPractised, 0))),
