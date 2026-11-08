@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ActionButton } from '@/components/button';
 import { TextField } from '@/components/field';
+import { SessionLoading } from '@/components/page';
 import { Label } from '@/components/type';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/lib/supabase';
@@ -21,10 +22,14 @@ export default function WelcomePage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Redirect to home once signed in.
+  // Send a signed-in student straight to Home.
   useEffect(() => {
     if (!loading && user) router.replace('/home');
   }, [user, loading, router]);
+
+  // Never show the sign-in form while the saved session is still loading, and
+  // keep it off screen while a signed-in student is being sent to Home.
+  if (loading || user) return <SessionLoading />;
 
   const handleEmailAuth = async (event: FormEvent) => {
     event.preventDefault();

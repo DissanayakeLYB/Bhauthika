@@ -9,6 +9,7 @@ import { ProgressBar } from '@/components/progress-bar';
 import { StreakDisplay } from '@/components/streak';
 import { weakestTopicIds } from '@/lib/progress';
 import { useAuth } from '@/lib/auth-context';
+import { displayNameFor } from '@/lib/account';
 
 function greetingForHour(hour: number) {
   if (hour < 12) return 'Good morning';
@@ -26,9 +27,7 @@ export default function HomePage() {
   const greeting = greetingForHour(new Date().getHours());
   const noDataYet = progress.totalPractised === 0;
 
-  const displayName = user?.user_metadata?.full_name
-    ? (user.user_metadata.full_name as string).split(' ')[0]
-    : (user?.email?.split('@')[0] ?? 'there');
+  const displayName = displayNameFor(user);
 
   const begin = () => {
     const total = startSession(weakestTopicIds(progress, 3), { count: 10, fill: true });

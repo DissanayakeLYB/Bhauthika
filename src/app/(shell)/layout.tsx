@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppHeader } from '@/components/app-header';
 import { Sidebar } from '@/components/nav';
+import { SessionLoading } from '@/components/page';
 import { useStudy } from '@/components/study-provider';
 import { useAuth } from '@/lib/auth-context';
 
@@ -17,8 +18,11 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
     if (!loading && !user) router.replace('/');
   }, [user, loading, router]);
 
-  // Show nothing while auth is resolving to avoid a flash.
-  if (loading || !user) return null;
+  // While the saved session is being read, show the loading state: never the
+  // sign-in screen and never a redirect. Then, without a session, show nothing
+  // because the effect above is already sending the student to the welcome page.
+  if (loading) return <SessionLoading />;
+  if (!user) return null;
 
   return (
     <div className="min-h-dvh lg:pl-[220px]">

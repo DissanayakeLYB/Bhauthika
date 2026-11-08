@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { displayNameFor } from '@/lib/account';
 import { cn } from '@/lib/utils';
 
 export const NAV_LINKS = [
@@ -60,8 +61,10 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto space-y-3">
-        {user?.email ? (
-          <p className="truncate font-mono text-label tracking-[0.06em] text-muted">{user.email}</p>
+        {user ? (
+          <p className="truncate font-mono text-label tracking-[0.06em] text-muted">
+            {displayNameFor(user)}
+          </p>
         ) : null}
         <button
           id="btn-sign-out"
