@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment, useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PotentiometerDiagram } from '@/components/circuit-diagram';
@@ -68,6 +68,8 @@ function QuestionView() {
   const [submitted, setSubmitted] = useState(currentAnswer !== null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [hintOpen, setHintOpen] = useState(false);
+  // One tap only: a double click must not record the same attempt twice.
+  const advancingRef = useRef(false);
 
   const closeSheet = useCallback(() => setSheetOpen(false), []);
 
@@ -93,6 +95,8 @@ function QuestionView() {
   };
 
   const next = () => {
+    if (advancingRef.current) return;
+    advancingRef.current = true;
     setSheetOpen(false);
     if (isLast) {
       finishSession();
@@ -303,7 +307,7 @@ function QuestionView() {
         <div className="mx-auto w-full max-w-narrow">
           {submitted && !sheetOpen ? (
             <ActionButton
-              label={isLast ? 'Finish session' : 'Next question'}
+              label={isLast ? 'See results' : 'Next question'}
               onClick={next}
             />
           ) : (
@@ -315,7 +319,7 @@ function QuestionView() {
           )}
           {submitted && !sheetOpen ? (
             <ActionButton
-              label="Review explanation"
+              label="View explanation"
               variant="text"
               className="mt-2 w-full"
               onClick={() => setSheetOpen(true)}

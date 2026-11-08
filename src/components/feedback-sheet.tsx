@@ -119,7 +119,7 @@ export function FeedbackSheet({
 
       <div className="shrink-0 border-t border-line px-5 pt-5 pb-5 sm:px-8">
         <ActionButton
-          label={isLast ? 'Finish session' : 'Next question'}
+          label={isLast ? 'See results' : 'Next question'}
           onClick={onNext}
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
@@ -129,6 +129,13 @@ export function FeedbackSheet({
             aria-pressed={bookmarked}
             onClick={onToggleBookmark}
           />
+          {question.videoUrl ? (
+            <ActionButton
+              variant="text"
+              label="Watch full explanation"
+              onClick={() => window.open(question.videoUrl, '_blank', 'noopener,noreferrer')}
+            />
+          ) : null}
         </div>
       </div>
     </Sheet>
@@ -202,7 +209,10 @@ function Sheet({
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = previousOverflow;
-      previouslyFocused?.focus();
+      // The opener may have been replaced while the sheet was open (the
+      // "Check answer" button becomes "Next question"), so fall back to the page.
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
+      else document.getElementById('main')?.focus();
     };
   }, [open, onClose]);
 
@@ -210,12 +220,7 @@ function Sheet({
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-bg/80 sm:items-center sm:p-8"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-bg/80 sm:items-center sm:p-8">
       <div
         ref={panelRef}
         role="dialog"
