@@ -1,178 +1,111 @@
-'use client';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { RedirectSignedIn } from '@/components/redirect-signed-in';
+import { site } from '@/config/site';
 
-import { FormEvent, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ActionButton } from '@/components/button';
-import { TextField } from '@/components/field';
-import { SessionLoading } from '@/components/page';
-import { Label } from '@/components/type';
-import { useAuth } from '@/lib/auth-context';
-import { supabase } from '@/lib/supabase';
+const PAGE_TITLE = `${site.siteName} | A/L Physics Past Paper Practice`;
+const PAGE_DESCRIPTION =
+  'Practice Sri Lankan A/L Physics past paper MCQs in English, then watch a short video that explains each question.';
 
-type Mode = 'sign-in' | 'sign-up';
+/** Same shape as the shared primary button, but a real link for search engines. */
+const PRIMARY_LINK =
+  'inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-sm bg-accent px-6 py-3.5 text-[0.9375rem] font-medium text-bg transition-opacity hover:opacity-90';
 
-export default function WelcomePage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-  const [mode, setMode] = useState<Mode>('sign-in');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+/** Same shape as the shared text button. */
+const TEXT_LINK =
+  'inline-flex min-h-11 items-center text-[0.9375rem] font-medium underline-offset-4 transition-colors hover:text-ink hover:underline';
 
-  // Send a signed-in student straight to Home.
-  useEffect(() => {
-    if (!loading && user) router.replace('/home');
-  }, [user, loading, router]);
+const BAR_LINK =
+  'font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink';
 
-  // Never show the sign-in form while the saved session is still loading, and
-  // keep it off screen while a signed-in student is being sent to Home.
-  if (loading || user) return <SessionLoading />;
+export const metadata: Metadata = {
+  title: { absolute: PAGE_TITLE },
+  description: PAGE_DESCRIPTION,
+  alternates: { canonical: site.siteUrl },
+  openGraph: {
+    type: 'website',
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    url: site.siteUrl,
+    siteName: site.siteName,
+    images: [
+      {
+        url: `${site.siteUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: PAGE_TITLE,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    images: [`${site.siteUrl}/og-image.png`],
+  },
+};
 
-  const handleEmailAuth = async (event: FormEvent) => {
-    event.preventDefault();
-    setError('');
-    setSuccessMessage('');
-    setSubmitting(true);
-    try {
-      if (mode === 'sign-up') {
-        const { error: signUpError } = await supabase.auth.signUp({ email, password });
-        if (signUpError) {
-          setError(signUpError.message);
-          return;
-        }
-        setSuccessMessage('Check your email to confirm your account, then sign in.');
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) {
-          setError(signInError.message);
-          return;
-        }
-        // onAuthStateChange in AuthProvider will update user → useEffect redirects.
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleGoogle = async () => {
-    setError('');
-    setGoogleLoading(true);
-    try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
-        },
-      });
-      if (oauthError) setError(oauthError.message);
-      // On success the browser navigates to Google; Supabase redirects back to the
-      // site origin, where detectSessionInUrl picks the session up.
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
-  const toggle = () => {
-    setMode((current) => (current === 'sign-in' ? 'sign-up' : 'sign-in'));
-    setError('');
-    setSuccessMessage('');
-  };
-
-  const busy = submitting || googleLoading;
+export default function LandingPage() {
+  const year = new Date().getFullYear();
 
   return (
-    <main
-      id="main"
-      className="mx-auto flex min-h-dvh w-full max-w-wide flex-col px-5 py-10 sm:px-8 lg:px-14 lg:py-16"
-    >
-      <div className="grid flex-1 items-center gap-14 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-20">
-        <section>
-          <Label className="text-muted">G.C.E. A/L Physics · Sri Lanka</Label>
-          <h1 className="mt-6 text-title font-medium text-ink">Bhauthika</h1>
-          <p className="mt-6 max-w-[34ch] text-body text-muted">
-            Past-paper MCQs for English-medium students. Answer, read the worked derivation, then
-            watch the explanation.
+    <div className="mx-auto flex min-h-dvh w-full max-w-wide flex-col px-5 sm:px-8 lg:px-14">
+      <RedirectSignedIn />
+      <header className="flex items-baseline justify-between gap-6 border-b border-line py-5">
+        <span className="font-mono text-label tracking-[0.14em] text-ink uppercase">
+          {site.siteName}
+        </span>
+        <Link href="/sign-in" className={BAR_LINK}>
+          Sign in
+        </Link>
+      </header>
+
+      <main id="main" className="flex flex-1 flex-col justify-center py-14">
+        <h1 className="max-w-[20ch] text-title font-medium text-ink">{site.tagline}</h1>
+        <p className="mt-6 max-w-[42ch] text-body text-muted">
+          Answer past paper questions, then watch a short video that explains each one.
+        </p>
+
+        <div className="mt-10 w-full max-w-[22rem]">
+          <Link href="/sign-up" className={PRIMARY_LINK}>
+            Start practice
+          </Link>
+          <Link href="/sign-in" className={`${TEXT_LINK} mt-3 w-full justify-center text-muted`}>
+            I already have an account
+          </Link>
+        </div>
+      </main>
+
+      <footer className="border-t border-line pt-6 pb-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-1">
+          <p className="text-meta text-muted">
+            <span className="text-ink">{site.tutorName}</span> · Explanation videos on YouTube.
           </p>
-          <p className="mt-16 font-mono text-meta text-muted">Eleven units · 2025 / 2026 syllabus</p>
-        </section>
-
-        <section aria-labelledby="auth-title">
-          <h2 id="auth-title" className="text-[1.5rem] leading-[1.2] font-medium text-ink">
-            {mode === 'sign-in' ? 'Sign in' : 'Create an account'}
-          </h2>
-          <p className="mt-2 text-meta text-muted">
-            {mode === 'sign-in'
-              ? 'Use your email and password.'
-              : 'Use your email, then confirm the link we send.'}
-          </p>
-
-          <form id="form-email-auth" onSubmit={handleEmailAuth} className="mt-10 space-y-6">
-            <TextField
-              id="input-email"
-              label="Email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder="you@example.com"
-              value={email}
-              onChange={setEmail}
-            />
-            <TextField
-              id="input-password"
-              label="Password"
-              type="password"
-              autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
-              required
-              minLength={6}
-              placeholder={mode === 'sign-in' ? 'Your password' : 'At least 6 characters'}
-              value={password}
-              onChange={setPassword}
-            />
-
-            {error ? (
-              <p id="auth-error" role="alert" className="text-meta text-wrong">
-                {error}
-              </p>
-            ) : null}
-            {successMessage ? (
-              <p id="auth-success" role="status" className="text-meta text-correct">
-                {successMessage}
-              </p>
-            ) : null}
-
-            <ActionButton
-              id="btn-email-auth"
-              type="submit"
-              label={submitting ? 'Please wait…' : mode === 'sign-in' ? 'Sign in' : 'Sign up'}
-              disabled={busy}
-            />
-          </form>
-
-          <ActionButton
-            id="btn-google"
-            label={googleLoading ? 'Opening Google…' : 'Continue with Google'}
-            variant="text"
-            className="mt-4 w-full"
-            disabled={busy}
-            onClick={handleGoogle}
-          />
-
-          <p className="mt-10 border-t border-line pt-6 text-meta text-muted">
-            {mode === 'sign-in' ? 'No account yet?' : 'Already have an account?'}{' '}
-            <button
-              id="btn-toggle-mode"
-              type="button"
-              onClick={toggle}
-              className="text-ink underline underline-offset-4 hover:opacity-80"
+          <div className="flex flex-wrap items-baseline gap-x-6">
+            <a
+              href={site.channelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${TEXT_LINK} text-ink`}
             >
-              {mode === 'sign-in' ? 'Sign up' : 'Sign in'}
-            </button>
-          </p>
-        </section>
-      </div>
-    </main>
+              Watch on YouTube
+            </a>
+            {site.classesUrl ? (
+              <a
+                href={site.classesUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${TEXT_LINK} text-ink`}
+              >
+                Join my classes
+              </a>
+            ) : null}
+          </div>
+        </div>
+        <p className="mt-8 font-mono text-label tracking-[0.14em] text-muted uppercase">
+          {site.siteName} · {year}
+        </p>
+      </footer>
+    </div>
   );
 }

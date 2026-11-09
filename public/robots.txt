@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /og-image.png
+
+Disallow: /home
+Disallow: /practice
+Disallow: /progress
+Disallow: /review
+Disallow: /account
+Disallow: /session
+Disallow: /summary
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /auth

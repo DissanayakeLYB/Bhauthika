@@ -1,17 +1,27 @@
 import type { Metadata, Viewport } from 'next';
 import { AuthProvider } from '@/lib/auth-context';
 import { StudyProvider } from '@/components/study-provider';
+import { site } from '@/config/site';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(site.siteUrl),
   title: {
-    default: 'Bhauthika · A/L Physics practice',
-    template: '%s · Bhauthika',
+    default: `${site.siteName} · A/L Physics practice`,
+    template: `%s · ${site.siteName}`,
   },
   description:
     'G.C.E. A/L Physics past-paper MCQs for English-medium students in Sri Lanka: practice, worked explanations and topic mastery.',
-  applicationName: 'Bhauthika',
+  applicationName: site.siteName,
   manifest: '/manifest.webmanifest',
+  // Shared share-card defaults; the landing page adds its own title and image.
+  openGraph: {
+    type: 'website',
+    siteName: site.siteName,
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
   icons: {
     icon: [
       { url: '/icons/icon-32.png', sizes: '32x32', type: 'image/png' },

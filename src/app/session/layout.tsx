@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Practice set',
+  robots: { index: false, follow: false },
 };
 
 export default function SessionLayout({ children }: { children: React.ReactNode }) {
