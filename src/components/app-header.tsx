@@ -14,7 +14,7 @@ export function AppHeader() {
         <span className="font-mono text-label tracking-[0.14em] text-muted uppercase">A/L Physics</span>
       </div>
       <nav aria-label="Primary" className="overflow-x-auto px-5 pb-4">
-        <ul className="flex gap-6">
+        <ul className="flex gap-4 sm:gap-6">
           {NAV_LINKS.map((item) => (
             <li key={item.href}>
               <NavLink href={item.href} label={item.label} />

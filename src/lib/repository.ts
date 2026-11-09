@@ -272,6 +272,58 @@ export function parseStoredActiveSet(raw: string): StoredActiveSet | null {
   };
 }
 
+/** Per-student key for the questions marked for review. */
+export function markedStorageKey(userId?: string | null): string {
+  return `marked:${userId ?? 'guest'}`;
+}
+
+/** Reads the marked list, keeping only question ids and dropping duplicates. */
+export function parseMarkedIds(raw: string): string[] | null {
+  const value = parseJson(raw);
+  if (!Array.isArray(value)) return null;
+  return [
+    ...new Set(value.filter((id): id is string => typeof id === 'string' && id.length > 0)),
+  ];
+}
+
+/**
+ * Marks live in localStorage, per student: there is no table for them and a
+ * mark has to survive a reload.
+ */
+export class LocalMarkedRepository {
+  private storage: KeyValueStorage | null;
+
+  constructor(storage?: KeyValueStorage | null) {
+    this.storage = storage === undefined ? readStorage('local') : storage;
+  }
+
+  load(key: string): string[] {
+    if (!this.storage) return [];
+    try {
+      const raw = this.storage.getItem(key);
+      return raw === null ? [] : (parseMarkedIds(raw) ?? []);
+    } catch {
+      return [];
+    }
+  }
+
+  save(key: string, ids: readonly string[]): void {
+    try {
+      this.storage?.setItem(key, JSON.stringify(ids));
+    } catch {
+      // Quota exceeded or storage disabled: marking must keep working.
+    }
+  }
+
+  clear(key: string): void {
+    try {
+      this.storage?.removeItem(key);
+    } catch {
+      // Nothing to recover from.
+    }
+  }
+}
+
 /**
  * The active set lives in localStorage (not sessionStorage) so a full reload, a
  * discarded tab or a trip to another site cannot lose it.

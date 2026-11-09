@@ -7,9 +7,11 @@ import type { TopicId } from '@/lib/topics';
 import { createSeedProgress, type StudyProgress } from '@/lib/progress';
 import {
   LocalActiveSetRepository,
+  LocalMarkedRepository,
   LocalProgressRepository,
   LocalResultRepository,
   activeSetStorageKey,
+  markedStorageKey,
   progressStorageKey,
   removeLegacyProgressKey,
   type ActiveSetMode,
@@ -40,6 +42,8 @@ interface StudyContextValue {
   active: ActiveSession | null;
   result: SessionResult | null;
   bookmarks: string[];
+  /** Every question the session engine can draw from. */
+  questions: Question[];
   questionsLoading: boolean;
   /** The saved set has been considered; before that, show a loading state. */
   ready: boolean;
@@ -47,6 +51,8 @@ interface StudyContextValue {
   sheetOpen: boolean;
   setSheetOpen: (open: boolean) => void;
   startSession: (topicIds: readonly TopicId[] | 'all', options?: StartSessionOptions) => number;
+  /** Start a set from exactly these questions, in the given order. */
+  startQuestions: (questions: readonly Question[]) => number;
   answerCurrent: (choice: number) => void;
   goToNext: () => void;
   finishSession: () => void;
@@ -118,6 +124,7 @@ async function fetchActiveDays(): Promise<string[] | null> {
 // storage lazily so server rendering never touches window.
 const progressRepository = new LocalProgressRepository();
 const activeSetRepository = new LocalActiveSetRepository();
+const markedRepository = new LocalMarkedRepository();
 const resultRepository = new LocalResultRepository();
 
 // Remove the old v1 key on first load (safe to call multiple times).
@@ -133,6 +140,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [result, setResult] = useState<SessionResult | null>(null);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
+  // The student whose marks are in state: never save one student's marks
+  // under another student's key while a switch is in flight.
+  const [marksUserId, setMarksUserId] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const previousUserIdRef = useRef<string | null>(null);
   const [questionsLoading, setQuestionsLoading] = useState(true);
@@ -172,6 +182,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const previousUserId = previousUserIdRef.current;
     if (previousUserId && previousUserId !== userId) {
       // Signing out, or in as someone else, must never leave a set behind.
+      // Marks are the student's own record and stay under their own key.
       activeSetRepository.clear(activeSetStorageKey(previousUserId));
     }
     previousUserIdRef.current = userId;
@@ -182,12 +193,17 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
         if (cancelled) return;
         setActive(null);
         setSheetOpen(false);
+        setBookmarks([]);
+        setMarksUserId(null);
         setReady(true);
         return;
       }
 
       const key = activeSetStorageKey(userId);
       progressRepository.setKey(progressStorageKey(userId));
+      // Marks are local and per student: read them before listing them.
+      setBookmarks(markedRepository.load(markedStorageKey(userId)));
+      setMarksUserId(userId);
 
       const [storedProgress, storedResult, remoteActiveDays] = await Promise.all([
         progressRepository.load(),
@@ -254,6 +270,14 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     });
   }, [ready, active, sheetOpen, mode, user?.id]);
 
+  // Save the marked list after every mark or unmark, per student.
+  useEffect(() => {
+    if (!ready) return;
+    const userId = user?.id ?? null;
+    if (!userId || marksUserId !== userId) return;
+    markedRepository.save(markedStorageKey(userId), bookmarks);
+  }, [ready, bookmarks, marksUserId, user?.id]);
+
   useEffect(() => {
     if (!ready) return;
     if (result) {
@@ -276,6 +300,17 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     },
     [allQuestions],
   );
+
+  const startQuestions = useCallback((questions: readonly Question[]) => {
+    if (questions.length === 0) return 0;
+    const picked = [...questions];
+    // Same engine as every other set: popup, attempts and results all follow.
+    setActive({ questions: picked, index: 0, answers: picked.map(() => null) });
+    setMode('mixed');
+    setSheetOpen(false);
+    setResult(null);
+    return picked.length;
+  }, []);
 
   const answerCurrent = useCallback((choice: number) => {
     const today = localDateString(new Date());
@@ -356,11 +391,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       active,
       result,
       bookmarks,
+      questions: allQuestions,
       questionsLoading,
       ready,
       sheetOpen,
       setSheetOpen,
       startSession,
+      startQuestions,
       answerCurrent,
       goToNext,
       finishSession,
@@ -372,10 +409,12 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       active,
       result,
       bookmarks,
+      allQuestions,
       questionsLoading,
       ready,
       sheetOpen,
       startSession,
+      startQuestions,
       answerCurrent,
       goToNext,
       finishSession,
