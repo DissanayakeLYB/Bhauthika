@@ -40,6 +40,8 @@ interface StudyContextValue {
   progress: StudyProgress;
   streak: StreakSummary;
   active: ActiveSession | null;
+  /** Where the saved set came from: one unit, a mixed draw, or a past paper. */
+  mode: ActiveSetMode;
   result: SessionResult | null;
   bookmarks: string[];
   /** Every question the session engine can draw from. */
@@ -389,6 +391,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       progress,
       streak,
       active,
+      mode,
       result,
       bookmarks,
       questions: allQuestions,
@@ -407,6 +410,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       progress,
       streak,
       active,
+      mode,
       result,
       bookmarks,
       allQuestions,
