@@ -15,8 +15,9 @@ const PRIMARY_LINK =
 const TEXT_LINK =
   'inline-flex min-h-11 items-center text-[0.9375rem] font-medium underline-offset-4 transition-colors hover:text-ink hover:underline';
 
+/** Sized for the bar, but with a 44px-tall touch area for thumbs. */
 const BAR_LINK =
-  'font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink';
+  'relative font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors before:absolute before:-inset-x-3 before:-inset-y-4 before:content-[""] hover:text-ink';
 
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
