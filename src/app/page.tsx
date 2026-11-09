@@ -60,10 +60,12 @@ export default function LandingPage() {
         </Link>
       </header>
 
-      <main id="main" className="flex flex-1 flex-col justify-center py-14">
-        <h1 className="max-w-[20ch] text-title font-medium text-ink">{site.tagline}</h1>
-        <p className="mt-6 max-w-[42ch] text-body text-muted">
-          Answer past paper questions, then watch a short video that explains each one.
+      <main id="main" className="flex flex-1 flex-col justify-center py-16">
+        <h1 className="max-w-[17ch] text-[clamp(2.5rem,7vw,4.75rem)] leading-[1.02] font-medium tracking-[-0.035em] text-ink">
+          {site.tagline}
+        </h1>
+        <p className="mt-8 text-body text-muted">
+          Answer a question, then watch a short video that explains it.
         </p>
 
         <div className="mt-10 w-full max-w-[22rem]">
