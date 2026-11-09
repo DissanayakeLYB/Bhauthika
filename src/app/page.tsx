@@ -60,7 +60,7 @@ export default function LandingPage() {
         </Link>
       </header>
 
-      <main id="main" className="flex flex-1 flex-col justify-center py-16">
+      <main id="main" className="flex flex-1 flex-col items-center justify-center py-16 text-center">
         <h1 className="max-w-[17ch] text-[clamp(2.5rem,7vw,4.75rem)] leading-[1.02] font-medium tracking-[-0.035em] text-ink">
           {site.tagline}
         </h1>
