@@ -3,12 +3,16 @@ import { QUESTIONS, type Question } from './questions';
 /** Where the scanned paper images are served from (public/past-papers). */
 const EM_2024_DIR = '/past-papers/em-2024';
 const EM_2022_DIR = '/past-papers/em-2022';
+const EM_2021_DIR = '/past-papers/em-2021';
 
 /** Fifty MCQs in the 2024 English-medium Paper I. */
 export const EM_2024_MCQ_COUNT = 50;
 
 /** Fifty MCQs in the 2022 English-medium Paper I. */
 export const EM_2022_MCQ_COUNT = 50;
+
+/** Fifty MCQs in the 2021 English-medium Paper I. */
+export const EM_2021_MCQ_COUNT = 50;
 
 /** The five options as numbered on the paper; the wording lives in the image. */
 const OPTION_NUMBERS = ['1', '2', '3', '4', '5'];
@@ -21,6 +25,11 @@ export function em2024ImageUrl(number: number): string {
 /** Public path of the 2022 scan for one question number (1-based). */
 export function em2022ImageUrl(number: number): string {
   return `${EM_2022_DIR}/EM_2022_Physics_MCQ_q${String(number).padStart(2, '0')}.webp`;
+}
+
+/** Public path of the 2021 scan for one question number (1-based). */
+export function em2021ImageUrl(number: number): string {
+  return `${EM_2021_DIR}/EM_2021_Physics_MCQ_q${String(number).padStart(2, '0')}.webp`;
 }
 
 /**
@@ -46,6 +55,12 @@ export const EM_2022_ANSWER_KEY: (number | null)[] = Array.from(
   () => null,
 );
 
+/** 2021 key, same convention again: printed option numbers or null. */
+export const EM_2021_ANSWER_KEY: (number | null)[] = Array.from(
+  { length: EM_2021_MCQ_COUNT },
+  () => null,
+);
+
 /** Printed option number (1-based) to option index, or null when unkeyed. */
 function toAnswerIndex(printed: number | null): number | null {
   return typeof printed === 'number' && printed >= 1 && printed <= OPTION_NUMBERS.length
@@ -64,6 +79,7 @@ interface PaperScans {
 const SCAN_PAPERS: PaperScans[] = [
   { year: 2024, count: EM_2024_MCQ_COUNT, answerKey: EM_2024_ANSWER_KEY, imageUrl: em2024ImageUrl },
   { year: 2022, count: EM_2022_MCQ_COUNT, answerKey: EM_2022_ANSWER_KEY, imageUrl: em2022ImageUrl },
+  { year: 2021, count: EM_2021_MCQ_COUNT, answerKey: EM_2021_ANSWER_KEY, imageUrl: em2021ImageUrl },
 ];
 
 /**
