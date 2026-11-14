@@ -4,6 +4,8 @@ import {
   EM_2021_MCQ_COUNT,
   EM_2022_ANSWER_KEY,
   EM_2022_MCQ_COUNT,
+  EM_2023_ANSWER_KEY,
+  EM_2023_MCQ_COUNT,
   EM_2024_ANSWER_KEY,
   EM_2024_MCQ_COUNT,
   EM_2025_ANSWER_KEY,
@@ -14,6 +16,7 @@ import {
 const PAPERS = [
   { year: 2021, count: EM_2021_MCQ_COUNT, key: EM_2021_ANSWER_KEY },
   { year: 2022, count: EM_2022_MCQ_COUNT, key: EM_2022_ANSWER_KEY },
+  { year: 2023, count: EM_2023_MCQ_COUNT, key: EM_2023_ANSWER_KEY },
   { year: 2024, count: EM_2024_MCQ_COUNT, key: EM_2024_ANSWER_KEY },
   { year: 2025, count: EM_2025_MCQ_COUNT, key: EM_2025_ANSWER_KEY },
 ];
@@ -21,7 +24,11 @@ const PAPERS = [
 describe('past-paper image bank', () => {
   it('builds one item per scan for every paper, each with a scan, five options and a video', () => {
     expect(PAST_PAPER_QUESTIONS).toHaveLength(
-      EM_2021_MCQ_COUNT + EM_2022_MCQ_COUNT + EM_2024_MCQ_COUNT + EM_2025_MCQ_COUNT,
+      EM_2021_MCQ_COUNT +
+      EM_2022_MCQ_COUNT +
+      EM_2023_MCQ_COUNT +
+      EM_2024_MCQ_COUNT +
+      EM_2025_MCQ_COUNT,
     );
 
     PAPERS.forEach((paper) => {
