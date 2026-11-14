@@ -1,9 +1,13 @@
 import { QUESTIONS, type Question } from './questions';
 
 /** Where the scanned paper images are served from (public/past-papers). */
+const EM_2025_DIR = '/past-papers/em-2025';
 const EM_2024_DIR = '/past-papers/em-2024';
 const EM_2022_DIR = '/past-papers/em-2022';
 const EM_2021_DIR = '/past-papers/em-2021';
+
+/** Fifty MCQs in the 2025 English-medium Paper I. */
+export const EM_2025_MCQ_COUNT = 50;
 
 /** Fifty MCQs in the 2024 English-medium Paper I. */
 export const EM_2024_MCQ_COUNT = 50;
@@ -16,6 +20,11 @@ export const EM_2021_MCQ_COUNT = 50;
 
 /** The five options as numbered on the paper; the wording lives in the image. */
 const OPTION_NUMBERS = ['1', '2', '3', '4', '5'];
+
+/** Public path of the 2025 scan for one question number (1-based). */
+export function em2025ImageUrl(number: number): string {
+  return `${EM_2025_DIR}/EM_2025_Physics_MCQ_q${String(number).padStart(2, '0')}.webp`;
+}
 
 /** Public path of the scan for one question number (1-based). */
 export function em2024ImageUrl(number: number): string {
@@ -37,6 +46,12 @@ export function em2021ImageUrl(number: number): string {
  * are ready: replace an entry with its own YouTube URL to update it.
  */
 export const PLACEHOLDER_VIDEO_URL = 'https://www.youtube.com/watch?v=XXXXXXXXXXX';
+
+/** 2025 key, same convention as the others: printed option numbers or null. */
+export const EM_2025_ANSWER_KEY: (number | null)[] = Array.from(
+  { length: EM_2025_MCQ_COUNT },
+  () => null,
+);
 
 /**
  * Answer key in paper order, written as the option numbers printed on the paper
@@ -77,6 +92,7 @@ interface PaperScans {
 
 /** Every paper that ships as scans, newest first. Add a year here to list it. */
 const SCAN_PAPERS: PaperScans[] = [
+  { year: 2025, count: EM_2025_MCQ_COUNT, answerKey: EM_2025_ANSWER_KEY, imageUrl: em2025ImageUrl },
   { year: 2024, count: EM_2024_MCQ_COUNT, answerKey: EM_2024_ANSWER_KEY, imageUrl: em2024ImageUrl },
   { year: 2022, count: EM_2022_MCQ_COUNT, answerKey: EM_2022_ANSWER_KEY, imageUrl: em2022ImageUrl },
   { year: 2021, count: EM_2021_MCQ_COUNT, answerKey: EM_2021_ANSWER_KEY, imageUrl: em2021ImageUrl },
