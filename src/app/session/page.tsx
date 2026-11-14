@@ -359,6 +359,7 @@ function QuestionView() {
         open={sheetOpen}
         question={question}
         correct={correct}
+        chosen={selected}
         bookmarked={bookmarked}
         isLast={isLast}
         onNext={next}

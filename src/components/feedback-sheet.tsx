@@ -26,6 +26,8 @@ interface FeedbackSheetProps {
   open: boolean;
   question: Question;
   correct: boolean;
+  /** The option this student picked, or null before they answer. */
+  chosen: number | null;
   bookmarked: boolean;
   isLast: boolean;
   onNext: () => void;
@@ -37,6 +39,7 @@ export function FeedbackSheet({
   open,
   question,
   correct,
+  chosen,
   bookmarked,
   isLast,
   onNext,
@@ -57,8 +60,14 @@ export function FeedbackSheet({
     : null;
   const answerLabel =
     acceptedLabel ?? (question.answer !== null ? String(question.answer + 1) : null);
+  // A paper answer is a number, so the pick has to be spelled out beside it:
+  // otherwise a wrong sheet says 5 and never says what was chosen.
+  const choiceNote =
+    isScan && hasKey && !correct && chosen !== null && answerLabel
+      ? `You chose ${chosen + 1} · Answer ${answerLabel}`
+      : null;
   const answerNote = isScan
-    ? null
+    ? choiceNote
     : acceptedLabel
       ? acceptedLabel === 'ALL'
         ? 'The marking table accepts every option in this question.'
