@@ -44,16 +44,28 @@ export function FeedbackSheet({
   onToggleBookmark,
 }: FeedbackSheetProps) {
   const hasKey = hasAnswerKey(question);
-  // Past-paper items are answered on the scan, so the sheet only states the
-  // answer: no verdict sentence and no caption under it.
+  const hasVideo = Boolean(question.videoUrl);
+  const unkeyed = !hasKey;
+  const verdict = unkeyed ? 'Recorded' : correct ? 'Correct' : 'Incorrect';
+  // Past-paper items are answered on the scan, so their sheet states the answer
+  // only: no caption beside it and no verdict sentence.
   const isScan = Boolean(question.questionImageUrl);
   const acceptedLabel = question.acceptedAnswers
     ? question.acceptedAnswers.length >= question.options.length
       ? 'ALL'
       : question.acceptedAnswers.map((option) => option + 1).join(' / ')
     : null;
-  const hasVideo = Boolean(question.videoUrl);
-  const unkeyed = !hasKey;
+  const answerLabel =
+    acceptedLabel ?? (question.answer !== null ? String(question.answer + 1) : null);
+  const answerNote = isScan
+    ? null
+    : acceptedLabel
+      ? acceptedLabel === 'ALL'
+        ? 'The marking table accepts every option in this question.'
+        : 'The marking table accepts more than one option in this question.'
+      : question.answer !== null
+        ? question.options[question.answer]
+        : null;
 
   const [reportOpen, setReportOpen] = useState(false);
   // 'sent' and 'duplicate' both mean this student is done reporting here.
@@ -144,7 +156,7 @@ export function FeedbackSheet({
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-6 pb-6 sm:px-8 sm:pt-8">
         <div className="flex items-baseline justify-between gap-4">
           <Label className={unkeyed ? 'text-muted' : correct ? 'text-correct' : 'text-wrong'}>
-            {unkeyed ? 'Recorded' : correct ? 'Correct' : 'Incorrect'}
+            {verdict}
           </Label>
           <button
             type="button"
@@ -155,50 +167,41 @@ export function FeedbackSheet({
           </button>
         </div>
 
-        {isScan ? (
-          // The sheet is labelled by this heading, so keep it for screen readers
-          // while the visible copy stays on the answer itself.
-          <h2 id="feedback-title" className="sr-only">
-            {unkeyed ? 'Answer recorded' : correct ? 'Correct' : 'Incorrect'}
-          </h2>
-        ) : (
-          <>
-            <h2
-              id="feedback-title"
-              className={cn(
-                'mt-4 text-[1.75rem] leading-[1.15] font-medium tracking-[-0.01em]',
-                unkeyed ? 'text-ink' : correct ? 'text-correct' : 'text-wrong',
-              )}
-            >
-              {unkeyed ? 'Answer recorded.' : correct ? 'Correct.' : 'Not quite.'}
-            </h2>
-            <p className="mt-3 text-meta text-muted">
-              {unkeyed
-                ? 'This paper has no answer key yet, so nothing is marked.'
-                : correct
-                  ? 'You picked the right option.'
-                  : 'The right option is below.'}
-            </p>
-          </>
+        {/* Names the dialog for screen readers even when the visible copy is
+            just the answer. */}
+        <h2
+          id="feedback-title"
+          className={
+            isScan
+              ? 'sr-only'
+              : cn(
+                  'mt-4 text-[1.75rem] leading-[1.15] font-medium tracking-[-0.01em]',
+                  unkeyed ? 'text-ink' : correct ? 'text-correct' : 'text-wrong',
+                )
+          }
+        >
+          {isScan
+            ? verdict
+            : unkeyed
+              ? 'Answer recorded.'
+              : correct
+                ? 'Correct.'
+                : 'Not quite.'}
+        </h2>
+        {isScan ? null : (
+          <p className="mt-3 text-meta text-muted">
+            {unkeyed
+              ? 'This paper has no answer key yet, so nothing is marked.'
+              : correct
+                ? 'You picked the right option.'
+                : 'The right option is below.'}
+          </p>
         )}
 
-        {acceptedLabel ? (
+        {answerLabel ? (
           <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
-            <Mono className="text-[1.375rem] leading-none text-correct">{acceptedLabel}</Mono>
-            {isScan ? null : (
-              <p className="min-w-0 text-body text-ink">
-                {acceptedLabel === 'ALL'
-                  ? 'The marking table accepts every option in this question.'
-                  : 'The marking table accepts more than one option in this question.'}
-              </p>
-            )}
-          </div>
-        ) : question.answer !== null ? (
-          <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
-            <Mono className="text-[1.375rem] leading-none text-correct">{question.answer + 1}</Mono>
-            {isScan ? null : (
-              <p className="min-w-0 text-body text-ink">{question.options[question.answer]}</p>
-            )}
+            <Mono className="text-[1.375rem] leading-none text-correct">{answerLabel}</Mono>
+            {answerNote ? <p className="min-w-0 text-body text-ink">{answerNote}</p> : null}
           </div>
         ) : null}
 
