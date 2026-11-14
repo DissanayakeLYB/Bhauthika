@@ -316,28 +316,19 @@ export function FeedbackSheet({
           label={isLast ? 'See results' : 'Next question'}
           onClick={onNext}
         />
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <ActionButton
-              variant="text"
-              label={bookmarked ? 'Marked for review' : 'Mark for review'}
-              aria-pressed={bookmarked}
-              onClick={onToggleBookmark}
-            />
-            <ActionButton
-              variant="text"
-              label={reported ? 'Reported' : 'Report this question'}
-              aria-expanded={reportOpen}
-              onClick={toggleReport}
-            />
-          </div>
-          {question.videoUrl ? (
-            <ActionButton
-              variant="text"
-              label="Watch full explanation"
-              onClick={() => window.open(question.videoUrl, '_blank', 'noopener,noreferrer')}
-            />
-          ) : null}
+        <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <ActionButton
+            variant="text"
+            label={bookmarked ? 'Marked for review' : 'Mark for review'}
+            aria-pressed={bookmarked}
+            onClick={onToggleBookmark}
+          />
+          <ActionButton
+            variant="text"
+            label={reported ? 'Reported' : 'Report this question'}
+            aria-expanded={reportOpen}
+            onClick={toggleReport}
+          />
         </div>
       </div>
     </Sheet>
