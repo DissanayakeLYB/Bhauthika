@@ -22,7 +22,7 @@ describe('past-paper image bank', () => {
 
       items.forEach((question, index) => {
         expect(question.questionImageUrl, question.id).toBe(
-          `/past-papers/em-${paper.year}/EM_${paper.year}_Physics_MCQ_q${String(index + 1).padStart(2, '0')}.png`,
+          `/past-papers/em-${paper.year}/EM_${paper.year}_Physics_MCQ_q${String(index + 1).padStart(2, '0')}.webp`,
         );
         expect(question.options, question.id).toHaveLength(5);
         expect(question.videoUrl, question.id).toMatch(/^https:\/\/www\.youtube\.com\/watch\?v=/);

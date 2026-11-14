@@ -15,12 +15,12 @@ const OPTION_NUMBERS = ['1', '2', '3', '4', '5'];
 
 /** Public path of the scan for one question number (1-based). */
 export function em2024ImageUrl(number: number): string {
-  return `${EM_2024_DIR}/EM_2024_Physics_MCQ_q${String(number).padStart(2, '0')}.png`;
+  return `${EM_2024_DIR}/EM_2024_Physics_MCQ_q${String(number).padStart(2, '0')}.webp`;
 }
 
 /** Public path of the 2022 scan for one question number (1-based). */
 export function em2022ImageUrl(number: number): string {
-  return `${EM_2022_DIR}/EM_2022_Physics_MCQ_q${String(number).padStart(2, '0')}.png`;
+  return `${EM_2022_DIR}/EM_2022_Physics_MCQ_q${String(number).padStart(2, '0')}.webp`;
 }
 
 /**

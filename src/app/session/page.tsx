@@ -181,6 +181,7 @@ function QuestionView() {
               <img
                 src={question.questionImageUrl}
                 alt={`Question ${question.number} of the ${question.year} ${question.paper}, as printed in the paper`}
+                loading="lazy"
                 decoding="async"
                 className="w-full rounded-xs border border-line"
               />

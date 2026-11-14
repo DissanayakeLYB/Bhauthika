@@ -181,7 +181,7 @@ describe('applySessionResult', () => {
       topicId: undefined,
       answer: null,
       options: ['1', '2', '3', '4', '5'],
-      questionImageUrl: '/past-papers/em-2024/EM_2024_Physics_MCQ_q01.png',
+      questionImageUrl: '/past-papers/em-2024/EM_2024_Physics_MCQ_q01.webp',
     };
 
     const { progress: next, result } = applySessionResult(progress, [scan], [2]);
