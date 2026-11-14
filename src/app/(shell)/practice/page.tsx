@@ -51,10 +51,16 @@ function PracticeFlow() {
   const mode: Mode | null = rawMode === 'unit' || rawMode === 'year' ? rawMode : null;
 
   const begin = (topicIds: readonly TopicId[] | 'all', fill = false, year?: number) => {
+    // A past paper is sat as printed: every question of that year, in order.
+    const size =
+      year === undefined
+        ? count
+        : PAST_PAPER_QUESTIONS.filter((question) => question.year === year).length;
     const total = startSession(topicIds, {
-      count,
+      count: size,
       fill,
       year,
+      ordered: year !== undefined,
       mode: year !== undefined ? 'past-paper' : topicIds === 'all' ? 'mixed' : 'unit',
     });
     if (total === 0) {

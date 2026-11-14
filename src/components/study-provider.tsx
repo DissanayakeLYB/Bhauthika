@@ -32,6 +32,8 @@ interface StartSessionOptions {
   fill?: boolean;
   /** Draw only from one exam year, e.g. a single past paper. */
   year?: number;
+  /** Keep the printed order instead of shuffling, for a paper. */
+  ordered?: boolean;
   /** Where the set came from; restored with the saved set. */
   mode?: ActiveSetMode;
 }
@@ -290,8 +292,11 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   }, [ready, result]);
 
   const startSession = useCallback(
-    (topicIds: readonly TopicId[] | 'all', { count = 10, fill = false, year, mode: nextMode }: StartSessionOptions = {}) => {
-      const picked = pickQuestions(allQuestions, { topicIds, count, fill, year });
+    (
+      topicIds: readonly TopicId[] | 'all',
+      { count = 10, fill = false, year, ordered = false, mode: nextMode }: StartSessionOptions = {},
+    ) => {
+      const picked = pickQuestions(allQuestions, { topicIds, count, fill, year, ordered });
       if (picked.length === 0) return 0;
       // A new set replaces the saved one, which also drops the previous set.
       setActive({ questions: picked, index: 0, answers: picked.map(() => null) });

@@ -53,6 +53,19 @@ describe('pickQuestions', () => {
     expect(picked).toHaveLength(1);
   });
 
+  it('keeps a paper in printed order when ordered is on', () => {
+    const paper: Question[] = Array.from({ length: 50 }, (_, index) => ({
+      ...question(`p${index + 1}`, 'current'),
+      number: index + 1,
+    }));
+
+    const picked = pickQuestions(paper, { count: 50, ordered: true, rng: () => 0 });
+
+    expect(picked.map((item) => item.number)).toEqual(
+      Array.from({ length: 50 }, (_, index) => index + 1),
+    );
+  });
+
   it('does not mutate the source pool', () => {
     const before = pool.map((item) => item.id);
     pickQuestions(pool, { count: 4 });
@@ -174,6 +187,23 @@ describe('applySessionResult', () => {
     expect(result).toMatchObject({ correct: 0, total: 0, points: 0, topics: [] });
   });
 
+  it('counts keyed past-paper answers in accuracy but not in unit mastery', () => {
+    const progress = createSeedProgress();
+    const scan: Question = {
+      ...question('img2', 'current', 4),
+      topicId: undefined,
+      questionImageUrl: '/past-papers/em-2025/EM_2025_Physics_MCQ_q01.webp',
+    };
+
+    const { progress: next, result } = applySessionResult(progress, [scan], [4]);
+
+    expect(result).toMatchObject({ correct: 1, total: 1, answered: 1 });
+    expect(next.totalPractised).toBe(progress.totalPractised + 1);
+    expect(next.totalCorrect).toBe(progress.totalCorrect + 1);
+    // No unit is credited, so every mastery line stays as it was.
+    expect(next.topics).toEqual(progress.topics);
+  });
+
   it('records past-paper items without a key but does not mark them', () => {
     const progress = createSeedProgress();
     const scan: Question = {
@@ -187,7 +217,8 @@ describe('applySessionResult', () => {
     const { progress: next, result } = applySessionResult(progress, [scan], [2]);
 
     expect(result).toMatchObject({ correct: 0, total: 0, answered: 1, points: 0, topics: [] });
-    expect(next.totalPractised).toBe(progress.totalPractised + 1);
+    // Unmarked answers are activity, not practice results.
+    expect(next.totalPractised).toBe(progress.totalPractised);
     expect(next.answeredToday).toBe(progress.answeredToday + 1);
     expect(next.topics.current).toEqual(progress.topics.current);
   });

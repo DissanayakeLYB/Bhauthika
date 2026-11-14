@@ -37,6 +37,8 @@ interface PickQuestionsOptions {
   fill?: boolean;
   /** Restrict the draw to one exam year, e.g. a single past paper. */
   year?: number;
+  /** Keep the pool's own order (a paper as printed) instead of shuffling it. */
+  ordered?: boolean;
 }
 
 /** Fisher–Yates on a copy; the input array is never mutated. */
@@ -58,7 +60,7 @@ export function shuffle<T>(items: readonly T[], rng: () => number = Math.random)
  */
 export function pickQuestions(
   pool: readonly Question[],
-  { topicIds = 'all', count = 10, rng = Math.random, fill = false, year }: PickQuestionsOptions = {},
+  { topicIds = 'all', count = 10, rng = Math.random, fill = false, year, ordered = false }: PickQuestionsOptions = {},
 ): Question[] {
   const limit = Math.max(0, Math.floor(count));
   const inYear = year === undefined ? [...pool] : pool.filter((question) => question.year === year);
@@ -66,7 +68,9 @@ export function pickQuestions(
   const primary = allowed
     ? inYear.filter((question) => question.topicId !== undefined && allowed.has(question.topicId))
     : inYear;
-  const picked = shuffle(primary, rng).slice(0, limit);
+  // A paper is sat as printed: same questions, same order, no draw.
+  const drawn = ordered ? [...primary].sort((a, b) => a.number - b.number) : shuffle(primary, rng);
+  const picked = drawn.slice(0, limit);
 
   if (fill && picked.length < limit) {
     const pickedIds = new Set(picked.map((question) => question.id));
@@ -108,15 +112,18 @@ export function applySessionResult(
   const byTopic = new Map<TopicId, { total: number; correct: number }>();
 
   questions.forEach((question, index) => {
-    // Items with no key yet (the past-paper scans) are recorded, never marked.
-    if (!hasAnswerKey(question) || question.topicId === undefined) return;
+    // An answer with no key is recorded but never marked, so it counts towards
+    // neither accuracy nor mastery.
+    if (!hasAnswerKey(question)) return;
     scored += 1;
+    const right = isCorrectChoice(question, answers[index] ?? null);
+    if (right) correct += 1;
+    // Past-paper scans span units, so they score above but only a tagged item
+    // moves a unit's mastery.
+    if (question.topicId === undefined) return;
     const entry = byTopic.get(question.topicId) ?? { total: 0, correct: 0 };
     entry.total += 1;
-    if (isCorrectChoice(question, answers[index] ?? null)) {
-      entry.correct += 1;
-      correct += 1;
-    }
+    if (right) entry.correct += 1;
     byTopic.set(question.topicId, entry);
   });
 
@@ -146,7 +153,8 @@ export function applySessionResult(
     ...progress,
     answeredToday: progress.answeredToday + answered,
     correctToday: progress.correctToday + correct,
-    totalPractised: progress.totalPractised + answered,
+    // Both totals count marked answers only, so accuracy stays a true ratio.
+    totalPractised: progress.totalPractised + scored,
     totalCorrect: progress.totalCorrect + correct,
     topics,
   };
