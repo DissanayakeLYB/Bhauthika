@@ -20,6 +20,8 @@ export interface Question {
   options: string[];
   /** Correct option index, or null while a past-paper answer key is pending. */
   answer: number | null;
+  /** True when the marking table accepts every option (printed as "ALL"). */
+  allOptionsCorrect?: boolean;
   hint: string;
   steps: DerivationStep[];
   diagram?: 'potentiometer';
@@ -27,6 +29,23 @@ export interface Question {
   questionImageUrl?: string;
   /** Optional YouTube / video explanation URL. */
   videoUrl?: string;
+}
+
+/** A question is marked when it has a single correct index or accepts them all. */
+export function hasAnswerKey(
+  question: Pick<Question, 'answer' | 'allOptionsCorrect'>,
+): boolean {
+  return question.answer !== null || question.allOptionsCorrect === true;
+}
+
+/** True when the option this student picked is accepted by the key. */
+export function isCorrectChoice(
+  question: Pick<Question, 'answer' | 'allOptionsCorrect'>,
+  choice: number | null,
+): boolean {
+  if (choice === null) return false;
+  if (question.allOptionsCorrect === true) return true;
+  return question.answer !== null && choice === question.answer;
 }
 
 /**

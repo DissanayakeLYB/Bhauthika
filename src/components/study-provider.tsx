@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { Question } from '@/lib/questions';
+import { isCorrectChoice, type Question } from '@/lib/questions';
 import { PAST_PAPER_QUESTIONS, QUESTION_BANK, QUESTION_BANK_MAP } from '@/lib/past-papers';
 import type { TopicId } from '@/lib/topics';
 import { createSeedProgress, type StudyProgress } from '@/lib/progress';
@@ -350,7 +350,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const q = active.questions[active.index];
     const sel = active.answers[active.index];
     if (sel !== null) {
-      void recordAttempt(q.id, sel, q.answer !== null && sel === q.answer);
+      void recordAttempt(q.id, sel, isCorrectChoice(q, sel));
     }
     const index = Math.min(active.index + 1, active.questions.length - 1);
     setSheetOpen(false);
@@ -364,7 +364,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     const lastQ = active.questions[active.index];
     const lastSel = active.answers[active.index];
     if (lastSel !== null) {
-      void recordAttempt(lastQ.id, lastSel, lastQ.answer !== null && lastSel === lastQ.answer);
+      void recordAttempt(lastQ.id, lastSel, isCorrectChoice(lastQ, lastSel));
     }
 
     const { progress: nextProgress, result: nextResult } = applySessionResult(

@@ -10,7 +10,7 @@ import { useStudy } from '@/components/study-provider';
 import { ActionButton } from '@/components/button';
 import { ProgressBar } from '@/components/progress-bar';
 import { Label } from '@/components/type';
-import type { Question } from '@/lib/questions';
+import { hasAnswerKey, isCorrectChoice, type Question } from '@/lib/questions';
 import { TOPIC_MAP } from '@/lib/topics';
 import { cn } from '@/lib/utils';
 
@@ -100,8 +100,8 @@ function QuestionView() {
   const question: Question = questions[index];
   const total = questions.length;
   const isLast = index + 1 >= total;
-  const hasKey = question.answer !== null;
-  const correct = hasKey && selected !== null && selected === question.answer;
+  const hasKey = hasAnswerKey(question);
+  const correct = isCorrectChoice(question, selected);
   const bookmarked = bookmarks.includes(question.id);
   const topic = question.topicId ? TOPIC_MAP[question.topicId] : null;
   const hasHint = question.steps.length > 0;
@@ -211,7 +211,12 @@ function QuestionView() {
             <legend className="sr-only">Choose one answer</legend>
             {question.options.map((option, optionIndex) => {
               const isSelected = selected === optionIndex;
-              const isCorrectOption = submitted && hasKey && optionIndex === question.answer;
+              // When every option is accepted, the one this student picked is
+              // the correct row; there is no single answer to point at.
+              const isCorrectOption =
+                submitted &&
+                hasKey &&
+                (question.allOptionsCorrect === true ? isSelected : optionIndex === question.answer);
               const isIncorrectChoice = submitted && isSelected && !isCorrectOption;
 
               return (

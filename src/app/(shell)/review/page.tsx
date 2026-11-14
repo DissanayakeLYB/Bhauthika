@@ -7,7 +7,7 @@ import { ActionButton } from '@/components/button';
 import { PageHead, Screen } from '@/components/page';
 import { TopicRow } from '@/components/topic-row';
 import { Label } from '@/components/type';
-import type { Question } from '@/lib/questions';
+import { hasAnswerKey, type Question } from '@/lib/questions';
 import { shuffle } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import { TOPIC_MAP } from '@/lib/topics';
@@ -115,7 +115,7 @@ export default function ReviewPage() {
       const question = byId.get(id);
       // A paper with no answer key stores every answer as not correct; those
       // attempts were never marked, so they are not mistakes.
-      if (!question || question.answer === null) return;
+      if (!question || !hasAnswerKey(question)) return;
       wrongItems.push({ question, wrongAttempts: wrongCounts.get(id) ?? 1 });
     });
 

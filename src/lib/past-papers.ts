@@ -73,11 +73,14 @@ export const EM_2024_ANSWER_KEY: (number | null)[] = Array.from(
   () => null,
 );
 
-/** 2023 key, same convention as the others: printed option numbers or null. */
-export const EM_2023_ANSWER_KEY: (number | null)[] = Array.from(
-  { length: EM_2023_MCQ_COUNT },
-  () => null,
-);
+/**
+ * 2023 key from the paper's marking table. `'all'` is the table's "ALL": every
+ * option was accepted for that question.
+ */
+export const EM_2023_ANSWER_KEY: (number | 'all' | null)[] = [
+  1, 2, 4, 3, 5, 4, 5, 2, 5, 1, 3, 4, 5, 3, 3, 2, 4, 4, 3, 2, 5, 3, 2, 1, 2, 3, 3, 5, 4, 3, 'all', 1, 3,
+  5, 2, 5, 1, 1, 5, 2, 5, 4, 1, 3, 2, 3, 1, 4, 1, 4,
+];
 
 /**
  * 2022 key, same convention: the option number printed on the paper (1-5) for
@@ -104,7 +107,7 @@ function toAnswerIndex(printed: number | null): number | null {
 interface PaperScans {
   year: number;
   count: number;
-  answerKey: readonly (number | null)[];
+  answerKey: readonly (number | 'all' | null)[];
   imageUrl: (number: number) => string;
 }
 
@@ -126,6 +129,7 @@ const SCAN_PAPERS: PaperScans[] = [
 export const PAST_PAPER_QUESTIONS: Question[] = SCAN_PAPERS.flatMap((scanned) =>
   Array.from({ length: scanned.count }, (_, index): Question => {
     const number = index + 1;
+    const printed = scanned.answerKey[index] ?? null;
     return {
       id: `em-${scanned.year}-q${String(number).padStart(2, '0')}`,
       year: scanned.year,
@@ -133,7 +137,8 @@ export const PAST_PAPER_QUESTIONS: Question[] = SCAN_PAPERS.flatMap((scanned) =>
       number,
       stem: '',
       options: [...OPTION_NUMBERS],
-      answer: toAnswerIndex(scanned.answerKey[index] ?? null),
+      answer: toAnswerIndex(typeof printed === 'number' ? printed : null),
+      allOptionsCorrect: printed === 'all' || undefined,
       hint: '',
       steps: [],
       questionImageUrl: scanned.imageUrl(number),

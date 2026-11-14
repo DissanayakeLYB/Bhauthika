@@ -1,4 +1,4 @@
-import type { Question } from '@/lib/questions';
+import { hasAnswerKey, isCorrectChoice, type Question } from '@/lib/questions';
 import { TOPIC_MAP, type TopicId } from '@/lib/topics';
 import { clampPercent, type StudyProgress, type TopicProgress } from './progress';
 
@@ -109,11 +109,11 @@ export function applySessionResult(
 
   questions.forEach((question, index) => {
     // Items with no key yet (the past-paper scans) are recorded, never marked.
-    if (question.answer === null || question.topicId === undefined) return;
+    if (!hasAnswerKey(question) || question.topicId === undefined) return;
     scored += 1;
     const entry = byTopic.get(question.topicId) ?? { total: 0, correct: 0 };
     entry.total += 1;
-    if (answers[index] === question.answer) {
+    if (isCorrectChoice(question, answers[index] ?? null)) {
       entry.correct += 1;
       correct += 1;
     }

@@ -58,6 +58,15 @@ describe('past-paper image bank', () => {
       const items = PAST_PAPER_QUESTIONS.filter((question) => question.year === paper.year);
       items.forEach((question, index) => {
         const printed = paper.key[index] ?? null;
+
+        if (printed === 'all') {
+          // The table prints "ALL" where every option was accepted.
+          expect(question.allOptionsCorrect, question.id).toBe(true);
+          expect(question.answer, question.id).toBeNull();
+          return;
+        }
+
+        expect(question.allOptionsCorrect, question.id).toBeUndefined();
         expect(question.answer, question.id).toBe(printed === null ? null : printed - 1);
       });
     });

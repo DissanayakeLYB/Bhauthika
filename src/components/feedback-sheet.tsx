@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { Formula } from '@/components/formula';
 import { ActionButton } from '@/components/button';
 import { Label, Mono } from '@/components/type';
-import type { Question } from '@/lib/questions';
+import { hasAnswerKey, type Question } from '@/lib/questions';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -43,7 +43,7 @@ export function FeedbackSheet({
   onClose,
   onToggleBookmark,
 }: FeedbackSheetProps) {
-  const hasKey = question.answer !== null;
+  const hasKey = hasAnswerKey(question);
   const hasVideo = Boolean(question.videoUrl);
   const unkeyed = !hasKey;
 
@@ -164,7 +164,14 @@ export function FeedbackSheet({
               : 'The right option is below.'}
         </p>
 
-        {question.answer !== null ? (
+        {question.allOptionsCorrect ? (
+          <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
+            <Mono className="text-[1.375rem] leading-none text-correct">ALL</Mono>
+            <p className="min-w-0 text-body text-ink">
+              The marking table accepts every option in this question.
+            </p>
+          </div>
+        ) : question.answer !== null ? (
           <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
             <Mono className="text-[1.375rem] leading-none text-correct">{question.answer + 1}</Mono>
             <p className="min-w-0 text-body text-ink">
