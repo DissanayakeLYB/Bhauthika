@@ -1,0 +1,1206 @@
+{
+  "pdf": "EM_2021_Physics_MCQ.pdf",
+  "dpi": 200,
+  "questions": [
+    {
+      "question": 1,
+      "file": "EM_2021_Physics_MCQ_q01.webp",
+      "page": 1,
+      "box": [
+        106,
+        1002,
+        1189,
+        1185
+      ],
+      "segments": [
+        {
+          "page": 1,
+          "box": [
+            106,
+            1002,
+            1189,
+            1185
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 2,
+      "file": "EM_2021_Physics_MCQ_q02.webp",
+      "page": 1,
+      "box": [
+        105,
+        1169,
+        1451,
+        1351
+      ],
+      "segments": [
+        {
+          "page": 1,
+          "box": [
+            105,
+            1169,
+            1451,
+            1351
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 3,
+      "file": "EM_2021_Physics_MCQ_q03.webp",
+      "page": 1,
+      "box": [
+        105,
+        1356,
+        1417,
+        1488
+      ],
+      "segments": [
+        {
+          "page": 1,
+          "box": [
+            105,
+            1356,
+            1417,
+            1488
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 4,
+      "file": "EM_2021_Physics_MCQ_q04.webp",
+      "page": 1,
+      "box": [
+        110,
+        1487,
+        1443,
+        1673
+      ],
+      "segments": [
+        {
+          "page": 1,
+          "box": [
+            110,
+            1487,
+            1443,
+            1673
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 5,
+      "file": "EM_2021_Physics_MCQ_q05.webp",
+      "page": 1,
+      "box": [
+        116,
+        1671,
+        1343,
+        1795
+      ],
+      "segments": [
+        {
+          "page": 1,
+          "box": [
+            116,
+            1671,
+            1343,
+            1795
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 6,
+      "file": "EM_2021_Physics_MCQ_q06.webp",
+      "page": 1,
+      "box": [
+        109,
+        1806,
+        1450,
+        2002
+      ],
+      "segments": [
+        {
+          "page": 1,
+          "box": [
+            109,
+            1806,
+            1450,
+            2002
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 7,
+      "file": "EM_2021_Physics_MCQ_q07.webp",
+      "page": 1,
+      "box": [
+        111,
+        1998,
+        1454,
+        2166
+      ],
+      "segments": [
+        {
+          "page": 1,
+          "box": [
+            111,
+            1998,
+            1454,
+            2166
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 8,
+      "file": "EM_2021_Physics_MCQ_q08.webp",
+      "page": 2,
+      "box": [
+        129,
+        170,
+        1274,
+        310
+      ],
+      "segments": [
+        {
+          "page": 2,
+          "box": [
+            129,
+            170,
+            1274,
+            310
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 9,
+      "file": "EM_2021_Physics_MCQ_q09.webp",
+      "page": 2,
+      "box": [
+        132,
+        319,
+        1453,
+        1287
+      ],
+      "segments": [
+        {
+          "page": 2,
+          "box": [
+            132,
+            319,
+            1453,
+            1287
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 10,
+      "file": "EM_2021_Physics_MCQ_q10.webp",
+      "page": 2,
+      "box": [
+        115,
+        1309,
+        1340,
+        1589
+      ],
+      "segments": [
+        {
+          "page": 2,
+          "box": [
+            115,
+            1309,
+            1340,
+            1589
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 11,
+      "file": "EM_2021_Physics_MCQ_q11.webp",
+      "page": 2,
+      "box": [
+        111,
+        1610,
+        1448,
+        2194
+      ],
+      "segments": [
+        {
+          "page": 2,
+          "box": [
+            111,
+            1610,
+            1448,
+            2194
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 12,
+      "file": "EM_2021_Physics_MCQ_q12.webp",
+      "page": 3,
+      "box": [
+        107,
+        176,
+        1425,
+        1049
+      ],
+      "segments": [
+        {
+          "page": 3,
+          "box": [
+            107,
+            176,
+            1425,
+            1049
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 13,
+      "file": "EM_2021_Physics_MCQ_q13.webp",
+      "page": 3,
+      "box": [
+        116,
+        1044,
+        1440,
+        2201
+      ],
+      "segments": [
+        {
+          "page": 3,
+          "box": [
+            116,
+            1044,
+            1440,
+            2201
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 14,
+      "file": "EM_2021_Physics_MCQ_q14.webp",
+      "page": 4,
+      "box": [
+        134,
+        184,
+        1446,
+        318
+      ],
+      "segments": [
+        {
+          "page": 4,
+          "box": [
+            134,
+            184,
+            1446,
+            318
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 15,
+      "file": "EM_2021_Physics_MCQ_q15.webp",
+      "page": 4,
+      "box": [
+        132,
+        341,
+        1211,
+        694
+      ],
+      "segments": [
+        {
+          "page": 4,
+          "box": [
+            132,
+            341,
+            1211,
+            694
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 16,
+      "file": "EM_2021_Physics_MCQ_q16.webp",
+      "page": 4,
+      "box": [
+        127,
+        706,
+        1446,
+        877
+      ],
+      "segments": [
+        {
+          "page": 4,
+          "box": [
+            127,
+            706,
+            1446,
+            877
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 17,
+      "file": "EM_2021_Physics_MCQ_q17.webp",
+      "page": 4,
+      "box": [
+        125,
+        900,
+        1446,
+        1194
+      ],
+      "segments": [
+        {
+          "page": 4,
+          "box": [
+            125,
+            900,
+            1446,
+            1194
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 18,
+      "file": "EM_2021_Physics_MCQ_q18.webp",
+      "page": 4,
+      "box": [
+        121,
+        1225,
+        1442,
+        1606
+      ],
+      "segments": [
+        {
+          "page": 4,
+          "box": [
+            121,
+            1225,
+            1442,
+            1606
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 19,
+      "file": "EM_2021_Physics_MCQ_q19.webp",
+      "page": 4,
+      "box": [
+        117,
+        1632,
+        1440,
+        2192
+      ],
+      "segments": [
+        {
+          "page": 4,
+          "box": [
+            117,
+            1632,
+            1440,
+            2192
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 20,
+      "file": "EM_2021_Physics_MCQ_q20.webp",
+      "page": 5,
+      "box": [
+        116,
+        268,
+        1441,
+        409
+      ],
+      "segments": [
+        {
+          "page": 5,
+          "box": [
+            116,
+            268,
+            1441,
+            409
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 21,
+      "file": "EM_2021_Physics_MCQ_q21.webp",
+      "page": 5,
+      "box": [
+        116,
+        434,
+        1400,
+        805
+      ],
+      "segments": [
+        {
+          "page": 5,
+          "box": [
+            116,
+            434,
+            1400,
+            805
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 22,
+      "file": "EM_2021_Physics_MCQ_q22.webp",
+      "page": 5,
+      "box": [
+        117,
+        832,
+        1442,
+        1011
+      ],
+      "segments": [
+        {
+          "page": 5,
+          "box": [
+            117,
+            832,
+            1442,
+            1011
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 23,
+      "file": "EM_2021_Physics_MCQ_q23.webp",
+      "page": 5,
+      "box": [
+        117,
+        1033,
+        1392,
+        1341
+      ],
+      "segments": [
+        {
+          "page": 5,
+          "box": [
+            117,
+            1033,
+            1392,
+            1341
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 24,
+      "file": "EM_2021_Physics_MCQ_q24.webp",
+      "page": 5,
+      "box": [
+        117,
+        1360,
+        1443,
+        1826
+      ],
+      "segments": [
+        {
+          "page": 5,
+          "box": [
+            117,
+            1360,
+            1443,
+            1826
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 25,
+      "file": "EM_2021_Physics_MCQ_q25.webp",
+      "page": 5,
+      "box": [
+        118,
+        1856,
+        1445,
+        2061
+      ],
+      "segments": [
+        {
+          "page": 5,
+          "box": [
+            118,
+            1856,
+            1445,
+            2061
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 26,
+      "file": "EM_2021_Physics_MCQ_q26.webp",
+      "page": 6,
+      "box": [
+        121,
+        185,
+        1458,
+        624
+      ],
+      "segments": [
+        {
+          "page": 6,
+          "box": [
+            121,
+            185,
+            1458,
+            624
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 27,
+      "file": "EM_2021_Physics_MCQ_q27.webp",
+      "page": 6,
+      "box": [
+        120,
+        628,
+        1247,
+        1009
+      ],
+      "segments": [
+        {
+          "page": 6,
+          "box": [
+            120,
+            628,
+            1247,
+            1009
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 28,
+      "file": "EM_2021_Physics_MCQ_q28.webp",
+      "page": 6,
+      "box": [
+        106,
+        1022,
+        1446,
+        1300
+      ],
+      "segments": [
+        {
+          "page": 6,
+          "box": [
+            106,
+            1022,
+            1446,
+            1300
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 29,
+      "file": "EM_2021_Physics_MCQ_q29.webp",
+      "page": 6,
+      "box": [
+        116,
+        1313,
+        1447,
+        1738
+      ],
+      "segments": [
+        {
+          "page": 6,
+          "box": [
+            116,
+            1313,
+            1447,
+            1738
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 30,
+      "file": "EM_2021_Physics_MCQ_q30.webp",
+      "page": 6,
+      "box": [
+        108,
+        1743,
+        1432,
+        2166
+      ],
+      "segments": [
+        {
+          "page": 6,
+          "box": [
+            108,
+            1743,
+            1432,
+            2166
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 31,
+      "file": "EM_2021_Physics_MCQ_q31.webp",
+      "page": 7,
+      "box": [
+        108,
+        195,
+        1451,
+        577
+      ],
+      "segments": [
+        {
+          "page": 7,
+          "box": [
+            108,
+            195,
+            1451,
+            577
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 32,
+      "file": "EM_2021_Physics_MCQ_q32.webp",
+      "page": 7,
+      "box": [
+        105,
+        580,
+        1472,
+        1054
+      ],
+      "segments": [
+        {
+          "page": 7,
+          "box": [
+            105,
+            580,
+            1472,
+            1054
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 33,
+      "file": "EM_2021_Physics_MCQ_q33.webp",
+      "page": 7,
+      "box": [
+        99,
+        1034,
+        1446,
+        1425
+      ],
+      "segments": [
+        {
+          "page": 7,
+          "box": [
+            99,
+            1034,
+            1446,
+            1425
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 34,
+      "file": "EM_2021_Physics_MCQ_q34.webp",
+      "page": 7,
+      "box": [
+        110,
+        1414,
+        1427,
+        1842
+      ],
+      "segments": [
+        {
+          "page": 7,
+          "box": [
+            110,
+            1414,
+            1427,
+            1842
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 35,
+      "file": "EM_2021_Physics_MCQ_q35.webp",
+      "page": 7,
+      "box": [
+        114,
+        1863,
+        1450,
+        2213
+      ],
+      "segments": [
+        {
+          "page": 7,
+          "box": [
+            114,
+            1863,
+            1450,
+            2213
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 36,
+      "file": "EM_2021_Physics_MCQ_q36.webp",
+      "page": 8,
+      "box": [
+        129,
+        199,
+        1430,
+        655
+      ],
+      "segments": [
+        {
+          "page": 8,
+          "box": [
+            129,
+            199,
+            1430,
+            655
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 37,
+      "file": "EM_2021_Physics_MCQ_q37.webp",
+      "page": 8,
+      "box": [
+        123,
+        687,
+        1441,
+        1106
+      ],
+      "segments": [
+        {
+          "page": 8,
+          "box": [
+            123,
+            687,
+            1441,
+            1106
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 38,
+      "file": "EM_2021_Physics_MCQ_q38.webp",
+      "page": 8,
+      "box": [
+        109,
+        1116,
+        1448,
+        1276
+      ],
+      "segments": [
+        {
+          "page": 8,
+          "box": [
+            109,
+            1116,
+            1448,
+            1276
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 39,
+      "file": "EM_2021_Physics_MCQ_q39.webp",
+      "page": 8,
+      "box": [
+        116,
+        1286,
+        1436,
+        1748
+      ],
+      "segments": [
+        {
+          "page": 8,
+          "box": [
+            116,
+            1286,
+            1436,
+            1748
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 40,
+      "file": "EM_2021_Physics_MCQ_q40.webp",
+      "page": 8,
+      "box": [
+        111,
+        1772,
+        1414,
+        2205
+      ],
+      "segments": [
+        {
+          "page": 8,
+          "box": [
+            111,
+            1772,
+            1414,
+            2205
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 41,
+      "file": "EM_2021_Physics_MCQ_q41.webp",
+      "page": 9,
+      "box": [
+        116,
+        186,
+        1451,
+        465
+      ],
+      "segments": [
+        {
+          "page": 9,
+          "box": [
+            116,
+            186,
+            1451,
+            465
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 42,
+      "file": "EM_2021_Physics_MCQ_q42.webp",
+      "page": 9,
+      "box": [
+        118,
+        474,
+        1451,
+        716
+      ],
+      "segments": [
+        {
+          "page": 9,
+          "box": [
+            118,
+            474,
+            1451,
+            716
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 43,
+      "file": "EM_2021_Physics_MCQ_q43.webp",
+      "page": 9,
+      "box": [
+        113,
+        725,
+        1454,
+        1896
+      ],
+      "segments": [
+        {
+          "page": 9,
+          "box": [
+            113,
+            725,
+            1454,
+            1896
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 44,
+      "file": "EM_2021_Physics_MCQ_q44.webp",
+      "page": 10,
+      "box": [
+        131,
+        191,
+        1447,
+        704
+      ],
+      "segments": [
+        {
+          "page": 10,
+          "box": [
+            131,
+            191,
+            1447,
+            704
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 45,
+      "file": "EM_2021_Physics_MCQ_q45.webp",
+      "page": 10,
+      "box": [
+        118,
+        721,
+        1405,
+        1636
+      ],
+      "segments": [
+        {
+          "page": 10,
+          "box": [
+            118,
+            721,
+            1405,
+            1636
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 46,
+      "file": "EM_2021_Physics_MCQ_q46.webp",
+      "page": 10,
+      "box": [
+        110,
+        1649,
+        1452,
+        2067
+      ],
+      "segments": [
+        {
+          "page": 10,
+          "box": [
+            110,
+            1649,
+            1452,
+            2067
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 47,
+      "file": "EM_2021_Physics_MCQ_q47.webp",
+      "page": 11,
+      "box": [
+        109,
+        192,
+        1406,
+        757
+      ],
+      "segments": [
+        {
+          "page": 11,
+          "box": [
+            109,
+            192,
+            1406,
+            757
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 48,
+      "file": "EM_2021_Physics_MCQ_q48.webp",
+      "page": 11,
+      "box": [
+        110,
+        782,
+        1438,
+        950
+      ],
+      "segments": [
+        {
+          "page": 11,
+          "box": [
+            110,
+            782,
+            1438,
+            950
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 49,
+      "file": "EM_2021_Physics_MCQ_q49.webp",
+      "page": 11,
+      "box": [
+        111,
+        974,
+        1377,
+        1386
+      ],
+      "segments": [
+        {
+          "page": 11,
+          "box": [
+            111,
+            974,
+            1377,
+            1386
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    },
+    {
+      "question": 50,
+      "file": "EM_2021_Physics_MCQ_q50.webp",
+      "page": 11,
+      "box": [
+        102,
+        1407,
+        1433,
+        2145
+      ],
+      "segments": [
+        {
+          "page": 11,
+          "box": [
+            102,
+            1407,
+            1433,
+            2145
+          ],
+          "review": []
+        }
+      ],
+      "review": []
+    }
+  ]
+}
