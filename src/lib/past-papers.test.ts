@@ -52,6 +52,9 @@ describe('past-paper image bank', () => {
 
   it('turns each filled-in key entry into a 0-based option index', () => {
     PAPERS.forEach((paper) => {
+      // An entry per question, so a short key cannot silently unmark a tail.
+      expect(paper.key, String(paper.year)).toHaveLength(paper.count);
+
       const items = PAST_PAPER_QUESTIONS.filter((question) => question.year === paper.year);
       items.forEach((question, index) => {
         const printed = paper.key[index] ?? null;

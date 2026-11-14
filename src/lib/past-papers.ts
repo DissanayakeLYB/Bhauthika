@@ -79,11 +79,14 @@ export const EM_2023_ANSWER_KEY: (number | null)[] = Array.from(
   () => null,
 );
 
-/** 2022 key, same convention as the 2024 one: printed option numbers or null. */
-export const EM_2022_ANSWER_KEY: (number | null)[] = Array.from(
-  { length: EM_2022_MCQ_COUNT },
-  () => null,
-);
+/**
+ * 2022 key, same convention: the option number printed on the paper (1-5) for
+ * questions 1-50, in paper order, taken from the paper's marking table.
+ */
+export const EM_2022_ANSWER_KEY: (number | null)[] = [
+  4, 5, 5, 1, 4, 5, 4, 2, 2, 3, 3, 3, 1, 5, 2, 5, 4, 2, 1, 1, 2, 3, 4, 2, 2, 4, 3, 1, 5, 3, 5, 4, 3, 4,
+  4, 2, 4, 5, 1, 2, 5, 1, 2, 3, 1, 2, 1, 4, 3, 2,
+];
 
 /** 2021 key, same convention again: printed option numbers or null. */
 export const EM_2021_ANSWER_KEY: (number | null)[] = Array.from(
