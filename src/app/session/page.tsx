@@ -211,12 +211,12 @@ function QuestionView() {
             <legend className="sr-only">Choose one answer</legend>
             {question.options.map((option, optionIndex) => {
               const isSelected = selected === optionIndex;
-              // When every option is accepted, the one this student picked is
-              // the correct row; there is no single answer to point at.
+              // When several options are accepted, the one this student picked
+              // is the correct row; there is no single answer to point at.
               const isCorrectOption =
                 submitted &&
                 hasKey &&
-                (question.allOptionsCorrect === true ? isSelected : optionIndex === question.answer);
+                (question.acceptedAnswers ? isSelected && correct : optionIndex === question.answer);
               const isIncorrectChoice = submitted && isSelected && !isCorrectOption;
 
               return (

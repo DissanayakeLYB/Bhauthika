@@ -44,6 +44,11 @@ export function FeedbackSheet({
   onToggleBookmark,
 }: FeedbackSheetProps) {
   const hasKey = hasAnswerKey(question);
+  const acceptedLabel = question.acceptedAnswers
+    ? question.acceptedAnswers.length >= question.options.length
+      ? 'ALL'
+      : question.acceptedAnswers.map((option) => option + 1).join(' / ')
+    : null;
   const hasVideo = Boolean(question.videoUrl);
   const unkeyed = !hasKey;
 
@@ -164,11 +169,13 @@ export function FeedbackSheet({
               : 'The right option is below.'}
         </p>
 
-        {question.allOptionsCorrect ? (
+        {acceptedLabel ? (
           <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
-            <Mono className="text-[1.375rem] leading-none text-correct">ALL</Mono>
+            <Mono className="text-[1.375rem] leading-none text-correct">{acceptedLabel}</Mono>
             <p className="min-w-0 text-body text-ink">
-              The marking table accepts every option in this question.
+              {acceptedLabel === 'ALL'
+                ? 'The marking table accepts every option in this question.'
+                : 'The marking table accepts more than one option in this question.'}
             </p>
           </div>
         ) : question.answer !== null ? (

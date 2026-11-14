@@ -61,12 +61,19 @@ describe('past-paper image bank', () => {
 
         if (printed === 'all') {
           // The table prints "ALL" where every option was accepted.
-          expect(question.allOptionsCorrect, question.id).toBe(true);
+          expect(question.acceptedAnswers, question.id).toEqual([0, 1, 2, 3, 4]);
           expect(question.answer, question.id).toBeNull();
           return;
         }
 
-        expect(question.allOptionsCorrect, question.id).toBeUndefined();
+        if (printed !== null && typeof printed === 'object') {
+          // A printed pair such as "02/04" accepts both options.
+          expect(question.acceptedAnswers, question.id).toEqual(printed.map((n) => n - 1));
+          expect(question.answer, question.id).toBeNull();
+          return;
+        }
+
+        expect(question.acceptedAnswers, question.id).toBeUndefined();
         expect(question.answer, question.id).toBe(printed === null ? null : printed - 1);
       });
     });

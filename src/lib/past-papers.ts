@@ -56,22 +56,23 @@ export function em2021ImageUrl(number: number): string {
  */
 export const PLACEHOLDER_VIDEO_URL = 'https://www.youtube.com/watch?v=XXXXXXXXXXX';
 
-/** 2025 key, same convention as the others: printed option numbers or null. */
-export const EM_2025_ANSWER_KEY: (number | null)[] = Array.from(
-  { length: EM_2025_MCQ_COUNT },
-  () => null,
-);
+/**
+ * 2025 key from the paper's marking table. One entry is printed as "02/04":
+ * both of those options were accepted for that question.
+ */
+export const EM_2025_ANSWER_KEY: (number | readonly number[] | null)[] = [
+  5, 3, 1, 4, 3, 5, 1, 2, 2, 1, 2, 2, 4, 5, [2, 4], 5, 3, 1, 2, 2, 2, 3, 3, 4, 4, 1, 4, 5, 1, 5, 1, 1, 1,
+  3, 1, 4, 3, 3, 4, 3, 2, 3, 2, 3, 5, 2, 5, 2, 3, 4,
+];
 
 /**
- * Answer key in paper order, written as the option numbers printed on the paper
- * (1-5). `null` means the key has not been entered yet: the question is still
- * recorded, but it is not marked. Fill an entry in and that question starts
- * showing correct/incorrect plus the explanation video.
+ * 2024 key from the paper's marking table: the option number (1-5) for
+ * questions 1-50, in paper order.
  */
-export const EM_2024_ANSWER_KEY: (number | null)[] = Array.from(
-  { length: EM_2024_MCQ_COUNT },
-  () => null,
-);
+export const EM_2024_ANSWER_KEY: (number | null)[] = [
+  5, 1, 5, 1, 5, 3, 3, 2, 3, 5, 2, 4, 5, 4, 4, 2, 5, 2, 4, 3, 4, 2, 2, 3, 2, 1, 1, 3, 2, 5, 4, 2, 2, 3,
+  3, 4, 2, 3, 5, 1, 3, 1, 1, 1, 4, 1, 4, 2, 4, 5,
+];
 
 /**
  * 2023 key from the paper's marking table. `'all'` is the table's "ALL": every
@@ -91,11 +92,14 @@ export const EM_2022_ANSWER_KEY: (number | null)[] = [
   4, 2, 4, 5, 1, 2, 5, 1, 2, 3, 1, 2, 1, 4, 3, 2,
 ];
 
-/** 2021 key, same convention again: printed option numbers or null. */
-export const EM_2021_ANSWER_KEY: (number | null)[] = Array.from(
-  { length: EM_2021_MCQ_COUNT },
-  () => null,
-);
+/**
+ * 2021 key from the paper's marking table: the option number (1-5) for
+ * questions 1-50, in paper order.
+ */
+export const EM_2021_ANSWER_KEY: (number | null)[] = [
+  2, 1, 4, 5, 4, 4, 4, 3, 2, 1, 4, 3, 1, 5, 3, 2, 1, 5, 5, 1, 3, 2, 1, 2, 2, 5, 2, 3, 1, 2, 3, 1, 1, 4,
+  3, 5, 1, 3, 2, 3, 4, 4, 1, 3, 2, 4, 2, 3, 5, 5,
+];
 
 /** Printed option number (1-based) to option index, or null when unkeyed. */
 function toAnswerIndex(printed: number | null): number | null {
@@ -107,7 +111,7 @@ function toAnswerIndex(printed: number | null): number | null {
 interface PaperScans {
   year: number;
   count: number;
-  answerKey: readonly (number | 'all' | null)[];
+  answerKey: readonly (number | 'all' | readonly number[] | null)[];
   imageUrl: (number: number) => string;
 }
 
@@ -130,6 +134,13 @@ export const PAST_PAPER_QUESTIONS: Question[] = SCAN_PAPERS.flatMap((scanned) =>
   Array.from({ length: scanned.count }, (_, index): Question => {
     const number = index + 1;
     const printed = scanned.answerKey[index] ?? null;
+    // "ALL" is the whole option set; a list is the options the table accepted.
+    const accepted =
+      printed === 'all'
+        ? OPTION_NUMBERS.map((_, optionIndex) => optionIndex)
+        : Array.isArray(printed)
+          ? printed.map((option) => option - 1)
+          : null;
     return {
       id: `em-${scanned.year}-q${String(number).padStart(2, '0')}`,
       year: scanned.year,
@@ -138,7 +149,7 @@ export const PAST_PAPER_QUESTIONS: Question[] = SCAN_PAPERS.flatMap((scanned) =>
       stem: '',
       options: [...OPTION_NUMBERS],
       answer: toAnswerIndex(typeof printed === 'number' ? printed : null),
-      allOptionsCorrect: printed === 'all' || undefined,
+      acceptedAnswers: accepted ?? undefined,
       hint: '',
       steps: [],
       questionImageUrl: scanned.imageUrl(number),
