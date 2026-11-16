@@ -56,6 +56,28 @@ export function em2021ImageUrl(number: number): string {
  */
 export const PLACEHOLDER_VIDEO_URL = 'https://www.youtube.com/watch?v=XXXXXXXXXXX';
 
+/** Canonical watch link for a video id, so every item stores the same shape. */
+function youtubeUrl(videoId: string): string {
+  return `https://www.youtube.com/watch?v=${videoId}`;
+}
+
+/** 2025 walkthrough videos, keyed by the question number printed on the paper. */
+export const EM_2025_VIDEO_IDS: Readonly<Record<number, string>> = {
+  1: 'xbWG22Rjk2s',
+  2: 'pS3R-ZFuqy0',
+  3: 'MCDx9F4PNcA',
+  4: 'tIxRuTRirBo',
+  5: 'bsQeK_HnP4g',
+  6: 'IxWEBtVTh84',
+  7: 'gWEt9fjPCxE',
+  8: 'hO1dPGmx4r4',
+  9: 'nmW787w6eeo',
+  10: '7GzSPOhElaU',
+  11: 'rJrp7BqGGe8',
+  12: 'obdg008QRGo',
+  13: 'nY4g8upo3hs',
+};
+
 /**
  * 2025 key from the paper's marking table. One entry is printed as "02/04":
  * both of those options were accepted for that question.
@@ -113,11 +135,19 @@ interface PaperScans {
   count: number;
   answerKey: readonly (number | 'all' | readonly number[] | null)[];
   imageUrl: (number: number) => string;
+  /** Walkthrough video ids by printed question number; the rest use the placeholder. */
+  videos?: Readonly<Record<number, string>>;
 }
 
 /** Every paper that ships as scans, newest first. Add a year here to list it. */
 const SCAN_PAPERS: PaperScans[] = [
-  { year: 2025, count: EM_2025_MCQ_COUNT, answerKey: EM_2025_ANSWER_KEY, imageUrl: em2025ImageUrl },
+  {
+    year: 2025,
+    count: EM_2025_MCQ_COUNT,
+    answerKey: EM_2025_ANSWER_KEY,
+    imageUrl: em2025ImageUrl,
+    videos: EM_2025_VIDEO_IDS,
+  },
   { year: 2024, count: EM_2024_MCQ_COUNT, answerKey: EM_2024_ANSWER_KEY, imageUrl: em2024ImageUrl },
   { year: 2023, count: EM_2023_MCQ_COUNT, answerKey: EM_2023_ANSWER_KEY, imageUrl: em2023ImageUrl },
   { year: 2022, count: EM_2022_MCQ_COUNT, answerKey: EM_2022_ANSWER_KEY, imageUrl: em2022ImageUrl },
@@ -134,6 +164,7 @@ export const PAST_PAPER_QUESTIONS: Question[] = SCAN_PAPERS.flatMap((scanned) =>
   Array.from({ length: scanned.count }, (_, index): Question => {
     const number = index + 1;
     const printed = scanned.answerKey[index] ?? null;
+    const videoId = scanned.videos?.[number];
     // "ALL" is the whole option set; a list is the options the table accepted.
     const accepted =
       printed === 'all'
@@ -153,7 +184,7 @@ export const PAST_PAPER_QUESTIONS: Question[] = SCAN_PAPERS.flatMap((scanned) =>
       hint: '',
       steps: [],
       questionImageUrl: scanned.imageUrl(number),
-      videoUrl: PLACEHOLDER_VIDEO_URL,
+      videoUrl: videoId ? youtubeUrl(videoId) : PLACEHOLDER_VIDEO_URL,
     };
   }),
 );

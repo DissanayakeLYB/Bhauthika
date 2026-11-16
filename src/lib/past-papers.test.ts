@@ -10,7 +10,9 @@ import {
   EM_2024_MCQ_COUNT,
   EM_2025_ANSWER_KEY,
   EM_2025_MCQ_COUNT,
+  EM_2025_VIDEO_IDS,
   PAST_PAPER_QUESTIONS,
+  PLACEHOLDER_VIDEO_URL,
 } from './past-papers';
 
 const PAPERS = [
@@ -43,6 +45,21 @@ describe('past-paper image bank', () => {
         expect(question.videoUrl, question.id).toMatch(/^https:\/\/www\.youtube\.com\/watch\?v=/);
       });
     });
+  });
+
+  it('carries the supplied 2025 walkthrough videos and leaves the rest unset', () => {
+    const items = PAST_PAPER_QUESTIONS.filter((question) => question.year === 2025);
+    const ids = Object.keys(EM_2025_VIDEO_IDS).map(Number).sort((a, b) => a - b);
+
+    ids.forEach((number) => {
+      expect(items[number - 1].videoUrl, String(number)).toBe(
+        `https://www.youtube.com/watch?v=${EM_2025_VIDEO_IDS[number]}`,
+      );
+    });
+
+    expect(
+      items.slice(ids.length).every((question) => question.videoUrl === PLACEHOLDER_VIDEO_URL),
+    ).toBe(true);
   });
 
   it('keeps ids unique across papers', () => {
