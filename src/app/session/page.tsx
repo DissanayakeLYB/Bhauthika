@@ -105,6 +105,8 @@ function QuestionView() {
   const bookmarked = bookmarks.includes(question.id);
   const topic = question.topicId ? TOPIC_MAP[question.topicId] : null;
   const hasHint = question.steps.length > 0;
+  // An exam paper answers silently: no verdict, no sheet, until question 50.
+  const exam = active.exam === true;
 
   const submit = () => {
     if (selected === null || submitted) return;
@@ -112,7 +114,7 @@ function QuestionView() {
     setSubmitted(true);
     // Every set gets feedback: keyed items show a verdict, unkeyed ones still
     // offer the explanation video.
-    setSheetOpen(true);
+    if (!exam) setSheetOpen(true);
   };
 
   const next = () => {
@@ -211,13 +213,15 @@ function QuestionView() {
             <legend className="sr-only">Choose one answer</legend>
             {question.options.map((option, optionIndex) => {
               const isSelected = selected === optionIndex;
+              // An exam paper shows no verdict, only which option was taken.
+              const showVerdict = submitted && !exam;
               // When several options are accepted, the one this student picked
               // is the correct row; there is no single answer to point at.
               const isCorrectOption =
-                submitted &&
+                showVerdict &&
                 hasKey &&
                 (question.acceptedAnswers ? isSelected && correct : optionIndex === question.answer);
-              const isIncorrectChoice = submitted && isSelected && !isCorrectOption;
+              const isIncorrectChoice = showVerdict && isSelected && !isCorrectOption;
 
               return (
                 <label
@@ -225,7 +229,7 @@ function QuestionView() {
                   className={cn(
                     'choice-row relative flex w-full items-start gap-5 border-t border-line py-5 pl-4 transition-colors',
                     submitted ? 'cursor-default' : 'cursor-pointer hover:opacity-80',
-                    submitted && !isCorrectOption && !isIncorrectChoice && 'opacity-50',
+                    !exam && submitted && !isCorrectOption && !isIncorrectChoice && 'opacity-50',
                   )}
                 >
                   <span
@@ -236,7 +240,7 @@ function QuestionView() {
                         ? 'bg-correct'
                         : isIncorrectChoice
                           ? 'bg-wrong'
-                          : !submitted && isSelected
+                          : isSelected && (!submitted || exam)
                             ? 'bg-ink'
                             : 'bg-transparent',
                     )}
@@ -294,6 +298,12 @@ function QuestionView() {
             })}
           </fieldset>
 
+          {exam && submitted ? (
+            <p role="status" className="mt-6 text-meta text-muted">
+              Answer saved. Your answers and the time appear after the last question.
+            </p>
+          ) : null}
+
           {submitted && !hasKey ? (
             <p role="status" className="mt-6 text-meta text-muted">
               Answer recorded. This paper has no answer key yet, so the set is not marked.
@@ -344,7 +354,7 @@ function QuestionView() {
               onClick={submit}
             />
           )}
-          {submitted && !sheetOpen ? (
+          {submitted && !sheetOpen && !exam ? (
             <ActionButton
               label="View explanation"
               variant="text"
@@ -356,7 +366,7 @@ function QuestionView() {
       </div>
 
       <FeedbackSheet
-        open={sheetOpen}
+        open={sheetOpen && !exam}
         question={question}
         correct={correct}
         chosen={selected}

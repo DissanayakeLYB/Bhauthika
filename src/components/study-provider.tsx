@@ -34,6 +34,8 @@ interface StartSessionOptions {
   year?: number;
   /** Keep the printed order instead of shuffling, for a paper. */
   ordered?: boolean;
+  /** Hold feedback back until the set is finished, and report the time taken. */
+  exam?: boolean;
   /** Where the set came from; restored with the saved set. */
   mode?: ActiveSetMode;
 }
@@ -232,7 +234,13 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
             .filter((q): q is Question => Boolean(q))
         : [];
       if (stored && questions.length === stored.questionIds.length) {
-        setActive({ questions, index: stored.index, answers: stored.answers });
+        setActive({
+          questions,
+          index: stored.index,
+          answers: stored.answers,
+          exam: stored.exam,
+          startedAt: stored.startedAt ?? undefined,
+        });
         setMode(stored.mode);
         // Never reopen the popup on an unanswered question.
         setSheetOpen(stored.sheetOpen && stored.answers[stored.index] !== null);
@@ -271,6 +279,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       index: active.index,
       answers: active.answers,
       sheetOpen,
+      exam: active.exam === true,
+      startedAt: active.startedAt ?? null,
     });
   }, [ready, active, sheetOpen, mode, user?.id]);
 
@@ -294,12 +304,18 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const startSession = useCallback(
     (
       topicIds: readonly TopicId[] | 'all',
-      { count = 10, fill = false, year, ordered = false, mode: nextMode }: StartSessionOptions = {},
+      { count = 10, fill = false, year, ordered = false, exam = false, mode: nextMode }: StartSessionOptions = {},
     ) => {
       const picked = pickQuestions(allQuestions, { topicIds, count, fill, year, ordered });
       if (picked.length === 0) return 0;
       // A new set replaces the saved one, which also drops the previous set.
-      setActive({ questions: picked, index: 0, answers: picked.map(() => null) });
+      setActive({
+        questions: picked,
+        index: 0,
+        answers: picked.map(() => null),
+        exam,
+        startedAt: Date.now(),
+      });
       setMode(nextMode ?? (year ? 'past-paper' : 'mixed'));
       setSheetOpen(false);
       setResult(null);
@@ -377,8 +393,21 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       active.questions,
       active.answers,
     );
+    // An exam run reveals every pick and the clock; a normal set has neither.
+    const revealed: SessionResult = active.exam
+      ? {
+          ...nextResult,
+          review: active.questions.map((question, index) => ({
+            questionId: question.id,
+            chosen: active.answers[index] ?? null,
+          })),
+          ...(active.startedAt
+            ? { durationSeconds: Math.max(0, Math.round((Date.now() - active.startedAt) / 1000)) }
+            : {}),
+        }
+      : nextResult;
     setProgress(nextProgress);
-    setResult(nextResult);
+    setResult(revealed);
     setSheetOpen(false);
     setActive(null);
   }, [active, progress, recordAttempt]);

@@ -6,9 +6,21 @@ import { useStudy } from '@/components/study-provider';
 import { ActionButton } from '@/components/button';
 import { Label, Mono } from '@/components/type';
 import { TopicRow } from '@/components/topic-row';
+import { answerLabel, isCorrectChoice } from '@/lib/questions';
+import { cn } from '@/lib/utils';
+
+/** Exam clock in minutes and seconds, hours only when a paper runs that long. */
+function formatDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = seconds % 60;
+  return hours > 0
+    ? `${hours}h ${String(minutes).padStart(2, '0')}m`
+    : `${minutes}m ${String(rest).padStart(2, '0')}s`;
+}
 
 export default function SummaryPage() {
-  const { result, startSession } = useStudy();
+  const { result, startSession, questions } = useStudy();
   const router = useRouter();
 
   if (!result) {
@@ -29,6 +41,9 @@ export default function SummaryPage() {
 
   // Weak topics first: the units that scored lowest in this set.
   const weakTopics = [...result.topics].sort((a, b) => a.accuracy - b.accuracy).slice(0, 3);
+  // An exam paper carries every pick, so the answers can be revealed here.
+  const review = result.review ?? [];
+  const questionsById = new Map(questions.map((question) => [question.id, question]));
 
   const practiseAgain = () => {
     const total = startSession('all', { count: result.total, fill: true });
@@ -70,6 +85,54 @@ export default function SummaryPage() {
         <p className="mt-2 text-meta text-muted">
           {result.answered - result.total} of these answers are unmarked.
         </p>
+      ) : null}
+      {result.durationSeconds ? (
+        <p className="mt-2 font-mono text-meta text-muted tabular-nums">
+          Time {formatDuration(result.durationSeconds)}
+        </p>
+      ) : null}
+
+      {review.length > 0 ? (
+        <section aria-labelledby="answers-title" className="mt-16">
+          <h2 id="answers-title" className="text-[1.125rem] leading-[1.3] font-medium text-ink">
+            Your answers
+          </h2>
+          <ul className="mt-6 border-b border-line">
+            {review.map((item, itemIndex) => {
+              const question = questionsById.get(item.questionId);
+              if (!question) return null;
+              const right = isCorrectChoice(question, item.chosen);
+              return (
+                <li
+                  key={`${item.questionId}-${itemIndex}`}
+                  className="border-t border-line py-3"
+                >
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="font-mono text-meta text-muted tabular-nums">
+                      Q{String(question.number).padStart(2, '0')}
+                    </span>
+                    <span
+                      className={cn(
+                        'font-mono text-label tracking-[0.14em] uppercase',
+                        right ? 'text-correct' : 'text-wrong',
+                      )}
+                    >
+                      {right ? 'Correct' : 'Incorrect'}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-meta text-muted">
+                    You chose{' '}
+                    <span className="font-mono text-ink tabular-nums">
+                      {item.chosen === null ? '—' : item.chosen + 1}
+                    </span>{' '}
+                    · Answer{' '}
+                    <span className="font-mono text-ink">{answerLabel(question) ?? '—'}</span>
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       ) : null}
 
       <section aria-labelledby="weak-title" className="mt-16">

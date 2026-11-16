@@ -41,6 +41,22 @@ export function hasAnswerKey(
   return question.answer !== null || (question.acceptedAnswers?.length ?? 0) > 0;
 }
 
+/**
+ * The answer as printed on the marking table: "ALL", "2 / 4", "5", or null
+ * when the question carries no key.
+ */
+export function answerLabel(
+  question: Pick<Question, 'answer' | 'acceptedAnswers' | 'options'>,
+): string | null {
+  const accepted = question.acceptedAnswers;
+  if (accepted?.length) {
+    return accepted.length >= question.options.length
+      ? 'ALL'
+      : accepted.map((option) => option + 1).join(' / ');
+  }
+  return question.answer !== null ? String(question.answer + 1) : null;
+}
+
 /** True when the option this student picked is accepted by the key. */
 export function isCorrectChoice(
   question: Pick<Question, 'answer' | 'acceptedAnswers'>,

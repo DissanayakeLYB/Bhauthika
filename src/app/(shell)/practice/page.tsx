@@ -13,6 +13,12 @@ import { cn } from '@/lib/utils';
 
 const COUNTS = [5, 10, 15] as const;
 
+/** When a paper shows its answers: after each question, or all at the end. */
+const FEEDBACK = [
+  { label: 'After each question', exam: false },
+  { label: 'At the end', exam: true },
+] as const;
+
 type Mode = 'unit' | 'year';
 
 /**
@@ -45,6 +51,8 @@ function PracticeFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [count, setCount] = useState<number>(10);
+  // Exam mode holds the answers back until the last question is answered.
+  const [exam, setExam] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const rawMode = searchParams.get('mode');
@@ -61,6 +69,7 @@ function PracticeFlow() {
       fill,
       year,
       ordered: year !== undefined,
+      exam: year !== undefined && exam,
       mode: year !== undefined ? 'past-paper' : topicIds === 'all' ? 'mixed' : 'unit',
     });
     if (total === 0) {
@@ -150,6 +159,35 @@ function PracticeFlow() {
               </button>
             ))}
           </div>
+        </div>
+      ) : null}
+
+      {mode === 'year' ? (
+        <div>
+          <Label className="text-muted">Feedback</Label>
+          <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Feedback">
+            {FEEDBACK.map((option) => (
+              <button
+                key={option.label}
+                type="button"
+                aria-pressed={exam === option.exam}
+                onClick={() => setExam(option.exam)}
+                className={cn(
+                  'min-h-11 rounded-sm border px-4 font-mono text-meta transition-colors',
+                  exam === option.exam
+                    ? 'border-ink text-ink'
+                    : 'border-line text-muted hover:border-muted hover:text-ink',
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-3 text-meta text-muted">
+            {exam
+              ? 'Answers, your picks and the time appear after question 50.'
+              : 'The answer appears after each question.'}
+          </p>
         </div>
       ) : null}
 

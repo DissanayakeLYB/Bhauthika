@@ -5,7 +5,8 @@ import { createPortal } from 'react-dom';
 import { Formula } from '@/components/formula';
 import { ActionButton } from '@/components/button';
 import { Label, Mono } from '@/components/type';
-import { hasAnswerKey, type Question } from '@/lib/questions';
+import { answerLabel as formatAnswer, hasAnswerKey, type Question } from '@/lib/questions';
+import { PLACEHOLDER_VIDEO_URL } from '@/lib/past-papers';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -47,19 +48,18 @@ export function FeedbackSheet({
   onToggleBookmark,
 }: FeedbackSheetProps) {
   const hasKey = hasAnswerKey(question);
-  const hasVideo = Boolean(question.videoUrl);
+  // A scan still on the placeholder has no walkthrough to offer, so it shows no
+  // video block and the report panel does not suggest one is wrong.
+  const videoUrl =
+    question.videoUrl && question.videoUrl !== PLACEHOLDER_VIDEO_URL ? question.videoUrl : null;
+  const hasVideo = videoUrl !== null;
   const unkeyed = !hasKey;
   const verdict = unkeyed ? 'Recorded' : correct ? 'Correct' : 'Incorrect';
   // Past-paper items are answered on the scan, so their sheet states the answer
   // only: no caption beside it and no verdict sentence.
   const isScan = Boolean(question.questionImageUrl);
-  const acceptedLabel = question.acceptedAnswers
-    ? question.acceptedAnswers.length >= question.options.length
-      ? 'ALL'
-      : question.acceptedAnswers.map((option) => option + 1).join(' / ')
-    : null;
-  const answerLabel =
-    acceptedLabel ?? (question.answer !== null ? String(question.answer + 1) : null);
+  const acceptedLabel = question.acceptedAnswers ? formatAnswer(question) : null;
+  const answerLabel = formatAnswer(question);
   // A paper answer is a number, so the pick has to be spelled out beside it:
   // otherwise a wrong sheet says 5 and never says what was chosen.
   const choiceNote =
@@ -214,16 +214,16 @@ export function FeedbackSheet({
           </div>
         ) : null}
 
-        {question.videoUrl ? (
+        {videoUrl ? (
           <div className="mt-8 border-t border-line pt-6">
             <Label className="text-muted">Explanation video</Label>
             <a
-              href={question.videoUrl}
+              href={videoUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 block break-words font-mono text-meta text-ink underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
             >
-              {question.videoUrl}
+              {videoUrl}
             </a>
           </div>
         ) : null}

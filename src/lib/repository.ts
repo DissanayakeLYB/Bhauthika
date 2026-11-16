@@ -1,7 +1,7 @@
 import { QUESTION_MAP } from './questions';
 import { TOPIC_MAP, TOPICS, type TopicId } from './topics';
 import { clampPercent, type StudyProgress, type TopicProgress } from './progress';
-import type { SessionResult, SessionTopicResult } from './session';
+import type { SessionAnswerReview, SessionResult, SessionTopicResult } from './session';
 
 /** The subset of the Web Storage API this app needs (easy to stub in tests). */
 export interface KeyValueStorage {
@@ -140,6 +140,27 @@ function parseStoredResult(raw: string): SessionResult | null {
     });
   }
 
+  // Exam extras are optional: a result saved before them simply has neither.
+  const durationSeconds =
+    typeof value.durationSeconds === 'number' && value.durationSeconds > 0
+      ? Math.round(value.durationSeconds)
+      : undefined;
+  const review: SessionAnswerReview[] = [];
+  if (Array.isArray(value.review)) {
+    value.review.forEach((entry) => {
+      if (!isRecord(entry)) return;
+      const questionId = entry.questionId;
+      // Only the shape is checked: the summary skips ids it cannot resolve.
+      if (typeof questionId !== 'string' || questionId.length === 0) return;
+      const chosen = entry.chosen;
+      review.push({
+        questionId,
+        chosen:
+          typeof chosen === 'number' && Number.isInteger(chosen) && chosen >= 0 ? chosen : null,
+      });
+    });
+  }
+
   return {
     correct,
     total,
@@ -147,6 +168,8 @@ function parseStoredResult(raw: string): SessionResult | null {
     answered: Math.max(total, Math.round(finiteNumber(value.answered, total))),
     points: Math.max(0, Math.round(finiteNumber(value.points, 0))),
     topics,
+    ...(durationSeconds === undefined ? {} : { durationSeconds }),
+    ...(review.length === 0 ? {} : { review }),
   };
 }
 
@@ -236,6 +259,10 @@ export interface StoredActiveSet {
   answers: (number | null)[];
   /** Whether the answer popup was open on the current question. */
   sheetOpen: boolean;
+  /** Exam mode: answers are held back until the set is finished. */
+  exam: boolean;
+  /** Epoch ms the set started, or null when no clock was recorded. */
+  startedAt: number | null;
 }
 
 /** Per-student key: one account never restores another account's set. */
@@ -269,6 +296,9 @@ export function parseStoredActiveSet(raw: string): StoredActiveSet | null {
       typeof answer === 'number' && Number.isInteger(answer) && answer >= 0 ? answer : null,
     ),
     sheetOpen: value.sheetOpen === true,
+    exam: value.exam === true,
+    startedAt:
+      typeof value.startedAt === 'number' && value.startedAt > 0 ? value.startedAt : null,
   };
 }
 

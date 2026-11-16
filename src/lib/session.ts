@@ -7,6 +7,10 @@ export interface ActiveSession {
   index: number;
   /** Selected option per question; null until answered. */
   answers: (number | null)[];
+  /** Exam mode: nothing is revealed until the set is finished. */
+  exam?: boolean;
+  /** Epoch ms the set started, so the finished paper can report its time. */
+  startedAt?: number;
 }
 
 export interface SessionTopicResult {
@@ -17,6 +21,12 @@ export interface SessionTopicResult {
   accuracy: number;
 }
 
+/** One answered question, kept so an exam paper can be revealed at the end. */
+export interface SessionAnswerReview {
+  questionId: string;
+  chosen: number | null;
+}
+
 export interface SessionResult {
   correct: number;
   /** Questions that carried an answer key and were therefore marked. */
@@ -25,6 +35,10 @@ export interface SessionResult {
   answered: number;
   points: number;
   topics: SessionTopicResult[];
+  /** Exam runs only: every question with the option this student picked. */
+  review?: SessionAnswerReview[];
+  /** Exam runs only: how long the paper took, in seconds. */
+  durationSeconds?: number;
 }
 
 interface PickQuestionsOptions {

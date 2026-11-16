@@ -4,6 +4,7 @@ import {
   LocalProgressRepository,
   LocalResultRepository,
   LocalSessionRepository,
+  parseStoredActiveSet,
   parseStoredProgress,
   parseStoredSession,
   progressStorageKey,
@@ -143,6 +144,49 @@ describe('session and result repositories', () => {
       JSON.stringify({ questionIds: ['me-stopping'], index: 8, answers: [null] }),
     );
     expect(parsed?.index).toBe(0);
+  });
+
+  it('keeps an exam set and the clock it started with', () => {
+    const parsed = parseStoredActiveSet(
+      JSON.stringify({
+        mode: 'past-paper',
+        questionIds: ['em-2025-q01'],
+        index: 0,
+        answers: [null],
+        sheetOpen: false,
+        exam: true,
+        startedAt: 1700000000000,
+      }),
+    );
+
+    expect(parsed?.exam).toBe(true);
+    expect(parsed?.startedAt).toBe(1700000000000);
+  });
+
+  it('reads a set saved before exam mode as a normal one', () => {
+    const parsed = parseStoredActiveSet(
+      JSON.stringify({ questionIds: ['em-2025-q01'], index: 0, answers: [null] }),
+    );
+
+    expect(parsed?.exam).toBe(false);
+    expect(parsed?.startedAt).toBeNull();
+  });
+
+  it('round-trips an exam result with its picks and time', async () => {
+    const storage = new MemoryStorage();
+    const repository = new LocalResultRepository(storage);
+    const result = {
+      correct: 1,
+      total: 1,
+      answered: 1,
+      points: 10,
+      topics: [],
+      durationSeconds: 2530,
+      review: [{ questionId: 'em-2025-q01', chosen: 4 }],
+    };
+
+    await repository.save(result);
+    await expect(repository.load()).resolves.toEqual(result);
   });
 
   it('round-trips a session result and rejects emptiness', async () => {
