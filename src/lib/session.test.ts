@@ -187,6 +187,15 @@ describe('applySessionResult', () => {
     expect(result).toMatchObject({ correct: 0, total: 0, points: 0, topics: [] });
   });
 
+  it('counts only the answers given when a set is finished early', () => {
+    const progress = createSeedProgress();
+    const paper = [question('c1', 'current'), question('c2', 'current'), question('c3', 'current')];
+
+    const { result } = applySessionResult(progress, paper, [0, null, null]);
+
+    expect(result).toMatchObject({ correct: 1, total: 3, answered: 1 });
+  });
+
   it('counts keyed past-paper answers in accuracy but not in unit mastery', () => {
     const progress = createSeedProgress();
     const scan: Question = {

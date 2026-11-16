@@ -120,7 +120,8 @@ export function applySessionResult(
   questions: readonly Question[],
   answers: readonly (number | null)[],
 ): { progress: StudyProgress; result: SessionResult } {
-  const answered = questions.length;
+  // A paper can be finished early, so count the answers actually given.
+  const answered = answers.filter((answer) => answer !== null).length;
   let correct = 0;
   let scored = 0;
   const byTopic = new Map<TopicId, { total: number; correct: number }>();

@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useCallback, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PotentiometerDiagram } from '@/components/circuit-diagram';
@@ -53,6 +53,16 @@ export default function SessionPage() {
   return <QuestionView key={active.questions[active.index].id} />;
 }
 
+/** Exam clock: minutes and seconds, hours only once a paper runs that long. */
+function clock(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = seconds % 60;
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`
+    : `${minutes}:${String(rest).padStart(2, '0')}`;
+}
+
 /** Renders **double-asterisk** emphasis as ink weight inside the stem. */
 function RichText({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -76,6 +86,7 @@ function QuestionView() {
   const {
     active,
     answerCurrent,
+    goTo,
     goToNext,
     finishSession,
     bookmarks,
@@ -89,8 +100,18 @@ function QuestionView() {
   const [selected, setSelected] = useState<number | null>(currentAnswer);
   const [submitted, setSubmitted] = useState(currentAnswer !== null);
   const [hintOpen, setHintOpen] = useState(false);
+  const [gridOpen, setGridOpen] = useState(false);
   // One tap only: a double click must not record the same attempt twice.
   const advancingRef = useRef(false);
+  // Exam mode holds every answer back, so it runs its own clock.
+  const exam = active?.exam === true;
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!exam) return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [exam]);
 
   const closeSheet = useCallback(() => setSheetOpen(false), [setSheetOpen]);
 
@@ -105,8 +126,8 @@ function QuestionView() {
   const bookmarked = bookmarks.includes(question.id);
   const topic = question.topicId ? TOPIC_MAP[question.topicId] : null;
   const hasHint = question.steps.length > 0;
-  // An exam paper answers silently: no verdict, no sheet, until question 50.
-  const exam = active.exam === true;
+  const answeredCount = active.answers.filter((answer) => answer !== null).length;
+  const elapsed = exam && active.startedAt ? Math.max(0, Math.round((now - active.startedAt) / 1000)) : null;
 
   const submit = () => {
     if (selected === null || submitted) return;
@@ -117,13 +138,27 @@ function QuestionView() {
     if (!exam) setSheetOpen(true);
   };
 
+  // In a paper, picking an option is the answer: it is kept, changeable, and
+  // nothing is revealed until the paper is finished.
+  const choose = (optionIndex: number) => {
+    setSelected(optionIndex);
+    if (!exam) return;
+    answerCurrent(optionIndex);
+    setSubmitted(true);
+  };
+
+  const finish = () => {
+    setSheetOpen(false);
+    finishSession();
+    router.replace('/summary');
+  };
+
   const next = () => {
     if (advancingRef.current) return;
     advancingRef.current = true;
     setSheetOpen(false);
     if (isLast) {
-      finishSession();
-      router.replace('/summary');
+      finish();
       return;
     }
     goToNext();
@@ -148,6 +183,14 @@ function QuestionView() {
             >
               {bookmarked ? 'Marked' : 'Mark'}
             </button>
+            {elapsed === null ? null : (
+              <p
+                className="font-mono text-meta text-ink tabular-nums"
+                aria-label="Time on this paper"
+              >
+                {clock(elapsed)}
+              </p>
+            )}
             <p className="font-mono text-meta text-muted tabular-nums">
               <span className="text-ink">{pad(index + 1)}</span> / {pad(total)}
             </p>
@@ -251,8 +294,8 @@ function QuestionView() {
                     value={optionIndex}
                     aria-label={question.questionImageUrl ? `Option ${optionIndex + 1}` : undefined}
                     checked={isSelected}
-                    onChange={() => setSelected(optionIndex)}
-                    disabled={submitted}
+                    onChange={() => choose(optionIndex)}
+                    disabled={submitted && !exam}
                     className="sr-only"
                   />
                   <span
@@ -300,7 +343,8 @@ function QuestionView() {
 
           {exam && submitted ? (
             <p role="status" className="mt-6 text-meta text-muted">
-              Answer saved. Your answers and the time appear after the last question.
+              Answer saved. You can change it until you finish; the answers and the time appear at
+              the end.
             </p>
           ) : null}
 
@@ -342,7 +386,71 @@ function QuestionView() {
 
       <div className="fixed inset-x-0 bottom-0 border-t border-line bg-bg px-5 py-4 sm:px-8">
         <div className="mx-auto w-full max-w-narrow">
-          {submitted && !sheetOpen ? (
+          {exam ? (
+            <>
+              <div className="flex items-baseline justify-between gap-4">
+                <ActionButton
+                  label="Previous"
+                  variant="text"
+                  disabled={index === 0}
+                  onClick={() => goTo(index - 1)}
+                />
+                <p className="font-mono text-meta text-muted tabular-nums">
+                  {answeredCount} / {total} answered
+                </p>
+              </div>
+              {isLast ? (
+                <ActionButton label="Finish paper" onClick={finish} />
+              ) : (
+                <ActionButton label="Next" onClick={() => goTo(index + 1)} />
+              )}
+              <ActionButton
+                label={gridOpen ? 'Hide questions' : 'All questions'}
+                variant="text"
+                className="mt-1 w-full"
+                aria-expanded={gridOpen}
+                onClick={() => setGridOpen((open) => !open)}
+              />
+              {gridOpen ? (
+                <>
+                <ol className="mt-3 flex max-h-40 flex-wrap gap-2 overflow-y-auto">
+                  {questions.map((item, itemIndex) => {
+                    const answered = active.answers[itemIndex] !== null;
+                    const current = itemIndex === index;
+                    return (
+                      <li key={item.id}>
+                        <button
+                          type="button"
+                          onClick={() => goTo(itemIndex)}
+                          aria-current={current ? 'step' : undefined}
+                          aria-label={`Question ${itemIndex + 1}${answered ? ', answered' : ''}`}
+                          className={cn(
+                            'h-9 w-9 rounded-sm border font-mono text-meta tabular-nums transition-colors',
+                            current
+                              ? 'border-ink text-ink'
+                              : answered
+                                ? 'border-line text-ink'
+                                : 'border-line text-muted hover:border-muted hover:text-ink',
+                          )}
+                        >
+                          {itemIndex + 1}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ol>
+                {isLast ? null : (
+                  <ActionButton
+                    label="Finish paper"
+                    variant="text"
+                    className="mt-2 w-full"
+                    onClick={finish}
+                  />
+                )}
+                </>
+              ) : null}
+            </>
+          ) : submitted && !sheetOpen ? (
             <ActionButton
               label={isLast ? 'See results' : 'Next question'}
               onClick={next}

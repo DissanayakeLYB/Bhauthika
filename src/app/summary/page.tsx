@@ -6,7 +6,7 @@ import { useStudy } from '@/components/study-provider';
 import { ActionButton } from '@/components/button';
 import { Label, Mono } from '@/components/type';
 import { TopicRow } from '@/components/topic-row';
-import { answerLabel, isCorrectChoice } from '@/lib/questions';
+import { answerLabel, isCorrectChoice, type Question } from '@/lib/questions';
 import { cn } from '@/lib/utils';
 
 /** Exam clock in minutes and seconds, hours only when a paper runs that long. */
@@ -20,7 +20,7 @@ function formatDuration(seconds: number): string {
 }
 
 export default function SummaryPage() {
-  const { result, startSession, questions } = useStudy();
+  const { result, startSession, startQuestions, questions } = useStudy();
   const router = useRouter();
 
   if (!result) {
@@ -48,6 +48,14 @@ export default function SummaryPage() {
   const practiseAgain = () => {
     const total = startSession('all', { count: result.total, fill: true });
     if (total > 0) router.replace('/session');
+  };
+
+  // An exam paper carries its own questions, so it can be sat again as printed.
+  const sitAgain = () => {
+    const paper = review
+      .map((item) => questionsById.get(item.questionId))
+      .filter((question): question is Question => Boolean(question));
+    if (startQuestions(paper, { exam: true }) > 0) router.replace('/session');
   };
 
   return (
@@ -84,6 +92,11 @@ export default function SummaryPage() {
       {result.total > 0 && result.answered > result.total ? (
         <p className="mt-2 text-meta text-muted">
           {result.answered - result.total} of these answers are unmarked.
+        </p>
+      ) : null}
+      {result.total > 0 && result.answered < result.total ? (
+        <p className="mt-2 text-meta text-muted">
+          {result.total - result.answered} left unanswered, counted as incorrect.
         </p>
       ) : null}
       {result.durationSeconds ? (
@@ -159,7 +172,11 @@ export default function SummaryPage() {
       </section>
 
       <div className="mt-16 space-y-3">
-        <ActionButton label="Practice again" onClick={practiseAgain} />
+        {review.length > 0 ? (
+          <ActionButton label="Sit this paper again" onClick={sitAgain} />
+        ) : (
+          <ActionButton label="Practice again" onClick={practiseAgain} />
+        )}
         <ActionButton
           label="Back to home"
           variant="text"

@@ -58,8 +58,10 @@ interface StudyContextValue {
   setSheetOpen: (open: boolean) => void;
   startSession: (topicIds: readonly TopicId[] | 'all', options?: StartSessionOptions) => number;
   /** Start a set from exactly these questions, in the given order. */
-  startQuestions: (questions: readonly Question[]) => number;
+  startQuestions: (questions: readonly Question[], options?: { exam?: boolean }) => number;
   answerCurrent: (choice: number) => void;
+  /** Move to a question by position; used by the paper's own navigation. */
+  goTo: (index: number) => void;
   goToNext: () => void;
   finishSession: () => void;
   toggleBookmark: (questionId: string) => void;
@@ -151,6 +153,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   const [marksUserId, setMarksUserId] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const previousUserIdRef = useRef<string | null>(null);
+  // One attempt row per question per set, however often the student jumps back.
+  const recordedRef = useRef<Set<string>>(new Set());
   const [questionsLoading, setQuestionsLoading] = useState(true);
   const [allQuestions, setAllQuestions] = useState<Question[]>(QUESTION_BANK);
   const questionMapRef = useRef<Record<string, Question>>(QUESTION_BANK_MAP);
@@ -234,6 +238,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
             .filter((q): q is Question => Boolean(q))
         : [];
       if (stored && questions.length === stored.questionIds.length) {
+        recordedRef.current = new Set();
         setActive({
           questions,
           index: stored.index,
@@ -309,6 +314,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       const picked = pickQuestions(allQuestions, { topicIds, count, fill, year, ordered });
       if (picked.length === 0) return 0;
       // A new set replaces the saved one, which also drops the previous set.
+      recordedRef.current = new Set();
       setActive({
         questions: picked,
         index: 0,
@@ -324,11 +330,19 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     [allQuestions],
   );
 
-  const startQuestions = useCallback((questions: readonly Question[]) => {
-    if (questions.length === 0) return 0;
-    const picked = [...questions];
-    // Same engine as every other set: popup, attempts and results all follow.
-    setActive({ questions: picked, index: 0, answers: picked.map(() => null) });
+  const startQuestions = useCallback(
+    (questions: readonly Question[], { exam = false }: { exam?: boolean } = {}) => {
+      if (questions.length === 0) return 0;
+      const picked = [...questions];
+      recordedRef.current = new Set();
+      // Same engine as every other set: popup, attempts and results all follow.
+      setActive({
+        questions: picked,
+        index: 0,
+        answers: picked.map(() => null),
+        exam,
+        startedAt: Date.now(),
+      });
     setMode('mixed');
     setSheetOpen(false);
     setResult(null);
@@ -364,19 +378,29 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     [user],
   );
 
+  /** Saves the current question's attempt once, then moves to `target`. */
+  const goTo = useCallback(
+    (target: number) => {
+      if (!active) return;
+      // Record the attempt outside the state updater: React may call updaters
+      // more than once, which would write duplicate rows to `attempts`.
+      const q = active.questions[active.index];
+      const sel = active.answers[active.index];
+      if (sel !== null && !recordedRef.current.has(q.id)) {
+        recordedRef.current.add(q.id);
+        void recordAttempt(q.id, sel, isCorrectChoice(q, sel));
+      }
+      const index = Math.min(Math.max(0, Math.trunc(target)), active.questions.length - 1);
+      setSheetOpen(false);
+      setActive({ ...active, index });
+    },
+    [active, recordAttempt],
+  );
+
   const goToNext = useCallback(() => {
     if (!active) return;
-    // Record the attempt outside the state updater: React may call updaters
-    // more than once, which would write duplicate rows to `attempts`.
-    const q = active.questions[active.index];
-    const sel = active.answers[active.index];
-    if (sel !== null) {
-      void recordAttempt(q.id, sel, isCorrectChoice(q, sel));
-    }
-    const index = Math.min(active.index + 1, active.questions.length - 1);
-    setSheetOpen(false);
-    setActive({ ...active, index });
-  }, [active, recordAttempt]);
+    goTo(active.index + 1);
+  }, [active, goTo]);
 
   const finishSession = useCallback(() => {
     if (!active) return;
@@ -384,7 +408,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     // Record attempt for the very last question.
     const lastQ = active.questions[active.index];
     const lastSel = active.answers[active.index];
-    if (lastSel !== null) {
+    if (lastSel !== null && !recordedRef.current.has(lastQ.id)) {
+      recordedRef.current.add(lastQ.id);
       void recordAttempt(lastQ.id, lastSel, isCorrectChoice(lastQ, lastSel));
     }
 
@@ -436,6 +461,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       startSession,
       startQuestions,
       answerCurrent,
+      goTo,
       goToNext,
       finishSession,
       toggleBookmark,
@@ -454,6 +480,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       startSession,
       startQuestions,
       answerCurrent,
+      goTo,
       goToNext,
       finishSession,
       toggleBookmark,
