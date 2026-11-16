@@ -8,12 +8,18 @@ import {
   EM_2023_MCQ_COUNT,
   EM_2024_ANSWER_KEY,
   EM_2024_MCQ_COUNT,
+  EM_2021_UNITS,
+  EM_2022_UNITS,
+  EM_2023_UNITS,
+  EM_2024_UNITS,
   EM_2025_ANSWER_KEY,
   EM_2025_MCQ_COUNT,
+  EM_2025_UNITS,
   EM_2025_VIDEO_IDS,
   PAST_PAPER_QUESTIONS,
   PLACEHOLDER_VIDEO_URL,
 } from './past-papers';
+import type { TopicId } from './topics';
 
 const PAPERS = [
   { year: 2021, count: EM_2021_MCQ_COUNT, key: EM_2021_ANSWER_KEY },
@@ -60,6 +66,29 @@ describe('past-paper image bank', () => {
     expect(
       items.slice(ids.length).every((question) => question.videoUrl === PLACEHOLDER_VIDEO_URL),
     ).toBe(true);
+  });
+
+  it('gives each scan the unit its paper map names, and nothing where it names none', () => {
+    const maps: [number, Readonly<Record<number, TopicId>>][] = [
+      [2021, EM_2021_UNITS],
+      [2022, EM_2022_UNITS],
+      [2023, EM_2023_UNITS],
+      [2024, EM_2024_UNITS],
+      [2025, EM_2025_UNITS],
+    ];
+
+    maps.forEach(([year, units]) => {
+      const items = PAST_PAPER_QUESTIONS.filter((question) => question.year === year);
+      const entries = Object.entries(units);
+
+      entries.forEach(([number, unit]) => {
+        expect(items[Number(number) - 1].topicId, `${year} q${number}`).toBe(unit);
+      });
+      // A number the map does not name stays untagged rather than defaulting.
+      expect(items.filter((question) => question.topicId === undefined)).toHaveLength(
+        items.length - entries.length,
+      );
+    });
   });
 
   it('keeps ids unique across papers', () => {

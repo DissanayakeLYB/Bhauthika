@@ -1,4 +1,5 @@
 import { QUESTIONS, type Question } from './questions';
+import type { TopicId } from './topics';
 
 /** Where the scanned paper images are served from (public/past-papers). */
 const EM_2025_DIR = '/past-papers/em-2025';
@@ -130,6 +131,13 @@ function toAnswerIndex(printed: number | null): number | null {
     : null;
 }
 
+/**
+ * The syllabus unit each question tests, keyed by the number printed on the
+ * paper. Empty until the mapping is supplied from the marking side: a scan with
+ * no unit still counts in accuracy but credits no unit, so nothing is guessed.
+ */
+type PaperUnits = Readonly<Record<number, TopicId>>;
+
 interface PaperScans {
   year: number;
   count: number;
@@ -137,7 +145,24 @@ interface PaperScans {
   imageUrl: (number: number) => string;
   /** Walkthrough video ids by printed question number; the rest use the placeholder. */
   videos?: Readonly<Record<number, string>>;
+  /** Unit per printed question number. */
+  units?: PaperUnits;
 }
+
+/** Unit per question for the 2025 paper. Fill as `{ 1: 'mechanics', 2: 'waves', … }`. */
+export const EM_2025_UNITS: PaperUnits = {};
+
+/** Unit per question for the 2024 paper. */
+export const EM_2024_UNITS: PaperUnits = {};
+
+/** Unit per question for the 2023 paper. */
+export const EM_2023_UNITS: PaperUnits = {};
+
+/** Unit per question for the 2022 paper. */
+export const EM_2022_UNITS: PaperUnits = {};
+
+/** Unit per question for the 2021 paper. */
+export const EM_2021_UNITS: PaperUnits = {};
 
 /** Every paper that ships as scans, newest first. Add a year here to list it. */
 const SCAN_PAPERS: PaperScans[] = [
@@ -147,11 +172,36 @@ const SCAN_PAPERS: PaperScans[] = [
     answerKey: EM_2025_ANSWER_KEY,
     imageUrl: em2025ImageUrl,
     videos: EM_2025_VIDEO_IDS,
+    units: EM_2025_UNITS,
   },
-  { year: 2024, count: EM_2024_MCQ_COUNT, answerKey: EM_2024_ANSWER_KEY, imageUrl: em2024ImageUrl },
-  { year: 2023, count: EM_2023_MCQ_COUNT, answerKey: EM_2023_ANSWER_KEY, imageUrl: em2023ImageUrl },
-  { year: 2022, count: EM_2022_MCQ_COUNT, answerKey: EM_2022_ANSWER_KEY, imageUrl: em2022ImageUrl },
-  { year: 2021, count: EM_2021_MCQ_COUNT, answerKey: EM_2021_ANSWER_KEY, imageUrl: em2021ImageUrl },
+  {
+    year: 2024,
+    count: EM_2024_MCQ_COUNT,
+    answerKey: EM_2024_ANSWER_KEY,
+    imageUrl: em2024ImageUrl,
+    units: EM_2024_UNITS,
+  },
+  {
+    year: 2023,
+    count: EM_2023_MCQ_COUNT,
+    answerKey: EM_2023_ANSWER_KEY,
+    imageUrl: em2023ImageUrl,
+    units: EM_2023_UNITS,
+  },
+  {
+    year: 2022,
+    count: EM_2022_MCQ_COUNT,
+    answerKey: EM_2022_ANSWER_KEY,
+    imageUrl: em2022ImageUrl,
+    units: EM_2022_UNITS,
+  },
+  {
+    year: 2021,
+    count: EM_2021_MCQ_COUNT,
+    answerKey: EM_2021_ANSWER_KEY,
+    imageUrl: em2021ImageUrl,
+    units: EM_2021_UNITS,
+  },
 ];
 
 /**
@@ -174,6 +224,7 @@ export const PAST_PAPER_QUESTIONS: Question[] = SCAN_PAPERS.flatMap((scanned) =>
           : null;
     return {
       id: `em-${scanned.year}-q${String(number).padStart(2, '0')}`,
+      topicId: scanned.units?.[number],
       year: scanned.year,
       paper: 'Paper I',
       number,
