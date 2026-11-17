@@ -185,7 +185,7 @@ function PracticeFlow() {
           </div>
           <p className="mt-3 text-meta text-muted">
             {exam
-              ? 'Answers, your picks and the time appear after question 50.'
+              ? 'Answers, your picks and the time appear at the end of the paper.'
               : 'The answer appears after each question.'}
           </p>
         </div>

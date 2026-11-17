@@ -63,6 +63,27 @@ function clock(seconds: number): string {
     : `${minutes}:${String(rest).padStart(2, '0')}`;
 }
 
+const secondsSince = (startedAt: number) => Math.max(0, Math.round((Date.now() - startedAt) / 1000));
+
+/**
+ * The exam clock re-renders once a second on its own, so the scan and the
+ * options are not redrawn on every tick.
+ */
+function PaperClock({ startedAt }: { startedAt: number }) {
+  const [seconds, setSeconds] = useState(() => secondsSince(startedAt));
+
+  useEffect(() => {
+    const id = window.setInterval(() => setSeconds(secondsSince(startedAt)), 1000);
+    return () => window.clearInterval(id);
+  }, [startedAt]);
+
+  return (
+    <p className="font-mono text-meta text-ink tabular-nums" aria-label="Time on this paper">
+      {clock(seconds)}
+    </p>
+  );
+}
+
 /** Renders **double-asterisk** emphasis as ink weight inside the stem. */
 function RichText({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -95,23 +116,17 @@ function QuestionView() {
     setSheetOpen,
   } = useStudy();
   const router = useRouter();
-  // Restore the checked state if the tab was reloaded mid-session.
+  // A paper is silent, so `submitted` only ever means "this practice question
+  // has been checked"; every verdict below hangs off it.
+  const exam = active?.exam === true;
+  // Restore the picked option, and the verdict, if the tab was reloaded.
   const currentAnswer = active ? (active.answers[active.index] ?? null) : null;
   const [selected, setSelected] = useState<number | null>(currentAnswer);
-  const [submitted, setSubmitted] = useState(currentAnswer !== null);
+  const [submitted, setSubmitted] = useState(!exam && currentAnswer !== null);
   const [hintOpen, setHintOpen] = useState(false);
   const [gridOpen, setGridOpen] = useState(false);
   // One tap only: a double click must not record the same attempt twice.
   const advancingRef = useRef(false);
-  // Exam mode holds every answer back, so it runs its own clock.
-  const exam = active?.exam === true;
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    if (!exam) return;
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [exam]);
 
   const closeSheet = useCallback(() => setSheetOpen(false), [setSheetOpen]);
 
@@ -127,24 +142,21 @@ function QuestionView() {
   const topic = question.topicId ? TOPIC_MAP[question.topicId] : null;
   const hasHint = question.steps.length > 0;
   const answeredCount = active.answers.filter((answer) => answer !== null).length;
-  const elapsed = exam && active.startedAt ? Math.max(0, Math.round((now - active.startedAt) / 1000)) : null;
 
+  // Practice only: a paper has no Check answer button. Every set gets feedback,
+  // keyed items show a verdict, unkeyed ones still offer the explanation video.
   const submit = () => {
     if (selected === null || submitted) return;
     answerCurrent(selected);
     setSubmitted(true);
-    // Every set gets feedback: keyed items show a verdict, unkeyed ones still
-    // offer the explanation video.
-    if (!exam) setSheetOpen(true);
+    setSheetOpen(true);
   };
 
   // In a paper, picking an option is the answer: it is kept, changeable, and
   // nothing is revealed until the paper is finished.
   const choose = (optionIndex: number) => {
     setSelected(optionIndex);
-    if (!exam) return;
-    answerCurrent(optionIndex);
-    setSubmitted(true);
+    if (exam) answerCurrent(optionIndex);
   };
 
   const finish = () => {
@@ -183,14 +195,7 @@ function QuestionView() {
             >
               {bookmarked ? 'Marked' : 'Mark'}
             </button>
-            {elapsed === null ? null : (
-              <p
-                className="font-mono text-meta text-ink tabular-nums"
-                aria-label="Time on this paper"
-              >
-                {clock(elapsed)}
-              </p>
-            )}
+            {exam && active.startedAt ? <PaperClock startedAt={active.startedAt} /> : null}
             <p className="font-mono text-meta text-muted tabular-nums">
               <span className="text-ink">{pad(index + 1)}</span> / {pad(total)}
             </p>
@@ -256,15 +261,13 @@ function QuestionView() {
             <legend className="sr-only">Choose one answer</legend>
             {question.options.map((option, optionIndex) => {
               const isSelected = selected === optionIndex;
-              // An exam paper shows no verdict, only which option was taken.
-              const showVerdict = submitted && !exam;
               // When several options are accepted, the one this student picked
               // is the correct row; there is no single answer to point at.
               const isCorrectOption =
-                showVerdict &&
+                submitted &&
                 hasKey &&
                 (question.acceptedAnswers ? isSelected && correct : optionIndex === question.answer);
-              const isIncorrectChoice = showVerdict && isSelected && !isCorrectOption;
+              const isIncorrectChoice = submitted && isSelected && !isCorrectOption;
 
               return (
                 <label
@@ -272,7 +275,7 @@ function QuestionView() {
                   className={cn(
                     'choice-row relative flex w-full items-start gap-5 border-t border-line py-5 pl-4 transition-colors',
                     submitted ? 'cursor-default' : 'cursor-pointer hover:opacity-80',
-                    !exam && submitted && !isCorrectOption && !isIncorrectChoice && 'opacity-50',
+                    submitted && !isCorrectOption && !isIncorrectChoice && 'opacity-50',
                   )}
                 >
                   <span
@@ -283,7 +286,7 @@ function QuestionView() {
                         ? 'bg-correct'
                         : isIncorrectChoice
                           ? 'bg-wrong'
-                          : isSelected && (!submitted || exam)
+                          : isSelected && !submitted
                             ? 'bg-ink'
                             : 'bg-transparent',
                     )}
@@ -295,7 +298,6 @@ function QuestionView() {
                     aria-label={question.questionImageUrl ? `Option ${optionIndex + 1}` : undefined}
                     checked={isSelected}
                     onChange={() => choose(optionIndex)}
-                    disabled={submitted && !exam}
                     className="sr-only"
                   />
                   <span
@@ -341,7 +343,7 @@ function QuestionView() {
             })}
           </fieldset>
 
-          {exam && submitted ? (
+          {exam && selected !== null ? (
             <p role="status" className="mt-6 text-meta text-muted">
               Answer saved. You can change it until you finish; the answers and the time appear at
               the end.
@@ -404,15 +406,18 @@ function QuestionView() {
               ) : (
                 <ActionButton label="Next" onClick={() => goTo(index + 1)} />
               )}
-              <ActionButton
-                label={gridOpen ? 'Hide questions' : 'All questions'}
-                variant="text"
-                className="mt-1 w-full"
-                aria-expanded={gridOpen}
-                onClick={() => setGridOpen((open) => !open)}
-              />
+              <div className="mt-1 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+                <ActionButton
+                  label={gridOpen ? 'Hide questions' : 'All questions'}
+                  variant="text"
+                  aria-expanded={gridOpen}
+                  onClick={() => setGridOpen((open) => !open)}
+                />
+                {isLast ? null : (
+                  <ActionButton label="Finish paper" variant="text" onClick={finish} />
+                )}
+              </div>
               {gridOpen ? (
-                <>
                 <ol className="mt-3 flex max-h-40 flex-wrap gap-2 overflow-y-auto">
                   {questions.map((item, itemIndex) => {
                     const answered = active.answers[itemIndex] !== null;
@@ -439,15 +444,6 @@ function QuestionView() {
                     );
                   })}
                 </ol>
-                {isLast ? null : (
-                  <ActionButton
-                    label="Finish paper"
-                    variant="text"
-                    className="mt-2 w-full"
-                    onClick={finish}
-                  />
-                )}
-                </>
               ) : null}
             </>
           ) : submitted && !sheetOpen ? (
@@ -473,17 +469,19 @@ function QuestionView() {
         </div>
       </div>
 
-      <FeedbackSheet
-        open={sheetOpen && !exam}
-        question={question}
-        correct={correct}
-        chosen={selected}
-        bookmarked={bookmarked}
-        isLast={isLast}
-        onNext={next}
-        onClose={closeSheet}
-        onToggleBookmark={() => toggleBookmark(question.id)}
-      />
+      {exam ? null : (
+        <FeedbackSheet
+          open={sheetOpen}
+          question={question}
+          correct={correct}
+          chosen={selected}
+          bookmarked={bookmarked}
+          isLast={isLast}
+          onNext={next}
+          onClose={closeSheet}
+          onToggleBookmark={() => toggleBookmark(question.id)}
+        />
+      )}
     </main>
   );
 }

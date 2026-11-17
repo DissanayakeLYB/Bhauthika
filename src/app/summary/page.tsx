@@ -89,11 +89,6 @@ export default function SummaryPage() {
           </p>
         </>
       )}
-      {result.total > 0 && result.answered > result.total ? (
-        <p className="mt-2 text-meta text-muted">
-          {result.answered - result.total} of these answers are unmarked.
-        </p>
-      ) : null}
       {result.total > 0 && result.answered < result.total ? (
         <p className="mt-2 text-meta text-muted">
           {result.total - result.answered} left unanswered, counted as incorrect.

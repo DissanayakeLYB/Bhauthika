@@ -306,48 +306,47 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     }
   }, [ready, result]);
 
+  /** Opens a set. The one place a session starts, whatever drew the questions. */
+  const begin = useCallback(
+    (
+      questions: readonly Question[],
+      { exam = false, mode: nextMode = 'mixed' }: { exam?: boolean; mode?: ActiveSetMode } = {},
+    ) => {
+      if (questions.length === 0) return 0;
+      // A new set replaces the saved one, which also drops the previous set.
+      recordedRef.current = new Set();
+      setActive({
+        questions: [...questions],
+        index: 0,
+        answers: questions.map(() => null),
+        exam,
+        startedAt: Date.now(),
+      });
+      setMode(nextMode);
+      setSheetOpen(false);
+      setResult(null);
+      return questions.length;
+    },
+    [],
+  );
+
   const startSession = useCallback(
     (
       topicIds: readonly TopicId[] | 'all',
       { count = 10, fill = false, year, ordered = false, exam = false, mode: nextMode }: StartSessionOptions = {},
-    ) => {
-      const picked = pickQuestions(allQuestions, { topicIds, count, fill, year, ordered });
-      if (picked.length === 0) return 0;
-      // A new set replaces the saved one, which also drops the previous set.
-      recordedRef.current = new Set();
-      setActive({
-        questions: picked,
-        index: 0,
-        answers: picked.map(() => null),
+    ) =>
+      begin(pickQuestions(allQuestions, { topicIds, count, fill, year, ordered }), {
         exam,
-        startedAt: Date.now(),
-      });
-      setMode(nextMode ?? (year ? 'past-paper' : 'mixed'));
-      setSheetOpen(false);
-      setResult(null);
-      return picked.length;
-    },
-    [allQuestions],
+        mode: nextMode ?? (year === undefined ? 'mixed' : 'past-paper'),
+      }),
+    [allQuestions, begin],
   );
 
   const startQuestions = useCallback(
-    (questions: readonly Question[], { exam = false }: { exam?: boolean } = {}) => {
-      if (questions.length === 0) return 0;
-      const picked = [...questions];
-      recordedRef.current = new Set();
-      // Same engine as every other set: popup, attempts and results all follow.
-      setActive({
-        questions: picked,
-        index: 0,
-        answers: picked.map(() => null),
-        exam,
-        startedAt: Date.now(),
-      });
-    setMode('mixed');
-    setSheetOpen(false);
-    setResult(null);
-    return picked.length;
-  }, []);
+    (questions: readonly Question[], { exam = false }: { exam?: boolean } = {}) =>
+      begin(questions, { exam }),
+    [begin],
+  );
 
   const answerCurrent = useCallback((choice: number) => {
     const today = localDateString(new Date());
@@ -378,23 +377,29 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     [user],
   );
 
-  /** Saves the current question's attempt once, then moves to `target`. */
+  /**
+   * Saves the current pick as an attempt, once per question per set. Called
+   * from event handlers, never a state updater: React may run an updater more
+   * than once, which would write duplicate rows to `attempts`.
+   */
+  const recordCurrent = useCallback(() => {
+    if (!active) return;
+    const question = active.questions[active.index];
+    const choice = active.answers[active.index];
+    if (choice === null || recordedRef.current.has(question.id)) return;
+    recordedRef.current.add(question.id);
+    void recordAttempt(question.id, choice, isCorrectChoice(question, choice));
+  }, [active, recordAttempt]);
+
   const goTo = useCallback(
     (target: number) => {
       if (!active) return;
-      // Record the attempt outside the state updater: React may call updaters
-      // more than once, which would write duplicate rows to `attempts`.
-      const q = active.questions[active.index];
-      const sel = active.answers[active.index];
-      if (sel !== null && !recordedRef.current.has(q.id)) {
-        recordedRef.current.add(q.id);
-        void recordAttempt(q.id, sel, isCorrectChoice(q, sel));
-      }
+      recordCurrent();
       const index = Math.min(Math.max(0, Math.trunc(target)), active.questions.length - 1);
       setSheetOpen(false);
       setActive({ ...active, index });
     },
-    [active, recordAttempt],
+    [active, recordCurrent],
   );
 
   const goToNext = useCallback(() => {
@@ -404,14 +409,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   const finishSession = useCallback(() => {
     if (!active) return;
-
-    // Record attempt for the very last question.
-    const lastQ = active.questions[active.index];
-    const lastSel = active.answers[active.index];
-    if (lastSel !== null && !recordedRef.current.has(lastQ.id)) {
-      recordedRef.current.add(lastQ.id);
-      void recordAttempt(lastQ.id, lastSel, isCorrectChoice(lastQ, lastSel));
-    }
+    recordCurrent();
 
     const { progress: nextProgress, result: nextResult } = applySessionResult(
       progress,
@@ -419,23 +417,25 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       active.answers,
     );
     // An exam run reveals every pick and the clock; a normal set has neither.
+    const seconds =
+      active.startedAt === undefined
+        ? undefined
+        : Math.max(0, Math.round((Date.now() - active.startedAt) / 1000));
     const revealed: SessionResult = active.exam
       ? {
           ...nextResult,
           review: active.questions.map((question, index) => ({
             questionId: question.id,
-            chosen: active.answers[index] ?? null,
+            chosen: active.answers[index],
           })),
-          ...(active.startedAt
-            ? { durationSeconds: Math.max(0, Math.round((Date.now() - active.startedAt) / 1000)) }
-            : {}),
+          ...(seconds === undefined ? {} : { durationSeconds: seconds }),
         }
       : nextResult;
     setProgress(nextProgress);
     setResult(revealed);
     setSheetOpen(false);
     setActive(null);
-  }, [active, progress, recordAttempt]);
+  }, [active, progress, recordCurrent]);
 
   const toggleBookmark = useCallback((questionId: string) => {
     setBookmarks((previous) =>
