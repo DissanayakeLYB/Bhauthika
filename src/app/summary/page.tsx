@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FeedbackSheet } from '@/components/feedback-sheet';
 import { useStudy } from '@/components/study-provider';
 import { ActionButton } from '@/components/button';
 import { Label, Mono } from '@/components/type';
@@ -20,8 +22,10 @@ function formatDuration(seconds: number): string {
 }
 
 export default function SummaryPage() {
-  const { result, startSession, startQuestions, questions } = useStudy();
+  const { result, startSession, startQuestions, questions, bookmarks, toggleBookmark } = useStudy();
   const router = useRouter();
+  // The row whose explanation sheet is open, by position in the answers list.
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   if (!result) {
     return (
@@ -44,6 +48,9 @@ export default function SummaryPage() {
   // An exam paper carries every pick, so the answers can be revealed here.
   const review = result.review ?? [];
   const questionsById = new Map(questions.map((question) => [question.id, question]));
+  // A row opens the question it reports, with the scan, answer, pick and video.
+  const opened = openIndex === null ? undefined : review[openIndex];
+  const openedQuestion = opened ? questionsById.get(opened.questionId) : undefined;
 
   const practiseAgain = () => {
     const total = startSession('all', { count: result.total, fill: true });
@@ -111,31 +118,35 @@ export default function SummaryPage() {
               if (!question) return null;
               const right = isCorrectChoice(question, item.chosen);
               return (
-                <li
-                  key={`${item.questionId}-${itemIndex}`}
-                  className="border-t border-line py-3"
-                >
-                  <div className="flex items-baseline justify-between gap-4">
-                    <span className="font-mono text-meta text-muted tabular-nums">
-                      Q{String(question.number).padStart(2, '0')}
+                <li key={`${item.questionId}-${itemIndex}`}>
+                  <button
+                    type="button"
+                    onClick={() => setOpenIndex(itemIndex)}
+                    aria-haspopup="dialog"
+                    className="w-full border-t border-line py-3 text-left hover:opacity-80 focus-visible:outline-offset-0"
+                  >
+                    <span className="flex items-baseline justify-between gap-4">
+                      <span className="font-mono text-meta text-muted tabular-nums">
+                        Q{String(question.number).padStart(2, '0')}
+                      </span>
+                      <span
+                        className={cn(
+                          'font-mono text-label tracking-[0.14em] uppercase',
+                          right ? 'text-correct' : 'text-wrong',
+                        )}
+                      >
+                        {right ? 'Correct' : 'Incorrect'}
+                      </span>
                     </span>
-                    <span
-                      className={cn(
-                        'font-mono text-label tracking-[0.14em] uppercase',
-                        right ? 'text-correct' : 'text-wrong',
-                      )}
-                    >
-                      {right ? 'Correct' : 'Incorrect'}
+                    <span className="mt-1 block text-meta text-muted">
+                      You chose{' '}
+                      <span className="font-mono text-ink tabular-nums">
+                        {item.chosen === null ? '—' : item.chosen + 1}
+                      </span>{' '}
+                      · Answer{' '}
+                      <span className="font-mono text-ink">{answerLabel(question) ?? '—'}</span>
                     </span>
-                  </div>
-                  <p className="mt-1 text-meta text-muted">
-                    You chose{' '}
-                    <span className="font-mono text-ink tabular-nums">
-                      {item.chosen === null ? '—' : item.chosen + 1}
-                    </span>{' '}
-                    · Answer{' '}
-                    <span className="font-mono text-ink">{answerLabel(question) ?? '—'}</span>
-                  </p>
+                  </button>
                 </li>
               );
             })}
@@ -179,6 +190,19 @@ export default function SummaryPage() {
           onClick={() => router.push('/home')}
         />
       </div>
+
+      {opened && openedQuestion ? (
+        <FeedbackSheet
+          open
+          showScan
+          question={openedQuestion}
+          correct={isCorrectChoice(openedQuestion, opened.chosen)}
+          chosen={opened.chosen}
+          bookmarked={bookmarks.includes(openedQuestion.id)}
+          onClose={() => setOpenIndex(null)}
+          onToggleBookmark={() => toggleBookmark(openedQuestion.id)}
+        />
+      ) : null}
     </main>
   );
 }

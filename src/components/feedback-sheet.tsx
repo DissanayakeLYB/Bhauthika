@@ -30,10 +30,13 @@ interface FeedbackSheetProps {
   /** The option this student picked, or null before they answer. */
   chosen: number | null;
   bookmarked: boolean;
-  isLast: boolean;
-  onNext: () => void;
+  isLast?: boolean;
+  /** Omit to hide the next button: the results screen has no set running. */
+  onNext?: () => void;
   onClose: () => void;
   onToggleBookmark: () => void;
+  /** Show the printed question inside the sheet, where no page sits behind it. */
+  showScan?: boolean;
 }
 
 export function FeedbackSheet({
@@ -46,6 +49,7 @@ export function FeedbackSheet({
   onNext,
   onClose,
   onToggleBookmark,
+  showScan = false,
 }: FeedbackSheetProps) {
   const hasKey = hasAnswerKey(question);
   // A scan still on the placeholder has no walkthrough to offer, so it shows no
@@ -207,6 +211,18 @@ export function FeedbackSheet({
           </p>
         )}
 
+        {showScan && question.questionImageUrl ? (
+          <figure className="mt-8">
+            <img
+              src={question.questionImageUrl}
+              alt={`Question ${question.number} of the ${question.year} ${question.paper}, as printed in the paper`}
+              loading="lazy"
+              decoding="async"
+              className="w-full rounded-xs border border-line"
+            />
+          </figure>
+        ) : null}
+
         {answerLabel ? (
           <div className="mt-8 flex items-baseline gap-5 border-t border-line pt-6">
             <Mono className="text-[1.375rem] leading-none text-correct">{answerLabel}</Mono>
@@ -351,10 +367,9 @@ export function FeedbackSheet({
       </div>
 
       <div className="shrink-0 border-t border-line px-5 pt-5 pb-5 sm:px-8">
-        <ActionButton
-          label={isLast ? 'See results' : 'Next question'}
-          onClick={onNext}
-        />
+        {onNext ? (
+          <ActionButton label={isLast ? 'See results' : 'Next question'} onClick={onNext} />
+        ) : null}
         <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
           <ActionButton
             variant="text"
