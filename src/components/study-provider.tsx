@@ -64,6 +64,10 @@ interface StudyContextValue {
   goTo: (index: number) => void;
   goToNext: () => void;
   finishSession: () => void;
+  /** Leave the set unfinished: nothing stays saved to pick up again. */
+  abandonSession: () => void;
+  /** Sit this set again from the first question, on a fresh clock. */
+  restartSession: () => void;
   toggleBookmark: (questionId: string) => void;
 }
 
@@ -437,6 +441,18 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setActive(null);
   }, [active, progress, recordCurrent]);
 
+  /** Leaving a set mid-way ends it, so no saved set lingers to be resumed. */
+  const abandonSession = useCallback(() => {
+    setActive(null);
+    setSheetOpen(false);
+  }, []);
+
+  /** The same set again from the top: every pick cleared, the clock restarted. */
+  const restartSession = useCallback(() => {
+    if (!active) return;
+    begin(active.questions, { exam: active.exam === true, mode });
+  }, [active, begin, mode]);
+
   const toggleBookmark = useCallback((questionId: string) => {
     setBookmarks((previous) =>
       previous.includes(questionId)
@@ -464,6 +480,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       goTo,
       goToNext,
       finishSession,
+      abandonSession,
+      restartSession,
       toggleBookmark,
     }),
     [
@@ -483,6 +501,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       goTo,
       goToNext,
       finishSession,
+      abandonSession,
+      restartSession,
       toggleBookmark,
     ],
   );

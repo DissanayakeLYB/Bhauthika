@@ -17,8 +17,16 @@ import { cn } from '@/lib/utils';
 const pad = (value: number) => String(value).padStart(2, '0');
 
 export default function SessionPage() {
-  const { active, ready } = useStudy();
+  const { active, ready, restartSession } = useStudy();
   const router = useRouter();
+  // A paper that opens with answers already on it — reloaded, or returned to —
+  // is not carried on silently with its clock: the student picks up those
+  // answers or starts again. Settled once, on opening, so answering the first
+  // question cannot raise the prompt.
+  const [askResume, setAskResume] = useState<boolean | null>(null);
+  if (askResume === null && ready) {
+    setAskResume(active?.exam === true && active.answers.some((answer) => answer !== null));
+  }
 
   // The saved set is read from storage on mount; until then show neither the
   // question nor the empty state.
@@ -44,6 +52,37 @@ export default function SessionPage() {
         <div className="mt-10 space-y-4">
           <ActionButton label="Choose a unit" onClick={() => router.push('/practice')} />
           <ActionButton label="Back to home" variant="text" onClick={() => router.push('/home')} />
+        </div>
+      </main>
+    );
+  }
+
+  if (askResume) {
+    const paper = active.questions[0];
+    const answered = active.answers.filter((answer) => answer !== null).length;
+    const elapsed =
+      active.startedAt === undefined ? null : clock(secondsSince(active.startedAt));
+
+    return (
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-narrow px-5 py-20 sm:px-8">
+        <Label className="text-muted">Practice</Label>
+        <h1 className="mt-6 text-title font-medium text-ink">
+          {paper.year} {paper.paper}, part way through.
+        </h1>
+        <p className="mt-4 text-body text-muted">
+          {answered} of {active.questions.length} answered
+          {elapsed ? ` · ${elapsed} on the clock` : ''}.
+        </p>
+        <div className="mt-10 space-y-4">
+          <ActionButton label="Resume paper" onClick={() => setAskResume(false)} />
+          <ActionButton
+            label="Start over"
+            variant="text"
+            onClick={() => {
+              setAskResume(false);
+              restartSession();
+            }}
+          />
         </div>
       </main>
     );
@@ -110,6 +149,7 @@ function QuestionView() {
     goTo,
     goToNext,
     finishSession,
+    abandonSession,
     bookmarks,
     toggleBookmark,
     sheetOpen,
@@ -180,12 +220,27 @@ function QuestionView() {
     <main id="main" tabIndex={-1} className="min-h-dvh">
       <div className="mx-auto w-full max-w-narrow px-5 pb-40 sm:px-8">
         <header className="flex items-baseline justify-between gap-4 py-5">
-          <Link
-            href="/home"
-            className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
-          >
-            Close
-          </Link>
+          {exam ? (
+            // Leaving a paper ends it: the saved set is cleared, so nothing is
+            // left counting up for a later return.
+            <button
+              type="button"
+              onClick={() => {
+                abandonSession();
+                router.push('/home');
+              }}
+              className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
+            >
+              Leave paper
+            </button>
+          ) : (
+            <Link
+              href="/home"
+              className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
+            >
+              Close
+            </Link>
+          )}
           <div className="flex items-baseline gap-6">
             <button
               type="button"
