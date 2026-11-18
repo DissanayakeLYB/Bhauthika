@@ -30,12 +30,11 @@ interface FeedbackSheetProps {
   /** The option this student picked, or null before they answer. */
   chosen: number | null;
   bookmarked: boolean;
-  isLast?: boolean;
   /** Step back through a finished set's answers; omitted at the first one. */
   onPrevious?: () => void;
   /** Omit to hide the next button when there is nowhere to step. */
   onNext?: () => void;
-  /** Next button copy where the list is a review rather than a live session. */
+  /** What the next step is called here: a session's move on, or the next answer. */
   nextLabel?: string;
   onClose: () => void;
   onToggleBookmark: () => void;
@@ -49,10 +48,9 @@ export function FeedbackSheet({
   correct,
   chosen,
   bookmarked,
-  isLast,
   onPrevious,
   onNext,
-  nextLabel,
+  nextLabel = 'Next question',
   onClose,
   onToggleBookmark,
   showScan = false,
@@ -381,7 +379,7 @@ export function FeedbackSheet({
             {onNext ? (
               <ActionButton
                 className="flex-1"
-                label={nextLabel ?? (isLast ? 'See results' : 'Next question')}
+                label={nextLabel}
                 onClick={onNext}
               />
             ) : null}

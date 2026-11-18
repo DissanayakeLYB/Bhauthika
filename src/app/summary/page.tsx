@@ -52,17 +52,10 @@ export default function SummaryPage() {
   const opened = openIndex === null ? undefined : review[openIndex];
   const openedQuestion = opened ? questionsById.get(opened.questionId) : undefined;
   // Stepping stays inside the sheet, so the whole list can be read in order.
-  const hasPrevious = openIndex !== null && openIndex > 0;
-  const hasNext = openIndex !== null && openIndex < review.length - 1;
-
-  const showPrevious = () => {
-    if (!hasPrevious || openIndex === null) return;
-    setOpenIndex(openIndex - 1);
-  };
-
-  const showNext = () => {
-    if (!hasNext || openIndex === null) return;
-    setOpenIndex(openIndex + 1);
+  const step = (delta: number) => {
+    if (openIndex === null) return;
+    const target = openIndex + delta;
+    if (target >= 0 && target < review.length) setOpenIndex(target);
   };
 
   const practiseAgain = () => {
@@ -75,7 +68,7 @@ export default function SummaryPage() {
     const paper = review
       .map((item) => questionsById.get(item.questionId))
       .filter((question): question is Question => Boolean(question));
-    if (startQuestions(paper, { exam: true }) > 0) router.replace('/session');
+    if (startQuestions(paper, { exam: true, mode: 'past-paper' }) > 0) router.replace('/session');
   };
 
   return (
@@ -214,8 +207,8 @@ export default function SummaryPage() {
           correct={isCorrectChoice(openedQuestion, opened.chosen)}
           chosen={opened.chosen}
           bookmarked={bookmarks.includes(openedQuestion.id)}
-          onPrevious={hasPrevious ? showPrevious : undefined}
-          onNext={hasNext ? showNext : undefined}
+          onPrevious={openIndex !== null && openIndex > 0 ? () => step(-1) : undefined}
+          onNext={openIndex !== null && openIndex < review.length - 1 ? () => step(1) : undefined}
           nextLabel="Next answer"
           onClose={() => setOpenIndex(null)}
           onToggleBookmark={() => toggleBookmark(openedQuestion.id)}

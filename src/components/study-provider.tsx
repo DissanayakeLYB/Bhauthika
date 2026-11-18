@@ -58,7 +58,10 @@ interface StudyContextValue {
   setSheetOpen: (open: boolean) => void;
   startSession: (topicIds: readonly TopicId[] | 'all', options?: StartSessionOptions) => number;
   /** Start a set from exactly these questions, in the given order. */
-  startQuestions: (questions: readonly Question[], options?: { exam?: boolean }) => number;
+  startQuestions: (
+    questions: readonly Question[],
+    options?: { exam?: boolean; mode?: ActiveSetMode },
+  ) => number;
   answerCurrent: (choice: number) => void;
   /** Move to a question by position; used by the paper's own navigation. */
   goTo: (index: number) => void;
@@ -66,8 +69,6 @@ interface StudyContextValue {
   finishSession: () => void;
   /** Leave the set unfinished: nothing stays saved to pick up again. */
   abandonSession: () => void;
-  /** Sit this set again from the first question, on a fresh clock. */
-  restartSession: () => void;
   toggleBookmark: (questionId: string) => void;
 }
 
@@ -347,8 +348,10 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
   );
 
   const startQuestions = useCallback(
-    (questions: readonly Question[], { exam = false }: { exam?: boolean } = {}) =>
-      begin(questions, { exam }),
+    (
+      questions: readonly Question[],
+      { exam = false, mode: nextMode = 'mixed' }: { exam?: boolean; mode?: ActiveSetMode } = {},
+    ) => begin(questions, { exam, mode: nextMode }),
     [begin],
   );
 
@@ -441,17 +444,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
     setActive(null);
   }, [active, progress, recordCurrent]);
 
-  /** Leaving a set mid-way ends it, so no saved set lingers to be resumed. */
-  const abandonSession = useCallback(() => {
-    setActive(null);
-    setSheetOpen(false);
-  }, []);
-
-  /** The same set again from the top: every pick cleared, the clock restarted. */
-  const restartSession = useCallback(() => {
-    if (!active) return;
-    begin(active.questions, { exam: active.exam === true, mode });
-  }, [active, begin, mode]);
+  /** Ending a set where it is, so no saved set lingers to be resumed. */
+  const abandonSession = useCallback(() => setActive(null), []);
 
   const toggleBookmark = useCallback((questionId: string) => {
     setBookmarks((previous) =>
@@ -481,7 +475,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       goToNext,
       finishSession,
       abandonSession,
-      restartSession,
       toggleBookmark,
     }),
     [
@@ -502,7 +495,6 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       goToNext,
       finishSession,
       abandonSession,
-      restartSession,
       toggleBookmark,
     ],
   );

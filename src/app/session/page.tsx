@@ -17,16 +17,12 @@ import { cn } from '@/lib/utils';
 const pad = (value: number) => String(value).padStart(2, '0');
 
 export default function SessionPage() {
-  const { active, ready, restartSession } = useStudy();
+  const { active, ready, startQuestions } = useStudy();
   const router = useRouter();
   // A paper that opens with answers already on it — reloaded, or returned to —
   // is not carried on silently with its clock: the student picks up those
-  // answers or starts again. Settled once, on opening, so answering the first
-  // question cannot raise the prompt.
-  const [askResume, setAskResume] = useState<boolean | null>(null);
-  if (askResume === null && ready) {
-    setAskResume(active?.exam === true && active.answers.some((answer) => answer !== null));
-  }
+  // answers or starts again from the top.
+  const [resumed, setResumed] = useState(false);
 
   // The saved set is read from storage on mount; until then show neither the
   // question nor the empty state.
@@ -57,7 +53,8 @@ export default function SessionPage() {
     );
   }
 
-  if (askResume) {
+  // A paper with any pick on it asks first; a practice set simply reopens.
+  if (active.exam === true && !resumed && active.answers.some((answer) => answer !== null)) {
     const paper = active.questions[0];
     const answered = active.answers.filter((answer) => answer !== null).length;
     const elapsed =
@@ -74,14 +71,11 @@ export default function SessionPage() {
           {elapsed ? ` · ${elapsed} on the clock` : ''}.
         </p>
         <div className="mt-10 space-y-4">
-          <ActionButton label="Resume paper" onClick={() => setAskResume(false)} />
+          <ActionButton label="Resume paper" onClick={() => setResumed(true)} />
           <ActionButton
             label="Start over"
             variant="text"
-            onClick={() => {
-              setAskResume(false);
-              restartSession();
-            }}
+            onClick={() => startQuestions(active.questions, { exam: true, mode: 'past-paper' })}
           />
         </div>
       </main>
@@ -176,6 +170,7 @@ function QuestionView() {
   const question: Question = questions[index];
   const total = questions.length;
   const isLast = index + 1 >= total;
+  const nextLabel = isLast ? 'See results' : 'Next question';
   const hasKey = hasAnswerKey(question);
   const correct = isCorrectChoice(question, selected);
   const bookmarked = bookmarks.includes(question.id);
@@ -220,27 +215,15 @@ function QuestionView() {
     <main id="main" tabIndex={-1} className="min-h-dvh">
       <div className="mx-auto w-full max-w-narrow px-5 pb-40 sm:px-8">
         <header className="flex items-baseline justify-between gap-4 py-5">
-          {exam ? (
-            // Leaving a paper ends it: the saved set is cleared, so nothing is
-            // left counting up for a later return.
-            <button
-              type="button"
-              onClick={() => {
-                abandonSession();
-                router.push('/home');
-              }}
-              className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
-            >
-              Leave paper
-            </button>
-          ) : (
-            <Link
-              href="/home"
-              className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
-            >
-              Close
-            </Link>
-          )}
+          {/* Leaving a paper ends it: the saved set is cleared, so nothing is
+              left counting up for a later return. */}
+          <Link
+            href="/home"
+            onClick={exam ? abandonSession : undefined}
+            className="font-mono text-label tracking-[0.14em] text-muted uppercase transition-colors hover:text-ink"
+          >
+            {exam ? 'Leave paper' : 'Close'}
+          </Link>
           <div className="flex items-baseline gap-6">
             <button
               type="button"
@@ -502,10 +485,7 @@ function QuestionView() {
               ) : null}
             </>
           ) : submitted && !sheetOpen ? (
-            <ActionButton
-              label={isLast ? 'See results' : 'Next question'}
-              onClick={next}
-            />
+            <ActionButton label={nextLabel} onClick={next} />
           ) : (
             <ActionButton
               label="Check answer"
@@ -531,8 +511,8 @@ function QuestionView() {
           correct={correct}
           chosen={selected}
           bookmarked={bookmarked}
-          isLast={isLast}
           onNext={next}
+          nextLabel={nextLabel}
           onClose={closeSheet}
           onToggleBookmark={() => toggleBookmark(question.id)}
         />
