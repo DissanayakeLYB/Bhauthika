@@ -181,6 +181,7 @@ describe('session and result repositories', () => {
       answered: 1,
       points: 10,
       topics: [],
+      exam: true,
       durationSeconds: 2530,
       review: [{ questionId: 'em-2025-q01', chosen: 4 }],
     };

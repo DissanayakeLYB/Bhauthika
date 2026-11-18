@@ -21,7 +21,7 @@ export interface SessionTopicResult {
   accuracy: number;
 }
 
-/** One answered question, kept so an exam paper can be revealed at the end. */
+/** One answered question, kept so a finished set can be read back. */
 export interface SessionAnswerReview {
   questionId: string;
   chosen: number | null;
@@ -35,7 +35,9 @@ export interface SessionResult {
   answered: number;
   points: number;
   topics: SessionTopicResult[];
-  /** Exam runs only: every question with the option this student picked. */
+  /** Sat as a paper: it kept its clock and can be sat again as printed. */
+  exam?: boolean;
+  /** Every question of the set with the option this student picked. */
   review?: SessionAnswerReview[];
   /** Exam runs only: how long the paper took, in seconds. */
   durationSeconds?: number;

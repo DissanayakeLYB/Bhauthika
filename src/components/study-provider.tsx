@@ -423,21 +423,22 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       active.questions,
       active.answers,
     );
-    // An exam run reveals every pick and the clock; a normal set has neither.
+    // Every finished set keeps its picks, so each one can be read back later.
+    const review = active.questions.map((question, index) => ({
+      questionId: question.id,
+      chosen: active.answers[index],
+    }));
+    // Only a paper reports the clock it ran on.
     const seconds =
-      active.startedAt === undefined
-        ? undefined
-        : Math.max(0, Math.round((Date.now() - active.startedAt) / 1000));
-    const revealed: SessionResult = active.exam
-      ? {
-          ...nextResult,
-          review: active.questions.map((question, index) => ({
-            questionId: question.id,
-            chosen: active.answers[index],
-          })),
-          ...(seconds === undefined ? {} : { durationSeconds: seconds }),
-        }
-      : nextResult;
+      active.exam && active.startedAt !== undefined
+        ? Math.max(0, Math.round((Date.now() - active.startedAt) / 1000))
+        : undefined;
+    const revealed: SessionResult = {
+      ...nextResult,
+      review,
+      ...(active.exam ? { exam: true } : {}),
+      ...(seconds === undefined ? {} : { durationSeconds: seconds }),
+    };
     setProgress(nextProgress);
     setResult(revealed);
     setSheetOpen(false);

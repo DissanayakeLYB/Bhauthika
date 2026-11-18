@@ -45,7 +45,7 @@ export default function SummaryPage() {
 
   // Weak topics first: the units that scored lowest in this set.
   const weakTopics = [...result.topics].sort((a, b) => a.accuracy - b.accuracy).slice(0, 3);
-  // An exam paper carries every pick, so the answers can be revealed here.
+  // Every finished set keeps each pick, so the answers can be read back here.
   const review = result.review ?? [];
   const questionsById = new Map(questions.map((question) => [question.id, question]));
   // A row opens the question it reports, with the scan, answer, pick and video.
@@ -184,7 +184,7 @@ export default function SummaryPage() {
       </section>
 
       <div className="mt-16 space-y-3">
-        {review.length > 0 ? (
+        {result.exam ? (
           <ActionButton label="Sit this paper again" onClick={sitAgain} />
         ) : (
           <ActionButton label="Practice again" onClick={practiseAgain} />

@@ -140,7 +140,7 @@ function parseStoredResult(raw: string): SessionResult | null {
     });
   }
 
-  // Exam extras are optional: a result saved before them simply has neither.
+  // The paper's own extras are optional: a result saved before them has neither.
   const durationSeconds =
     typeof value.durationSeconds === 'number' && value.durationSeconds > 0
       ? Math.round(value.durationSeconds)
@@ -168,6 +168,7 @@ function parseStoredResult(raw: string): SessionResult | null {
     answered: Math.max(total, Math.round(finiteNumber(value.answered, total))),
     points: Math.max(0, Math.round(finiteNumber(value.points, 0))),
     topics,
+    ...(value.exam === true ? { exam: true } : {}),
     ...(durationSeconds === undefined ? {} : { durationSeconds }),
     ...(review.length === 0 ? {} : { review }),
   };
