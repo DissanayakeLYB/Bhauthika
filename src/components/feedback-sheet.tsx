@@ -31,8 +31,12 @@ interface FeedbackSheetProps {
   chosen: number | null;
   bookmarked: boolean;
   isLast?: boolean;
-  /** Omit to hide the next button: the results screen has no set running. */
+  /** Step back through a finished set's answers; omitted at the first one. */
+  onPrevious?: () => void;
+  /** Omit to hide the next button when there is nowhere to step. */
   onNext?: () => void;
+  /** Next button copy where the list is a review rather than a live session. */
+  nextLabel?: string;
   onClose: () => void;
   onToggleBookmark: () => void;
   /** Show the printed question inside the sheet, where no page sits behind it. */
@@ -46,7 +50,9 @@ export function FeedbackSheet({
   chosen,
   bookmarked,
   isLast,
+  onPrevious,
   onNext,
+  nextLabel,
   onClose,
   onToggleBookmark,
   showScan = false,
@@ -367,8 +373,19 @@ export function FeedbackSheet({
       </div>
 
       <div className="shrink-0 border-t border-line px-5 pt-5 pb-5 sm:px-8">
-        {onNext ? (
-          <ActionButton label={isLast ? 'See results' : 'Next question'} onClick={onNext} />
+        {onPrevious || onNext ? (
+          <div className="flex items-center gap-4">
+            {onPrevious ? (
+              <ActionButton variant="text" label="Previous answer" onClick={onPrevious} />
+            ) : null}
+            {onNext ? (
+              <ActionButton
+                className="flex-1"
+                label={nextLabel ?? (isLast ? 'See results' : 'Next question')}
+                onClick={onNext}
+              />
+            ) : null}
+          </div>
         ) : null}
         <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
           <ActionButton

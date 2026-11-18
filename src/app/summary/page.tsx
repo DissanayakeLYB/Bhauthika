@@ -51,6 +51,19 @@ export default function SummaryPage() {
   // A row opens the question it reports, with the scan, answer, pick and video.
   const opened = openIndex === null ? undefined : review[openIndex];
   const openedQuestion = opened ? questionsById.get(opened.questionId) : undefined;
+  // Stepping stays inside the sheet, so the whole list can be read in order.
+  const hasPrevious = openIndex !== null && openIndex > 0;
+  const hasNext = openIndex !== null && openIndex < review.length - 1;
+
+  const showPrevious = () => {
+    if (!hasPrevious || openIndex === null) return;
+    setOpenIndex(openIndex - 1);
+  };
+
+  const showNext = () => {
+    if (!hasNext || openIndex === null) return;
+    setOpenIndex(openIndex + 1);
+  };
 
   const practiseAgain = () => {
     const total = startSession('all', { count: result.total, fill: true });
@@ -193,12 +206,17 @@ export default function SummaryPage() {
 
       {opened && openedQuestion ? (
         <FeedbackSheet
+          // Keyed by question so the report panel and scroll start fresh on each step.
+          key={openedQuestion.id}
           open
           showScan
           question={openedQuestion}
           correct={isCorrectChoice(openedQuestion, opened.chosen)}
           chosen={opened.chosen}
           bookmarked={bookmarks.includes(openedQuestion.id)}
+          onPrevious={hasPrevious ? showPrevious : undefined}
+          onNext={hasNext ? showNext : undefined}
+          nextLabel="Next answer"
           onClose={() => setOpenIndex(null)}
           onToggleBookmark={() => toggleBookmark(openedQuestion.id)}
         />
